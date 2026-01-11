@@ -26,12 +26,24 @@ UENUM(BlueprintType)
 	AT_FarAttack
 };
 
+USTRUCT(BlueprintType)
+struct FCharacterInfo
+{
+
+	//血量
+	float HP = 100;
+
+	//移动速度
+	float MaxSpeed = 800;
+
+};
 
 
 
 UCLASS()
 class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter
 {
+	
 	GENERATED_BODY()
 
 public:
@@ -61,15 +73,15 @@ protected:
 	UCameraComponent* CameraComponent;
 	//相机弹簧臂
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	 USpringArmComponent* SpringArmComponent;
+	USpringArmComponent* SpringArmComponent;
 	//输入上下文
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* InputMappingContext;
 	//移动输入
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
-	UPROPERTY(BlueprintReadWrite, Category = "Attack")
 	//攻击类型
+	UPROPERTY(BlueprintReadWrite, Category = "Attack")
 	EAttackType CurrentlyAttackType= EAttackType::AT_None;
 
 	//近战攻击输入
