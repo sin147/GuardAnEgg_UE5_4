@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,10 +17,10 @@ class SANDBOXDEMO_API UUI_CharacterInfo : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void Initialize(ASandBoxCharacter* InOwnerCharacter)
+	/*void Initialize()
 	{
 		OwnerCharacter = InOwnerCharacter;
-	}
+	}*/
 
 protected:
 	//更新角色血条

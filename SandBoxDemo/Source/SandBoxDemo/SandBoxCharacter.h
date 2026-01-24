@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,28 +14,41 @@
 #include "EnhancedInputSubsystems.h"
 #include "SandBoxPeople.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Attributes/AttributeBase.h"
+#include "StateMachine/StateMachineBase.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
 class ASandBox_Prop;
 class UUI_CharacterInfo;
 UENUM(BlueprintType)
- enum class EAttackType : uint8
+ enum EAttackType : uint8
 {
 	AT_None,
 	AT_CloseAttack,
 	AT_FarAttack
 };
 
-USTRUCT(BlueprintType)
-struct FCharacterInfo
+//角色属性
+UENUM(BlueprintType)
+enum ECharacterAttribute : uint8
 {
-
 	//血量
-	float HP = 100;
+	HP UMETA(DisplayName="血量"),
 
-	//移动速度
-	float MaxSpeed = 800;
+	//行走速度
+	WalkSpeed UMETA(DisplayName="行走速度"),
 
+};
+//角色运动状态
+UENUM(BlueprintType)
+enum ECharacterMoveState:uint8
+{
+	//行走
+	Walk UMETA(DisplayName = "行走"),
+	//奔跑
+	Run UMETA(DisplayName = "奔跑"),
+	//飞行
+	Fly UMETA(DisplayName = "飞行")
 };
 
 
@@ -49,119 +62,110 @@ class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter
 public:
 	// Sets default values for this pawn's properties
 	ASandBoxCharacter();
+/************************************属性***************************************************/
+private:
+	//校色属性
+	TMap<TEnumAsByte<ECharacterAttribute>, TObjectPtr<UAttributeBase>> CharacterAtributes;
 protected:
-	//角色绑定的King
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
-	ASandBoxPeople_King* BindKing;
-	//角色视口
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
-	TSubclassOf<UUI_CharacterInfo> CharacterInfoClass;
-	//敌人类型
-	UPROPERTY(EditAnywhere, Category = "Character")
-	TArray<EPeopleCamp> EnemyTypes;
-	//友军类型
-	UPROPERTY(EditAnywhere, Category = "Character")
-	TArray<EPeopleCamp> AllyTypes;
-
-	//血量
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
-	float MaxHP;
-	UPROPERTY(BlueprintReadOnly, Category = "Character")
-	float CurrentlyHP;
+	//设置属性
+	UFUNCTION()
+	bool SetAttributeByEnum(TEnumAsByte<ECharacterAttribute>Attribute, float NewValue);
+	//获取属性
+	UFUNCTION()
+	float GetAttributeByEnum(TEnumAsByte<ECharacterAttribute>Attribute);
+public:
+	//设置血量
+	UFUNCTION()
+	bool SetHP(float NewHP)
+	{
+		return SetAttributeByEnum(ECharacterAttribute::HP,NewHP);
+	}
+	//获取血量
+	UFUNCTION()
+	float GetHP()
+	{
+		return GetAttributeByEnum(ECharacterAttribute::HP);
+	}
+	//设置移动速度
+	bool SetSpeed(float InWalkSpeed)
+	{
+		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InWalkSpeed);
+	}
+	//获取移动速度
+	float GetSpeed()
+	{
+		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+	}
+/************************************组件***************************************************/
+protected:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStateMachineBase> StateMachine;
+/************************************运动***************************************************/
+protected:
+	//设置角色运动类型
+	void SetCurrentlyMoveState(EMovementMode InMoveState);
+	//获取角色运动类型
+	UFUNCTION()
+	EMovementMode GetCurrentlyMoveState();
+	//当角色运动改变
+	UFUNCTION()
+	virtual void OnMoveStateChange();
+/************************************相机***************************************************/
+protected:
 	//相机
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComponent;
 	//相机弹簧臂
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
+/************************************输入绑定***************************************************/
+	//输入动作
+protected:
 	//输入上下文
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* InputMappingContext;
 	//移动输入
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
-	//攻击类型
-	UPROPERTY(BlueprintReadWrite, Category = "Attack")
-	EAttackType CurrentlyAttackType= EAttackType::AT_None;
-
 	//近战攻击输入
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* CloseAttackAction;
-	UFUNCTION()
-	void SwitchCloseAttack();
-	//近战攻击
-	UFUNCTION(BlueprintCallable, Category = "Attack")
-	void CloseAttack();
 	//远程攻击输入
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* FarAttackAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|FarAttack")
-	TSubclassOf<ASandBox_Prop>FarAttackPropClass;
-	//切换为远程攻击状态
-	UFUNCTION()
-	void SwitchFarAttack();
+	//查看输入
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LookAction;
+protected:
+	//近战攻击
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void CloseAttack();
 	//远程攻击
 	UFUNCTION(BlueprintCallable, Category = "Attack|FarAttack")
 	void FarAttack();
 	UFUNCTION()
-	void Move(const FInputActionValue& Value);
-	//查看输入
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* LookAction;
+	void Move(const FInputActionValue& InputValue);
 	UFUNCTION()
-	void Look(const FInputActionValue& Value);
-	//移动锁定初始转向
-	FRotator BlockLookRotation;
-	//角色转向时间轴
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UTimelineComponent* CharacterRotationTimeline;
-	//更新转向
-	UPROPERTY(EditAnywhere, Category = "Character|Move")
-	UCurveFloat* RotationCurve;
-	UFUNCTION()
-	void UpdateRotation(float value);
-	UFUNCTION()
-	void UpdateRotationFinish();
-	void UpdateCharacterRotation();
-	//初始转向
-	FRotator BeginRotation;
-	//目标转向
-	FRotator TargetRotation;
-	//闪红定时器
-	FTimerHandle BeRedTimer;
-	//士兵1生成定时器
-	FTimerHandle Solder1SpawnTimer;
-	//士兵2生成定时器
-	FTimerHandle Solder2SpawnTimer;
-	//士兵3生成定时器
-	FTimerHandle Solder3SpawnTimer;
-	//士兵4生成定时器
-	FTimerHandle Solder4SpawnTimer;
+	void Look(const FInputActionValue& InputValue);
 
+protected:
+/************************************方向相关***************************************************/
+	//获取Actor向前向量
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetCharacterForwardVector();
+	//获取Actor右向量
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetCharacterRightVector();
+	//获取Actor向上前向量
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetCharacterUpVector();
+	//获取Actor头部旋转（根据相机和当前）
+
+/************************************方向相关***************************************************/
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 public:	
-	//获取绑定的King
-	ASandBoxPeople_King* GetKing()
-	{
-		return BindKing;
-	}
-	//设置绑定的King
-	void SetKing(ASandBoxPeople_King* InBindKing)
-	{
-		 BindKing=InBindKing;
-	}
-	//获取最大血量
-	float GetMaxHP()
-	{
-		return MaxHP;
-	}
-	//获取当前血量
-	float GetCurrentlyHP()
-	{
-		return CurrentlyHP;
-	}
 
 	void BeHit(float Damage);
 	//玩家阵营
