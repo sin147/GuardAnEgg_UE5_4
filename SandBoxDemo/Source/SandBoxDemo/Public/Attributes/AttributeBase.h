@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,39 +14,39 @@ class SANDBOXDEMO_API UAttributeBase : public UObject
 {
 	GENERATED_BODY()
 protected:
-	float MaxValue;
-	float MinValue;
+	float MaxValue=100;
+	float MinValue=-100;
 	float CurrentlyValue;
 public:
 
-	//ÉèÖÃ×î´óÖµ
+	//è®¾ç½®æœ€å¤§å€¼
 	void SetMaxValue(float NewValue)
 	{
 		MaxValue= NewValue;
 	}
-	//»ñÈ¡×î´óÖµ
+	//è·å–æœ€å¤§å€¼
 	float GetMaxValue()
 	{
 		return MaxValue;
 	}
 
-	//ÉèÖÃ×îĞ¡Öµ
+	//è®¾ç½®æœ€å°å€¼
 	void SetMinValue(float NewValue)
 	{
 		MinValue = NewValue;
 	}
-	//»ñÈ¡×îĞ¡Öµ
+	//è·å–æœ€å°å€¼
 	float GetMinValue()
 	{
 		return MinValue;
 	}
 
-	//ÉèÖÃµ±Ç°Öµ
+	//è®¾ç½®å½“å‰å€¼
 	void SetCurrentlyValue(float NewValue)
 	{
 		CurrentlyValue = FMath::Clamp(NewValue,MinValue,MaxValue);
 	}
-	//»ñÈ¡µ±Ç°Öµ
+	//è·å–å½“å‰å€¼
 	float GetCurrentlyValue()
 	{
 		return CurrentlyValue;

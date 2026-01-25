@@ -16,7 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GlobalEnums.h"
 #include "Attributes/AttributeBase.h"
-#include "StateMachine/StateMachineBase.h"
+#include "State/StateMachineBase.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
 class ASandBox_Prop;
@@ -36,8 +36,8 @@ enum ECharacterAttribute : uint8
 	//血量
 	HP UMETA(DisplayName="血量"),
 
-	//行走速度
-	WalkSpeed UMETA(DisplayName="行走速度"),
+	//移动速度
+	MoveSpeed UMETA(DisplayName="行走速度"),
 
 	//转向速度
 	RotatorSpeed UMETA(DisplayName = "转向速度")
@@ -82,12 +82,13 @@ public:
 	//设置移动速度
 	bool SetSpeed(float InWalkSpeed)
 	{
-		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InWalkSpeed);
+		return SetAttributeByEnum(ECharacterAttribute::MoveSpeed, InWalkSpeed);
 	}
 	//获取移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetSpeed();
 	//获取转向速度
+	UFUNCTION(BlueprintCallable,BlueprintPure)
 	float GetRotatorSpeed()
 	{
 		return GetAttributeByEnum(ECharacterAttribute::RotatorSpeed);
@@ -104,13 +105,13 @@ protected:
 /************************************运动***************************************************/
 protected:
 	//设置角色运动类型
-	void SetCurrentlyMoveState(EMovementMode InMoveState);
+	void SetCurrentlyMoveMode(EMovementMode InMoveState);
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)
-	EMovementMode GetCurrentlyMoveState();
+	EMovementMode GetCurrentlyMoveMode();
 	//当角色运动改变
 	UFUNCTION()
-	virtual void OnMoveStateChange();
+	virtual void OnMoveModeChange();
 
 /************************************相机***************************************************/
 protected:
@@ -166,10 +167,13 @@ protected:
 	
 /************************************Tick相关***************************************************/
 private:
+	//当前角色的Yaw
+	float CurrentlyYaw;
+
 	//更新角色基本状态
-	void UpdateCharacterState();
+	void UpdateCharacterState(float DeltaTime);
 	//更新属性
-	void UpdateAttributes();
+	void UpdateAttributes(float DeltaTime);
 
 public:
 	// Called every frame

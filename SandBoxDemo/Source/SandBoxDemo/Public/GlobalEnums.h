@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -15,31 +15,14 @@ public:
 };
 
 
-namespace CharacterState
+
+UENUM(BlueprintType)
+enum EState : uint8
 {
-	UENUM(BlueprintType)
-	enum ELayer : uint8
-	{
-		Movement UMETA(DisplayName = "ÒÆ¶¯"),
-		Interactive UMETA(DisplayName = "½»»¥"),
-	};
-	namespace Movement
-	{
-		UENUM(BlueprintType)
-		enum EMovement : uint8
-		{
-			Move UMETA(DisplayName = "ÒÆ¶¯"),
-			QuickMove UMETA(DisplayName = "¿ìËÙÒÆ¶¯"),
-			Idle UMETA(DisplayName = "´ý»ú"),
-		};
-	}
-	namespace Interactive
-	{
-		UENUM(BlueprintType)
-		enum EInteractive : uint8
-		{
-			Collect UMETA(DisplayName = "²É¼¯");
-		};
-	}
-}
+	S_None UMETA(DisplayName = "æ— "),
+	S_Move UMETA(DisplayName = "ç§»åŠ¨"),
+	S_QuickMove UMETA(DisplayName = "å¿«é€Ÿç§»åŠ¨"),
+	S_Idle UMETA(DisplayName = "å¾…æœº"),
+	S_Interactive UMETA(DisplayName = "äº¤äº’"),
+};
 

@@ -1,7 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "StateMachine/StateMachineBase.h"
+#include "State/StateMachineBase.h"
 
 // Sets default values for this component's properties
 UStateMachineBase::UStateMachineBase()
@@ -32,19 +32,24 @@ void UStateMachineBase::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
-void UStateMachineBase::OnEnterState(uint8 InState)
+void UStateMachineBase::OnEnterState(EState InState)
 {
-	//½øÈë×´Ì¬ºóÂß¼­
-	UE_LOG(LogTemp, Log, TEXT("%s EnterState State:%d"), *GetOwner()->GetActorNameOrLabel(), CurrentlyState);
+	//è¿›å…¥çŠ¶æ€åŽé€»è¾‘
+	//UE_LOG(LogTemp, Log, TEXT("%s EnterState State:%d"), *GetOwner()->GetActorNameOrLabel(), CurrentlyState);
 }
 
-void UStateMachineBase::OnExitState(uint8 InState)
+void UStateMachineBase::OnExitState(EState InState)
 {
-	//ÍË³ö×´Ì¬ºóÂß¼­
-	UE_LOG(LogTemp, Log, TEXT("%s ExitState State:%d"), *GetOwner()->GetActorNameOrLabel(), CurrentlyState);
+	//é€€å‡ºçŠ¶æ€åŽé€»è¾‘
+	//UE_LOG(LogTemp, Log, TEXT("%s ExitState State:%d"), *GetOwner()->GetActorNameOrLabel(), CurrentlyState);
 }
 
-uint8 UStateMachineBase::GetCurrentlyState()
+bool UStateMachineBase::CanEnterStates(EState InState)
+{
+	return true;
+}
+
+EState UStateMachineBase::GetCurrentlyState()
 {
 	return CurrentlyState;
 }

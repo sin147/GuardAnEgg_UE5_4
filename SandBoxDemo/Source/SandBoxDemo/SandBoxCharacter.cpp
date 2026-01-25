@@ -7,6 +7,7 @@
 #include "UI/UI_CharacterInfo.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+
 // Sets default values
 ASandBoxCharacter::ASandBoxCharacter()
 {
@@ -23,6 +24,7 @@ ASandBoxCharacter::ASandBoxCharacter()
 	//相机组件
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;
 	//箭头附加到Mesh上
 	//GetArrowComponent()->SetupAttachment(GetMesh());
 }
@@ -47,64 +49,56 @@ float ASandBoxCharacter::GetAttributeByEnum(TEnumAsByte<ECharacterAttribute> Att
 
 	if (!CharacterAtributes.Find(Attribute))
 	{
-		CharacterAtributes.Add(Attribute, 0);
+		TObjectPtr<UAttributeBase> NewAttribute = NewObject<UAttributeBase>();
+		CharacterAtributes.Add(Attribute, NewAttribute);
 		UE_LOG(LogTemp, Log, TEXT("Not Find Attribute:%d,New One"), Attribute.GetIntValue());
 	}
 	return CharacterAtributes[Attribute]->GetCurrentlyValue();
 }
 
-void ASandBoxCharacter::UpdateCharacterState()
+void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
 	if (GetSpeed() != 0)
 	{
-		switch (GetCurrentlyMoveState())
-		{
-		case MOVE_Walking:
-		{
-			StateMachine->EnterState(CharacterState::ECharacterWalkState::Walk);
-			break;
-		}
-		case MOVE_Falling:
-			break;
-		case MOVE_Swimming:
-			break;
-		case MOVE_Flying:
-			break;
-		default:
-			break;
-		}
+		StateMachine->EnterState(EState::S_Move);
 	}
 	else
 	{
-		StateMachine->EnterState(CharacterState::ECharacterWalkState::Idle);
+		StateMachine->EnterState(EState::S_Idle);
 	}
 }
 
-void ASandBoxCharacter::UpdateAttributes()
+void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 {
 	//更新速度
 	SetSpeed(GetVelocity().Length());
+	//更新角色旋转速度
+
+	SetRotatorSpeed((GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
+	//UE_LOG(LogTemp, Log, TEXT("%lf : Close Attack"), GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw);
+	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;
+
 }
 
 float ASandBoxCharacter::GetSpeed()
 {
-	return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+	return GetAttributeByEnum(ECharacterAttribute::MoveSpeed);
 }
 
-void ASandBoxCharacter::SetCurrentlyMoveState(EMovementMode InMoveState)
+void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
 	GetCharacterMovement()->SetMovementMode(InMoveState);
-	OnMoveStateChange();
+	OnMoveModeChange();
 }
 
-EMovementMode ASandBoxCharacter::GetCurrentlyMoveState()
+EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
 {
 	return GetCharacterMovement()->MovementMode;
 }
 
-void ASandBoxCharacter::OnMoveStateChange()
+void ASandBoxCharacter::OnMoveModeChange()
 {
-	UE_LOG(LogTemp, Log, TEXT("%s : Move State Change To %d"), *GetActorNameOrLabel(), GetCurrentlyMoveState());
+	UE_LOG(LogTemp, Log, TEXT("%s : Move State Change To %d"), *GetActorNameOrLabel(), GetCurrentlyMoveMode());
 }
 
 void ASandBoxCharacter::CloseAttack()
@@ -120,8 +114,8 @@ void ASandBoxCharacter::FarAttack()
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
 	FVector InputValue = Value.Get<FVector>();
-	AddMovementInput(GetCharacterForwardVector(), InputValue.X);
-	if (InputValue.X <0)
+	 AddMovementInput(GetCharacterForwardVector(), InputValue.X);
+	if (InputValue.X<0)
 	{
 		GetMesh()->SetWorldRotation(FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw - InputValue.Y, GetMesh()->GetComponentRotation().Roll));
 	}
@@ -131,7 +125,7 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	}
 
 	AddMovementInput(GetActorUpVector(), InputValue.Z);
-	UE_LOG(LogTemp, Log, TEXT("Move: %s"), *InputValue.ToString());
+	//UE_LOG(LogTemp, Log, TEXT("Move: %s"), *InputValue.ToString());
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
@@ -142,7 +136,7 @@ void ASandBoxCharacter::Look(const FInputActionValue& Value)
 	NewRotator.Pitch = UKismetMathLibrary::ClampAngle(NewRotator.Pitch + InputValue.Y, -80.f, 80.f);
 	NewRotator.Yaw += InputValue.X;
 	SpringArmComponent->SetWorldRotation(NewRotator);
-	UE_LOG(LogTemp, Log, TEXT("Look: %s"),*SpringArmComponent->GetComponentRotation().ToString());
+	//UE_LOG(LogTemp, Log, TEXT("Look: %s"),*SpringArmComponent->GetComponentRotation().ToString());
 }
 
 FVector ASandBoxCharacter::GetCharacterForwardVector()
@@ -186,9 +180,9 @@ void ASandBoxCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//更新速度
-	UpdateAttributes();
+	UpdateAttributes(DeltaTime);
 	//更新角色状态
-	UpdateCharacterState();
+	UpdateCharacterState(DeltaTime);
 
 	
 
