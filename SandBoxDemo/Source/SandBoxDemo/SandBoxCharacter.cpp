@@ -53,6 +53,44 @@ float ASandBoxCharacter::GetAttributeByEnum(TEnumAsByte<ECharacterAttribute> Att
 	return CharacterAtributes[Attribute]->GetCurrentlyValue();
 }
 
+void ASandBoxCharacter::UpdateCharacterState()
+{
+	if (GetSpeed() != 0)
+	{
+		switch (GetCurrentlyMoveState())
+		{
+		case MOVE_Walking:
+		{
+			StateMachine->EnterState(CharacterState::ECharacterWalkState::Walk);
+			break;
+		}
+		case MOVE_Falling:
+			break;
+		case MOVE_Swimming:
+			break;
+		case MOVE_Flying:
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		StateMachine->EnterState(CharacterState::ECharacterWalkState::Idle);
+	}
+}
+
+void ASandBoxCharacter::UpdateAttributes()
+{
+	//更新速度
+	SetSpeed(GetVelocity().Length());
+}
+
+float ASandBoxCharacter::GetSpeed()
+{
+	return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+}
+
 void ASandBoxCharacter::SetCurrentlyMoveState(EMovementMode InMoveState)
 {
 	GetCharacterMovement()->SetMovementMode(InMoveState);
@@ -122,6 +160,13 @@ FVector ASandBoxCharacter::GetCharacterUpVector()
 	return GetMesh()->GetUpVector();
 }
 
+void ASandBoxCharacter::InitCharacterState()
+{
+	//初始化角色状态
+
+
+}
+
 // Called when the game starts or when spawned
 void ASandBoxCharacter::BeginPlay()
 {
@@ -140,7 +185,11 @@ void ASandBoxCharacter::BeHit(float Damage)
 void ASandBoxCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//更新转向
+	//更新速度
+	UpdateAttributes();
+	//更新角色状态
+	UpdateCharacterState();
+
 	
 
 }

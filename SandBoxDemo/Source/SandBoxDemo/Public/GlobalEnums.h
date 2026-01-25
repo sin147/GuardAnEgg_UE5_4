@@ -18,13 +18,28 @@ public:
 namespace CharacterState
 {
 	UENUM(BlueprintType)
-	enum ECharacterState : uint8
+	enum ELayer : uint8
 	{
-		Walk UMETA(DisplayName="行走"),
-		Run UMETA(DisplayName="跑"),
-		Idle UMETA(DisplayName="待机"),
-		Interactive UMETA(DisplayName="交互"),
-		Other UMETA(DisplayName="其他"),
+		Movement UMETA(DisplayName = "移动"),
+		Interactive UMETA(DisplayName = "交互"),
 	};
+	namespace Movement
+	{
+		UENUM(BlueprintType)
+		enum EMovement : uint8
+		{
+			Move UMETA(DisplayName = "移动"),
+			QuickMove UMETA(DisplayName = "快速移动"),
+			Idle UMETA(DisplayName = "待机"),
+		};
+	}
+	namespace Interactive
+	{
+		UENUM(BlueprintType)
+		enum EInteractive : uint8
+		{
+			Collect UMETA(DisplayName = "采集");
+		};
+	}
 }
 

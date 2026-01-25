@@ -14,6 +14,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "SandBoxPeople.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GlobalEnums.h"
 #include "Attributes/AttributeBase.h"
 #include "StateMachine/StateMachineBase.h"
 #include "InputAction.h"
@@ -38,17 +39,9 @@ enum ECharacterAttribute : uint8
 	//行走速度
 	WalkSpeed UMETA(DisplayName="行走速度"),
 
-};
-//角色运动状态
-UENUM(BlueprintType)
-enum ECharacterMoveState:uint8
-{
-	//行走
-	Walk UMETA(DisplayName = "行走"),
-	//奔跑
-	Run UMETA(DisplayName = "奔跑"),
-	//飞行
-	Fly UMETA(DisplayName = "飞行")
+	//转向速度
+	RotatorSpeed UMETA(DisplayName = "转向速度")
+
 };
 
 
@@ -92,9 +85,17 @@ public:
 		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InWalkSpeed);
 	}
 	//获取移动速度
-	float GetSpeed()
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetSpeed();
+	//获取转向速度
+	float GetRotatorSpeed()
 	{
-		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+		return GetAttributeByEnum(ECharacterAttribute::RotatorSpeed);
+	}
+	//设置旋转速度
+	bool SetRotatorSpeed(float InRotatorSpeed)
+	{
+		return SetAttributeByEnum(ECharacterAttribute::RotatorSpeed, InRotatorSpeed);
 	}
 /************************************组件***************************************************/
 protected:
@@ -105,11 +106,12 @@ protected:
 	//设置角色运动类型
 	void SetCurrentlyMoveState(EMovementMode InMoveState);
 	//获取角色运动类型
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable,BlueprintPure)
 	EMovementMode GetCurrentlyMoveState();
 	//当角色运动改变
 	UFUNCTION()
 	virtual void OnMoveStateChange();
+
 /************************************相机***************************************************/
 protected:
 	//相机
@@ -143,13 +145,15 @@ protected:
 	//远程攻击
 	UFUNCTION(BlueprintCallable, Category = "Attack|FarAttack")
 	void FarAttack();
+	//移动
 	UFUNCTION()
 	void Move(const FInputActionValue& InputValue);
+	//视野
 	UFUNCTION()
 	void Look(const FInputActionValue& InputValue);
-
-protected:
 /************************************方向相关***************************************************/
+protected:
+
 	//获取Actor向前向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector GetCharacterForwardVector();
@@ -159,9 +163,28 @@ protected:
 	//获取Actor向上前向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector GetCharacterUpVector();
-	//获取Actor头部旋转（根据相机和当前）
+	
+/************************************Tick相关***************************************************/
+private:
+	//更新角色基本状态
+	void UpdateCharacterState();
+	//更新属性
+	void UpdateAttributes();
 
-/************************************方向相关***************************************************/
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+
+
+/************************************玩家状态类***************************************************/
+//todo
+private:
+	void InitCharacterState();
+	//角色状态组
+	//template<typename State>
+	//TMap<TEnumAsByte<CharacterState::ELayer>, State> CharacterState;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -172,8 +195,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")
 	EPeopleCamp CurrentCamp;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
