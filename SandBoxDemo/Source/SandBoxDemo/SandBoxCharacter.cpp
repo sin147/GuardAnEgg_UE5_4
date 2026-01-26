@@ -61,11 +61,19 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	if (GetSpeed() != 0)
 	{
 		StateMachine->EnterState(EState::S_Move);
+
 	}
 	else
 	{
 		StateMachine->EnterState(EState::S_Idle);
 	}
+	UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
+}
+
+TEnumAsByte<EState> ASandBoxCharacter::GetCurrentlyChracterState()
+{
+
+	return StateMachine->GetCurrentlyState();
 }
 
 void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
@@ -73,7 +81,6 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 	//更新速度
 	SetSpeed(GetVelocity().Length());
 	//更新角色旋转速度
-
 	SetRotatorSpeed((GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
 	//UE_LOG(LogTemp, Log, TEXT("%lf : Close Attack"), GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw);
 	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;

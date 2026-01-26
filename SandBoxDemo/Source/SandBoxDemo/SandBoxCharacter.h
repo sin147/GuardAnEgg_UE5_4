@@ -80,13 +80,15 @@ public:
 		return GetAttributeByEnum(ECharacterAttribute::HP);
 	}
 	//设置移动速度
-	bool SetSpeed(float InWalkSpeed)
+	bool SetSpeed(float InSpeed)
 	{
-		return SetAttributeByEnum(ECharacterAttribute::MoveSpeed, InWalkSpeed);
+		return SetAttributeByEnum(ECharacterAttribute::MoveSpeed, InSpeed);
 	}
 	//获取移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetSpeed();
+	//获取最大移动速度
+
 	//获取转向速度
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	float GetRotatorSpeed()
@@ -170,8 +172,6 @@ private:
 	//当前角色的Yaw
 	float CurrentlyYaw;
 
-	//更新角色基本状态
-	void UpdateCharacterState(float DeltaTime);
 	//更新属性
 	void UpdateAttributes(float DeltaTime);
 
@@ -185,15 +185,17 @@ public:
 //todo
 private:
 	void InitCharacterState();
-	//角色状态组
-	//template<typename State>
-	//TMap<TEnumAsByte<CharacterState::ELayer>, State> CharacterState;
+	//更新角色基本状态
+	void UpdateCharacterState(float DeltaTime);
+public:	
+	//获取当前的角色状态
+	UFUNCTION(BlueprintCallable,BlueprintPure)
+	TEnumAsByte<EState> GetCurrentlyChracterState();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-public:	
-
+public:
 	void BeHit(float Damage);
 	//玩家阵营
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character")

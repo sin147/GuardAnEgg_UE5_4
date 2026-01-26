@@ -31,7 +31,7 @@ public:
 
 private:
 	//当前状态
-	EState CurrentlyState= S_None;
+	TEnumAsByte<EState> CurrentlyState= S_None;
 protected:
 	//当进入状态
 	virtual void OnEnterState(EState InState);
@@ -51,13 +51,12 @@ public:
 		}
 		EState OldState = CurrentlyState;
 		EState NewState = InState;
-		//转为uint8存储
 		CurrentlyState= NewState;
 		OnExitState(OldState);
 		OnEnterState(NewState);
 	}
 
 	//获得当前状态
-	EState GetCurrentlyState();
+	TEnumAsByte<EState> GetCurrentlyState();
 
 };

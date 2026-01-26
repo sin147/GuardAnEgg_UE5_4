@@ -49,7 +49,7 @@ bool UStateMachineBase::CanEnterStates(EState InState)
 	return true;
 }
 
-EState UStateMachineBase::GetCurrentlyState()
+TEnumAsByte<EState> UStateMachineBase::GetCurrentlyState()
 {
 	return CurrentlyState;
 }
