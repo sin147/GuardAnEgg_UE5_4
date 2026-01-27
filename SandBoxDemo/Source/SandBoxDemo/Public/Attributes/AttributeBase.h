@@ -14,10 +14,16 @@ class SANDBOXDEMO_API UAttributeBase : public UObject
 {
 	GENERATED_BODY()
 protected:
-	float MaxValue=100;
-	float MinValue=-100;
-	float CurrentlyValue;
+	float MaxValue=0;
+	float MinValue=0;
+	float CurrentlyValue=0;
 public:
+	void Init(float InMaxValue, float InMinValue, float InDefaultValue)
+	{
+		MaxValue=InMaxValue;
+		MinValue = InMinValue;
+		CurrentlyValue = InDefaultValue;
+	}
 
 	//设置最大值
 	void SetMaxValue(float NewValue)

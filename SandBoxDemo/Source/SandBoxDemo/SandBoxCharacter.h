@@ -14,7 +14,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "SandBoxPeople.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GlobalEnums.h"
+#include "Datas/CharacterAttributeDataAsset.h"
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
 #include "InputAction.h"
@@ -27,21 +27,6 @@ UENUM(BlueprintType)
 	AT_None,
 	AT_CloseAttack,
 	AT_FarAttack
-};
-
-//角色属性
-UENUM(BlueprintType)
-enum ECharacterAttribute : uint8
-{
-	//血量
-	HP UMETA(DisplayName="血量"),
-
-	//移动速度
-	MoveSpeed UMETA(DisplayName="行走速度"),
-
-	//转向速度
-	RotatorSpeed UMETA(DisplayName = "转向速度")
-
 };
 
 
@@ -57,8 +42,14 @@ public:
 	ASandBoxCharacter();
 /************************************属性***************************************************/
 private:
+	//角色属性配置表
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UCharacterAttributeDataAsset> AttributeDataAsset;
 	//校色属性
 	TMap<TEnumAsByte<ECharacterAttribute>, TObjectPtr<UAttributeBase>> CharacterAtributes;
+	//初始化属性
+	void InitAttribute(TObjectPtr<UCharacterAttributeDataAsset> InAttributeDataAsset);
+
 protected:
 	//设置属性
 	UFUNCTION()
@@ -184,7 +175,6 @@ public:
 /************************************玩家状态类***************************************************/
 //todo
 private:
-	void InitCharacterState();
 	//更新角色基本状态
 	void UpdateCharacterState(float DeltaTime);
 public:	

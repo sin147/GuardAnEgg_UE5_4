@@ -26,3 +26,17 @@ enum EState : uint8
 	S_Interactive UMETA(DisplayName = "交互"),
 };
 
+//角色属性
+UENUM(BlueprintType)
+enum ECharacterAttribute : uint8
+{
+	//血量
+	HP UMETA(DisplayName = "血量"),
+
+	//移动速度
+	MoveSpeed UMETA(DisplayName = "行走速度"),
+
+	//转向速度
+	RotatorSpeed UMETA(DisplayName = "转向速度")
+
+};

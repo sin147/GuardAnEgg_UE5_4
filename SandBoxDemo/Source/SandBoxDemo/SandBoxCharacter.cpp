@@ -29,6 +29,17 @@ ASandBoxCharacter::ASandBoxCharacter()
 	//GetArrowComponent()->SetupAttachment(GetMesh());
 }
 
+void ASandBoxCharacter::InitAttribute(TObjectPtr<UCharacterAttributeDataAsset> InAttributeDataAsset)
+{
+	TArray<FCharacterAttribute> AttributeDatas = InAttributeDataAsset->Attributes;
+	for (FCharacterAttribute AttributeData : AttributeDatas)
+	{
+		TObjectPtr<UAttributeBase> NewAttribute = NewObject<UAttributeBase>();
+		NewAttribute->Init(AttributeData.MaxValue, AttributeData.MinValue, AttributeData.Default);
+		CharacterAtributes.Add(AttributeData.Attribute, NewAttribute);
+	}
+}
+
 bool ASandBoxCharacter::SetAttributeByEnum(TEnumAsByte<ECharacterAttribute> Attribute, float NewValue)
 {
 	if (CharacterAtributes.Find(Attribute))
@@ -161,17 +172,11 @@ FVector ASandBoxCharacter::GetCharacterUpVector()
 	return GetMesh()->GetUpVector();
 }
 
-void ASandBoxCharacter::InitCharacterState()
-{
-	//初始化角色状态
-
-
-}
-
 // Called when the game starts or when spawned
 void ASandBoxCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	InitAttribute(AttributeDataAsset);
 }
 
 void ASandBoxCharacter::BeHit(float Damage)
