@@ -12,3 +12,8 @@ ASandBoxGameMode::ASandBoxGameMode()
 	HUDClass = ASandBoxHUD::StaticClass();
 	PlayerControllerClass = ASandBoxPlayerController::StaticClass();
 }
+
+void ASandBoxGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+}

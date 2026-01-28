@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "GlobalEnums.h"
 #include "MessageSystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FNativeEventDelegate);
+DECLARE_MULTICAST_DELEGATE(FNetworkEventDelegate);
 
 /**
  * 
@@ -17,15 +19,66 @@ class SANDBOXDEMO_API UMessageSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	//todo
 public:
+/************************************本地事件************************************************/
+	//本地事件映射
+	 TMap<ENativeEventMessage, FNativeEventDelegate> NativeEventMap;
 	//注册本地事件
-	static BindNativeEvent(int32 MsgId, UObject* InObject, FName Function)
+	 FDelegateHandle BindNativeEvent(ENativeEventMessage InMessage, UObject* InObject, FName Function)
 	{
-		if (NativeEventMap.Find(MsgId) != nullptr)
+		if (NativeEventMap.Find(InMessage) == nullptr)
 		{
-			NativeEventMap.Add(MsgId, new FNativeEventDelegate());
+			NativeEventMap.Add(InMessage, FNativeEventDelegate());
 		}
-		NativeEventMap[MsgId].AddUFunction(InObject, Function);
+		return	NativeEventMap[InMessage].AddUFunction(InObject, Function);
 	}
-	static TMap<int32, FNativeEventDelegate> NativeEventMap;
-	
+	//取消本地事件
+	 bool UnBindNativeEventByHandle(ENativeEventMessage InMessage,FDelegateHandle InHandle)
+	{
+		if (NativeEventMap.Find(InMessage) != nullptr)
+		{
+			return NativeEventMap[InMessage].Remove(InHandle);
+		}
+		return false;
+	}
+	//激发本地事件
+	 bool FireNativeEvent(ENativeEventMessage InMessage)
+	{
+		if (NativeEventMap.Find(InMessage) == nullptr)
+		{
+			return false;
+		}
+		NativeEventMap[InMessage].Broadcast();
+		return true;
+	}
+
+/************************************网络事件************************************************/
+	//网络事件注册
+	 TMap<ENetworkEventMessage, FNetworkEventDelegate> NetworkEventMap;
+	//注册网络事件
+	 FDelegateHandle BindNetworkEvent(ENetworkEventMessage InMessage, UObject* InObject, FName Function)
+	{
+		if (NetworkEventMap.Find(InMessage) == nullptr)
+		{
+			NetworkEventMap.Add(InMessage, FNetworkEventDelegate());
+		}
+		return NetworkEventMap[InMessage].AddUFunction(InObject, Function);
+	}
+	//取消网络事件
+	 bool UnBindNetworkEvent(ENetworkEventMessage InMessage, FDelegateHandle InHandle)
+	{
+		if (NetworkEventMap.Find(InMessage) != nullptr)
+		{
+			return	NetworkEventMap[InMessage].Remove(InHandle);
+		}
+		return false;
+	}
+	//发送到服务端
+	 UFUNCTION(Server,Reliable)
+	 void SendToServer(ENetworkEventMessage InMessage);
+	//发送到所有客户端
+	 UFUNCTION(NetMulticast, Reliable)
+	 void SendToAllClients(ENetworkEventMessage InMessage);
+	//发送到目标客户端
+	 UFUNCTION(NetMulticast, Reliable)
+	 void SendToClient(APlayerController* PlayerController,ENetworkEventMessage InMessage);
 };

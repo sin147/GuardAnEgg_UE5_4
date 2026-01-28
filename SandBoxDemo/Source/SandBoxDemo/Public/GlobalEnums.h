@@ -40,3 +40,22 @@ enum ECharacterAttribute : uint8
 	RotatorSpeed UMETA(DisplayName = "转向速度")
 
 };
+
+//本地事件枚举
+UENUM(BlueprintType)
+enum ENativeEventMessage :uint8
+{
+	//本地事件测
+	Native_Test UMETA(DisplayName = "本地事件测试"),
+
+};
+
+//网络事件枚举
+UENUM(BlueprintType)
+enum ENetworkEventMessage:uint8
+{
+	//网络事件测试
+	C2S_Test UMETA(DisplayName = "服务器到客户端测试"),
+	S2C_Test UMETA(DisplayName = "客户端到服务器测试"),
+
+};

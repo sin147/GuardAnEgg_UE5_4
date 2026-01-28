@@ -15,5 +15,6 @@ class SANDBOXDEMO_API ASandBoxGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	ASandBoxGameMode();
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 };
