@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,10 +19,10 @@ class SANDBOXDEMO_API UMessageSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	//todo
 public:
-/************************************±¾µØÊÂ¼ş************************************************/
-	//±¾µØÊÂ¼şÓ³Éä
+/************************************æœ¬åœ°äº‹ä»¶************************************************/
+	//æœ¬åœ°äº‹ä»¶æ˜ å°„
 	 TMap<ENativeEventMessage, FNativeEventDelegate> NativeEventMap;
-	//×¢²á±¾µØÊÂ¼ş
+	//æ³¨å†Œæœ¬åœ°äº‹ä»¶
 	 FDelegateHandle BindNativeEvent(ENativeEventMessage InMessage, UObject* InObject, FName Function)
 	{
 		if (NativeEventMap.Find(InMessage) == nullptr)
@@ -31,7 +31,7 @@ public:
 		}
 		return	NativeEventMap[InMessage].AddUFunction(InObject, Function);
 	}
-	//È¡Ïû±¾µØÊÂ¼ş
+	//å–æ¶ˆæœ¬åœ°äº‹ä»¶
 	 bool UnBindNativeEventByHandle(ENativeEventMessage InMessage,FDelegateHandle InHandle)
 	{
 		if (NativeEventMap.Find(InMessage) != nullptr)
@@ -40,7 +40,7 @@ public:
 		}
 		return false;
 	}
-	//¼¤·¢±¾µØÊÂ¼ş
+	//æ¿€å‘æœ¬åœ°äº‹ä»¶
 	 bool FireNativeEvent(ENativeEventMessage InMessage)
 	{
 		if (NativeEventMap.Find(InMessage) == nullptr)
@@ -51,10 +51,10 @@ public:
 		return true;
 	}
 
-/************************************ÍøÂçÊÂ¼ş************************************************/
-	//ÍøÂçÊÂ¼ş×¢²á
-	 TMap<ENetworkEventMessage, FNetworkEventDelegate> NetworkEventMap;
-	//×¢²áÍøÂçÊÂ¼ş
+/************************************ç½‘ç»œäº‹ä»¶************************************************/
+	//ç½‘ç»œäº‹ä»¶æ³¨å†Œ
+	 TMap<TEnumAsByte<ENetworkEventMessage>, FNetworkEventDelegate> NetworkEventMap;
+	//æ³¨å†Œç½‘ç»œäº‹ä»¶
 	 FDelegateHandle BindNetworkEvent(ENetworkEventMessage InMessage, UObject* InObject, FName Function)
 	{
 		if (NetworkEventMap.Find(InMessage) == nullptr)
@@ -63,8 +63,8 @@ public:
 		}
 		return NetworkEventMap[InMessage].AddUFunction(InObject, Function);
 	}
-	//È¡ÏûÍøÂçÊÂ¼ş
-	 bool UnBindNetworkEvent(ENetworkEventMessage InMessage, FDelegateHandle InHandle)
+	//å–æ¶ˆç½‘ç»œäº‹ä»¶
+	 bool UnBindNetworkEvent(TEnumAsByte<ENetworkEventMessage> InMessage, FDelegateHandle InHandle)
 	{
 		if (NetworkEventMap.Find(InMessage) != nullptr)
 		{
@@ -72,13 +72,16 @@ public:
 		}
 		return false;
 	}
-	//·¢ËÍµ½·şÎñ¶Ë
-	 UFUNCTION(Server,Reliable)
+	//å‘é€åˆ°æœåŠ¡ç«¯
+	 UFUNCTION(Server, Reliable,BlueprintCallable)
 	 void SendToServer(ENetworkEventMessage InMessage);
-	//·¢ËÍµ½ËùÓĞ¿Í»§¶Ë
-	 UFUNCTION(NetMulticast, Reliable)
+	//å‘é€åˆ°æ‰€æœ‰å®¢æˆ·ç«¯
+	 UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	 void SendToAllClients(ENetworkEventMessage InMessage);
-	//·¢ËÍµ½Ä¿±ê¿Í»§¶Ë
-	 UFUNCTION(NetMulticast, Reliable)
-	 void SendToClient(APlayerController* PlayerController,ENetworkEventMessage InMessage);
+	//å‘é€åˆ°ç›®æ ‡å®¢æˆ·ç«¯
+	 UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	 void SendToClient(const FString& LocalPlayerId,ENetworkEventMessage InMessage);
+	 //æ‰“å°å½“å‰ç©å®¶å•ŠId
+	 UFUNCTION(BlueprintCallable)
+	 FString GetLocalPlayerId();
 };

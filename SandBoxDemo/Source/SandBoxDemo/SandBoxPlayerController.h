@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,5 +16,4 @@ class SANDBOXDEMO_API ASandBoxPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 protected:
-	//主要Character输入上下文
 };

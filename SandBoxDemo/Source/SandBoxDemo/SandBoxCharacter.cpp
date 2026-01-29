@@ -72,13 +72,12 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	if (GetSpeed() != 0)
 	{
 		StateMachine->EnterState(EState::S_Move);
-
 	}
 	else
 	{
 		StateMachine->EnterState(EState::S_Idle);
 	}
-	UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
+	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
 }
 
 TEnumAsByte<EState> ASandBoxCharacter::GetCurrentlyChracterState()
@@ -93,7 +92,7 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 	SetSpeed(GetVelocity().Length());
 	//更新角色旋转速度
 	SetRotatorSpeed((GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
-	//UE_LOG(LogTemp, Log, TEXT("%lf : Close Attack"), GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw);
+	//UE_LOG(LogTemp, Log, TEXT("RotatorSpeed %lf"), (GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
 	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;
 
 }
@@ -116,7 +115,7 @@ EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
 
 void ASandBoxCharacter::OnMoveModeChange()
 {
-	UE_LOG(LogTemp, Log, TEXT("%s : Move State Change To %d"), *GetActorNameOrLabel(), GetCurrentlyMoveMode());
+	//UE_LOG(LogTemp, Log, TEXT("%s : Move State Change To %d"), *GetActorNameOrLabel(), GetCurrentlyMoveMode());
 }
 
 void ASandBoxCharacter::CloseAttack()
@@ -132,16 +131,8 @@ void ASandBoxCharacter::FarAttack()
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
 	FVector InputValue = Value.Get<FVector>();
-	 AddMovementInput(GetCharacterForwardVector(), InputValue.X);
-	if (InputValue.X<0)
-	{
-		GetMesh()->SetWorldRotation(FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw - InputValue.Y, GetMesh()->GetComponentRotation().Roll));
-	}
-	else
-	{
-		GetMesh()->SetWorldRotation(FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw + InputValue.Y, GetMesh()->GetComponentRotation().Roll));
-	}
-
+	AddMovementInput(GetCharacterForwardVector(), InputValue.X);
+	AddControllerYawInput(InputValue.Y);
 	AddMovementInput(GetActorUpVector(), InputValue.Z);
 	//UE_LOG(LogTemp, Log, TEXT("Move: %s"), *InputValue.ToString());
 }
@@ -154,6 +145,7 @@ void ASandBoxCharacter::Look(const FInputActionValue& Value)
 	NewRotator.Pitch = UKismetMathLibrary::ClampAngle(NewRotator.Pitch + InputValue.Y, -80.f, 80.f);
 	NewRotator.Yaw += InputValue.X;
 	SpringArmComponent->SetWorldRotation(NewRotator);
+
 	//UE_LOG(LogTemp, Log, TEXT("Look: %s"),*SpringArmComponent->GetComponentRotation().ToString());
 }
 
