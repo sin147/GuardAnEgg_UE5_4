@@ -142,6 +142,9 @@ protected:
 	//移动
 	UFUNCTION()
 	void Move(const FInputActionValue& InputValue);
+
+	void StopMove(const FInputActionValue& InputValue);
+
 	//视野
 	UFUNCTION()
 	void Look(const FInputActionValue& InputValue);

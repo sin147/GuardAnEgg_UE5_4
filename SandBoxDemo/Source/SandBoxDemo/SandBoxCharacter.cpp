@@ -131,10 +131,47 @@ void ASandBoxCharacter::FarAttack()
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
 	FVector InputValue = Value.Get<FVector>();
-	AddMovementInput(GetCharacterForwardVector(), InputValue.X);
-	AddControllerYawInput(InputValue.Y);
-	AddMovementInput(GetActorUpVector(), InputValue.Z);
-	//UE_LOG(LogTemp, Log, TEXT("Move: %s"), *InputValue.ToString());
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	const FRotator ControllerRotation = Controller->GetControlRotation();
+	const FRotator ControllerYawRotation(0, ControllerRotation.Yaw, 0);
+	const FRotator ControllerPitchRotation(0, 0, ControllerRotation.Pitch);
+	const FRotator CharacterRotation= FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw + 90, GetMesh()->GetComponentRotation().Roll);
+	const FRotator CharacterYawRotation(0, CharacterRotation.Yaw, 0);
+	const FRotator CharacterPitchRotation(0,0, CharacterRotation.Pitch);
+	// 应用前进和后退输入
+	if (InputValue.X!=0)
+	{
+
+		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(ForwardDirection, InputValue.X);
+
+	}
+	//左右旋转
+	if (InputValue.Y != 0&& ControllerYawRotation.Equals(CharacterYawRotation,60))
+	{
+		AddControllerYawInput(InputValue.Y);
+	}
+	else if(!ControllerRotation.Equals(CharacterRotation,10))
+	{
+		Controller->SetControlRotation(FRotator(ControllerRotation.Pitch, CharacterRotation.Yaw, ControllerRotation.Roll));
+	}
+	//上下旋转
+	if (InputValue.Z != 0 && ControllerPitchRotation.Equals(CharacterPitchRotation, 60))
+	{
+		AddControllerPitchInput(InputValue.Z);
+		//AddControllerRollInput(InputValue.Z);
+		UE_LOG(LogTemp, Log, TEXT("Look: %s"), *ControllerRotation.ToString());
+	}
+	else if (InputValue.Z == 0 && !ControllerPitchRotation.Equals(CharacterPitchRotation,10))
+	{
+		Controller->SetControlRotation(FRotator(CharacterPitchRotation.Pitch, ControllerRotation.Yaw, ControllerRotation.Roll));
+	}
+
+}
+
+void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
+{
+	
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
@@ -142,9 +179,11 @@ void ASandBoxCharacter::Look(const FInputActionValue& Value)
 	//旋转相机臂
 	FVector2D InputValue = Value.Get<FVector2D>();
 	FRotator NewRotator = SpringArmComponent->GetComponentRotation();
-	NewRotator.Pitch = UKismetMathLibrary::ClampAngle(NewRotator.Pitch + InputValue.Y, -80.f, 80.f);
+	NewRotator.Pitch = UKismetMathLibrary::ClampAngle(NewRotator.Pitch - InputValue.Y, -80.f, 80.f);
 	NewRotator.Yaw += InputValue.X;
 	SpringArmComponent->SetWorldRotation(NewRotator);
+
+	// add yaw and pitch input to controller
 
 	//UE_LOG(LogTemp, Log, TEXT("Look: %s"),*SpringArmComponent->GetComponentRotation().ToString());
 }
@@ -201,6 +240,7 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if(EnhancedInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::StopMove);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::Look);
 		EnhancedInputComponent->BindAction(CloseAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::CloseAttack);
 		EnhancedInputComponent->BindAction(FarAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::FarAttack);
