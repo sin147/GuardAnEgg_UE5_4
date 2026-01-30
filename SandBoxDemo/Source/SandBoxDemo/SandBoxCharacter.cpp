@@ -120,58 +120,91 @@ void ASandBoxCharacter::OnMoveModeChange()
 
 void ASandBoxCharacter::CloseAttack()
 {
-	UE_LOG(LogTemp, Log, TEXT("%s : Close Attack"),*GetActorNameOrLabel());
+	//UE_LOG(LogTemp, Log, TEXT("%s : Close Attack"),*GetActorNameOrLabel());
 }
 
 void ASandBoxCharacter::FarAttack()
 {
-	UE_LOG(LogTemp, Log, TEXT("%s : Far Attack"), *GetActorNameOrLabel());
+	//UE_LOG(LogTemp, Log, TEXT("%s : Far Attack"), *GetActorNameOrLabel());
 }
 
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
 	FVector InputValue = Value.Get<FVector>();
+	if (!IsValid(Controller)) { return; }
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	const FRotator ControllerRotation = Controller->GetControlRotation();
 	const FRotator ControllerYawRotation(0, ControllerRotation.Yaw, 0);
-	const FRotator ControllerPitchRotation(0, 0, ControllerRotation.Pitch);
+	const FRotator ControllerPitchRotation(ControllerRotation.Pitch,0, 0);
 	const FRotator CharacterRotation= FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw + 90, GetMesh()->GetComponentRotation().Roll);
 	const FRotator CharacterYawRotation(0, CharacterRotation.Yaw, 0);
 	const FRotator CharacterPitchRotation(0,0, CharacterRotation.Pitch);
+	float PitchLimit=90;
 	// 应用前进和后退输入
-	if (InputValue.X!=0)
+	if (InputValue.X != 0)
 	{
-
+		//设置上下偏转限制
+		PitchLimit = 60;
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(ForwardDirection, InputValue.X);
-
 	}
+
 	//左右旋转
 	if (InputValue.Y != 0&& ControllerYawRotation.Equals(CharacterYawRotation,60))
 	{
 		AddControllerYawInput(InputValue.Y);
+		if (InputValue.X == 0)
+		{
+			//飞行状态下的左右旋转速度
+			if (GetCharacterMovement()->RotationRate.Yaw != 500)
+			{
+				GetCharacterMovement()->RotationRate.Yaw = 500;
+			}
+			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(ForwardDirection, 0.0001);
+
+		}
+		//非飞行状态下的旋转速度
+		else if(GetCharacterMovement()->RotationRate.Yaw==500)
+		{
+			GetCharacterMovement()->RotationRate.Yaw = 100;
+		}
+
 	}
+	//左右旋转取消，清除控制器旋转差量
 	else if(!ControllerRotation.Equals(CharacterRotation,10))
 	{
 		Controller->SetControlRotation(FRotator(ControllerRotation.Pitch, CharacterRotation.Yaw, ControllerRotation.Roll));
 	}
-	//上下旋转
-	if (InputValue.Z != 0 && ControllerPitchRotation.Equals(CharacterPitchRotation, 60))
-	{
-		AddControllerPitchInput(InputValue.Z);
-		//AddControllerRollInput(InputValue.Z);
-		UE_LOG(LogTemp, Log, TEXT("Look: %s"), *ControllerRotation.ToString());
-	}
-	else if (InputValue.Z == 0 && !ControllerPitchRotation.Equals(CharacterPitchRotation,10))
-	{
-		Controller->SetControlRotation(FRotator(CharacterPitchRotation.Pitch, ControllerRotation.Yaw, ControllerRotation.Roll));
-	}
 
+	//上下旋转
+	if (InputValue.Z != 0&& ControllerPitchRotation.Equals(FRotator(0, 0, 0), PitchLimit))
+	{
+		if (InputValue.X == 0)
+		{
+			AddControllerPitchInput(InputValue.Z);
+			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(ForwardDirection, 1);
+		}
+		AddControllerPitchInput(InputValue.Z);
+	}
+	//超过限制回归到限制范围
+	else
+	{
+		if (!ControllerPitchRotation.Equals(FRotator(PitchLimit* -InputValue.Z, 0, 0), 10))
+		{
+			Controller->SetControlRotation(FRotator(PitchLimit * -InputValue.Z, ControllerRotation.Yaw, ControllerRotation.Roll));
+			UE_LOG(LogTemp, Log, TEXT("Look: %lf , %s"), PitchLimit * -InputValue.Z, *ControllerPitchRotation.ToString());
+		}
+
+	}
 }
 
 void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
 {
-	
+	/*const FRotator ControllerRotation = Controller->GetControlRotation();
+	const FRotator CharacterRotation = FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw + 90, GetMesh()->GetComponentRotation().Roll);
+	Controller->SetControlRotation(FRotator(0, CharacterRotation.Yaw, CharacterRotation.Roll));*/
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
