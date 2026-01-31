@@ -24,52 +24,82 @@ ASandBoxCharacter::ASandBoxCharacter()
 	//相机组件
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
-	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;
-	//箭头附加到Mesh上
-	//GetArrowComponent()->SetupAttachment(GetMesh());
+	//角色控制点
+	CharacterControlPoint = CreateDefaultSubobject<USceneComponent>(TEXT("CharacterControlPoint"));
+	CharacterControlPoint->SetupAttachment(RootComponent);
+	GetMesh()->SetupAttachment(CharacterControlPoint);
+	//初始化当前Yaw和Pitch用于计算旋转速度
+	PreYaw = GetCharacterRotation().Yaw;
+	PrePitch = GetCharacterRotation().Pitch;
 }
 
-void ASandBoxCharacter::InitAttribute(TObjectPtr<UCharacterAttributeDataAsset> InAttributeDataAsset)
+void ASandBoxCharacter::InitAttribute()
 {
-	TArray<FCharacterAttribute> AttributeDatas = InAttributeDataAsset->Attributes;
-	for (FCharacterAttribute AttributeData : AttributeDatas)
-	{
-		TObjectPtr<UAttributeBase> NewAttribute = NewObject<UAttributeBase>();
-		NewAttribute->Init(AttributeData.MaxValue, AttributeData.MinValue, AttributeData.Default);
-		CharacterAtributes.Add(AttributeData.Attribute, NewAttribute);
-	}
+	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
+	//工具数据资产初始化属性
+	//飞行速度
+	CharacterMovementComponent->MaxFlySpeed = (*AttributeDataAsset)[ECharacterAttribute::FlySpeed].GetMaxValue();
+	//步行速度
+	CharacterMovementComponent->MaxWalkSpeed = (*AttributeDataAsset)[ECharacterAttribute::WalkSpeed].GetMaxValue();
+	//游泳速度
+	CharacterMovementComponent->MaxSwimSpeed = (*AttributeDataAsset)[ECharacterAttribute::SwimmingSpeed].GetMaxValue();
+	//左右旋转速度
+	CharacterMovementComponent->RotationRate.Yaw = (*AttributeDataAsset)[ECharacterAttribute::YawRotatorSpeed].GetMaxValue();
+	//上下旋转速度
+	CharacterMovementComponent->RotationRate.Pitch = (*AttributeDataAsset)[ECharacterAttribute::PitchRotatorSpeed].GetMaxValue();
 }
 
-bool ASandBoxCharacter::SetAttributeByEnum(TEnumAsByte<ECharacterAttribute> Attribute, float NewValue)
+bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue,ECAVType InValueType)
 {
-	if (CharacterAtributes.Find(Attribute))
+	if (!AttributeDataAsset->IsVaildKey(Attribute)){ return false; }
+	switch (InValueType)
 	{
-		CharacterAtributes[Attribute]->SetCurrentlyValue(NewValue);
-	}
-	else
-	{
-		TObjectPtr<UAttributeBase> NewAttribute= NewObject<UAttributeBase>();
-		CharacterAtributes.Add(Attribute, NewAttribute);
-		UE_LOG(LogTemp, Log, TEXT("Not Find Attribute:%d,New One"), Attribute.GetIntValue());
+	case CAVT_Max:
+		 (*AttributeDataAsset)[Attribute].SetMaxValue(NewValue);
+		break;
+	case CAVT_Currently:
+		(*AttributeDataAsset)[Attribute].SetCurrentlyValue(NewValue);
+		break;
+	case CAVT_Min:
+		(*AttributeDataAsset)[Attribute].SetMinValue(NewValue);
+		break;
+	default:
+		return false;
 	}
 	return true;
 }
 
-float ASandBoxCharacter::GetAttributeByEnum(TEnumAsByte<ECharacterAttribute> Attribute)
+float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType)
 {
 
-	if (!CharacterAtributes.Find(Attribute))
+	if (!AttributeDataAsset->IsVaildKey(Attribute)) { return 0; }
+	switch (InValueType)
 	{
-		TObjectPtr<UAttributeBase> NewAttribute = NewObject<UAttributeBase>();
-		CharacterAtributes.Add(Attribute, NewAttribute);
-		UE_LOG(LogTemp, Log, TEXT("Not Find Attribute:%d,New One"), Attribute.GetIntValue());
+	case CAVT_Max:
+		return (*AttributeDataAsset)[Attribute].GetMaxValue();
+	case CAVT_Currently:
+		return (*AttributeDataAsset)[Attribute].GetCurrentlyValue();
+	case CAVT_Min:
+		return (*AttributeDataAsset)[Attribute].GetMinValue();
+	default:
+		return 0;
 	}
-	return CharacterAtributes[Attribute]->GetCurrentlyValue();
+	
+}
+
+bool ASandBoxCharacter::SetCurrentlyHP(float NewHP)
+{
+	return SetAttributeByEnum(ECharacterAttribute::HP, NewHP);
+}
+
+float ASandBoxCharacter::GetCurrentlyHP()
+{
+	return GetAttributeByEnum(ECharacterAttribute::HP);
 }
 
 void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
-	if (GetSpeed() != 0)
+	if (GetCurrentlyMoveSpeed() != 0)
 	{
 		StateMachine->EnterState(EState::S_Move);
 	}
@@ -89,23 +119,121 @@ TEnumAsByte<EState> ASandBoxCharacter::GetCurrentlyChracterState()
 void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 {
 	//更新速度
-	SetSpeed(GetVelocity().Length());
-	//更新角色旋转速度
-	SetRotatorSpeed((GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
-	//UE_LOG(LogTemp, Log, TEXT("RotatorSpeed %lf"), (GetMesh()->GetComponentRotation().Yaw - CurrentlyYaw) / DeltaTime);
-	CurrentlyYaw = GetMesh()->GetComponentRotation().Yaw;
+	SetCurrentlyMoveSpeed(GetVelocity().Length());
+	//更新左右旋转速度
+	SetCurrentlyYawRotatorSpeed((GetCharacterRotation().Yaw - PreYaw)/DeltaTime);
+	//UE_LOG(LogTemp, Log, TEXT("YawRotatorSpeed %lf %lf %lf "), GetCharacterRotation().Yaw,PreYaw,(GetCharacterRotation().Yaw - PreYaw) / DeltaTime);
+	PreYaw = GetCharacterRotation().Yaw;
 
+	//更新上下速度旋转
+	SetCurrentlyPitchRotatorSpeed((GetCharacterRotation().Pitch - PrePitch) / DeltaTime);
+	//UE_LOG(LogTemp, Log, TEXT("PitchRotatorSpeed %lf %lf %lf "), GetCharacterRotation().Pitch, PrePitch, (GetCharacterRotation().Pitch - PrePitch) / DeltaTime);
+	PrePitch = GetCharacterRotation().Pitch;
 }
 
-float ASandBoxCharacter::GetSpeed()
+bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
 {
-	return GetAttributeByEnum(ECharacterAttribute::MoveSpeed);
+
+	return SetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, InRotatorSpeed);
 }
+float ASandBoxCharacter::GetCurrentlyYawRotatorSpeed()
+{
+	//UE_LOG(LogTemp, Log, TEXT("YawRotatorSpeed %lf "), GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed));
+	return GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed);
+}
+bool ASandBoxCharacter::SetMaxYawRotatorSpeed(float InRotatorSpeed)
+{
+	return SetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, InRotatorSpeed, ECAVType::CAVT_Max);
+}
+float ASandBoxCharacter::GetMaxYawRotatorSpeed()
+{
+	return GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, ECAVType::CAVT_Max);
+}
+
+bool ASandBoxCharacter::SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed)
+{
+	return SetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed, InRotatorSpeed);
+}
+float ASandBoxCharacter::GetCurrentlyPitchRotatorSpeed()
+{
+	//UE_LOG(LogTemp, Log, TEXT("PitchRotatorSpeed %lf "), GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed));
+	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed);
+}
+
+bool ASandBoxCharacter::SetMaxPitchRotatorSpeed(float InRotatorSpeed)
+{
+	return SetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,InRotatorSpeed,ECAVType::CAVT_Max);
+}
+
+float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
+{
+	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,ECAVType::CAVT_Max);
+}
+
+bool ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_Walking:
+		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InSpeed,ECAVType::CAVT_Max);
+	case MOVE_Swimming:
+		return SetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, InSpeed, ECAVType::CAVT_Max);
+	case MOVE_Flying:
+		return SetAttributeByEnum(ECharacterAttribute::FlySpeed, InSpeed, ECAVType::CAVT_Max);
+	default:
+		return false;
+	}
+}
+
+float ASandBoxCharacter::GetMaxMoveSpeed()
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_Walking:
+		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed, ECAVType::CAVT_Max);
+	case MOVE_Swimming:
+		return GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, ECAVType::CAVT_Max);
+	case MOVE_Flying:
+		return GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max);
+	default:
+		return 0;
+	}
+}
+
+bool ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_Walking:
+		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InSpeed);
+	case MOVE_Swimming:
+		return SetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, InSpeed);
+	case MOVE_Flying:
+		return SetAttributeByEnum(ECharacterAttribute::FlySpeed, InSpeed);
+	default:
+		return false;
+	}
+}
+
+float ASandBoxCharacter::GetCurrentlyMoveSpeed()
+{
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_Walking:
+		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+	case MOVE_Swimming:
+		return GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed);
+	case MOVE_Flying:
+		return GetAttributeByEnum(ECharacterAttribute::FlySpeed);
+	default:
+		return 0;
+	}
+}
+
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
 	GetCharacterMovement()->SetMovementMode(InMoveState);
-	OnMoveModeChange();
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
@@ -136,7 +264,7 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	const FRotator ControllerRotation = Controller->GetControlRotation();
 	const FRotator ControllerYawRotation(0, ControllerRotation.Yaw, 0);
 	const FRotator ControllerPitchRotation(ControllerRotation.Pitch,0, 0);
-	const FRotator CharacterRotation= FRotator(GetMesh()->GetComponentRotation().Pitch, GetMesh()->GetComponentRotation().Yaw + 90, GetMesh()->GetComponentRotation().Roll);
+	const FRotator CharacterRotation= GetCharacterRotation();
 	const FRotator CharacterYawRotation(0, CharacterRotation.Yaw, 0);
 	const FRotator CharacterPitchRotation(0,0, CharacterRotation.Pitch);
 	float PitchLimit=90;
@@ -194,7 +322,6 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 		if (!ControllerPitchRotation.Equals(FRotator(PitchLimit* -InputValue.Z, 0, 0), 10))
 		{
 			Controller->SetControlRotation(FRotator(PitchLimit * -InputValue.Z, ControllerRotation.Yaw, ControllerRotation.Roll));
-			UE_LOG(LogTemp, Log, TEXT("Look: %lf , %s"), PitchLimit * -InputValue.Z, *ControllerPitchRotation.ToString());
 		}
 
 	}
@@ -223,24 +350,29 @@ void ASandBoxCharacter::Look(const FInputActionValue& Value)
 
 FVector ASandBoxCharacter::GetCharacterForwardVector()
 {
-	return GetMesh()->GetRightVector();
+	return CharacterControlPoint->GetRightVector();
 }
 
 FVector ASandBoxCharacter::GetCharacterRightVector()
 {
-	return GetMesh()->GetForwardVector();
+	return CharacterControlPoint->GetForwardVector();
 }
 
 FVector ASandBoxCharacter::GetCharacterUpVector()
 {
-	return GetMesh()->GetUpVector();
+	return CharacterControlPoint->GetUpVector();
+}
+
+FRotator ASandBoxCharacter::GetCharacterRotation()
+{
+	return CharacterControlPoint->GetComponentRotation();
 }
 
 // Called when the game starts or when spawned
 void ASandBoxCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	InitAttribute(AttributeDataAsset);
+	InitAttribute();
 }
 
 void ASandBoxCharacter::BeHit(float Damage)

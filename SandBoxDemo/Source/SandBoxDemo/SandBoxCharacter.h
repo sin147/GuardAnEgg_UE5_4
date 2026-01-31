@@ -45,52 +45,23 @@ private:
 	//角色属性配置表
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCharacterAttributeDataAsset> AttributeDataAsset;
-	//校色属性
-	TMap<TEnumAsByte<ECharacterAttribute>, TObjectPtr<UAttributeBase>> CharacterAtributes;
 	//初始化属性
-	void InitAttribute(TObjectPtr<UCharacterAttributeDataAsset> InAttributeDataAsset);
+	void InitAttribute();
 
 protected:
 	//设置属性
 	UFUNCTION()
-	bool SetAttributeByEnum(TEnumAsByte<ECharacterAttribute>Attribute, float NewValue);
+	bool SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType =ECAVType::CAVT_Currently);
 	//获取属性
 	UFUNCTION()
-	float GetAttributeByEnum(TEnumAsByte<ECharacterAttribute>Attribute);
+	float GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType = ECAVType::CAVT_Currently);
 public:
 	//设置血量
 	UFUNCTION()
-	bool SetHP(float NewHP)
-	{
-		return SetAttributeByEnum(ECharacterAttribute::HP,NewHP);
-	}
+	bool SetCurrentlyHP(float NewHP);
 	//获取血量
 	UFUNCTION()
-	float GetHP()
-	{
-		return GetAttributeByEnum(ECharacterAttribute::HP);
-	}
-	//设置移动速度
-	bool SetSpeed(float InSpeed)
-	{
-		return SetAttributeByEnum(ECharacterAttribute::MoveSpeed, InSpeed);
-	}
-	//获取移动速度
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetSpeed();
-	//获取最大移动速度
-
-	//获取转向速度
-	UFUNCTION(BlueprintCallable,BlueprintPure)
-	float GetRotatorSpeed()
-	{
-		return GetAttributeByEnum(ECharacterAttribute::RotatorSpeed);
-	}
-	//设置旋转速度
-	bool SetRotatorSpeed(float InRotatorSpeed)
-	{
-		return SetAttributeByEnum(ECharacterAttribute::RotatorSpeed, InRotatorSpeed);
-	}
+	float GetCurrentlyHP();
 /************************************组件***************************************************/
 protected:
 	UPROPERTY(EditAnywhere)
@@ -105,6 +76,46 @@ protected:
 	//当角色运动改变
 	UFUNCTION()
 	virtual void OnMoveModeChange();
+public:
+	//设置左右旋转速度
+	bool SetCurrentlyYawRotatorSpeed(float InRotatorSpeed);
+	//获取左右转向速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetCurrentlyYawRotatorSpeed();
+
+	//当前左右旋转
+	float PreYaw;
+	//设置最大左右旋转速度
+	bool SetMaxYawRotatorSpeed(float InRotatorSpeed);
+	//获取最大左右转向速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxYawRotatorSpeed();
+
+	//当前上下旋转
+	float PrePitch;
+	//设置上下旋转速度
+	bool SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed);
+	//获取上下旋转速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetCurrentlyPitchRotatorSpeed();
+
+	//设置最大上下旋转速度
+	bool SetMaxPitchRotatorSpeed(float InRotatorSpeed);
+	//获取最大上下旋转速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxPitchRotatorSpeed();
+
+	//设置最大移动速度
+	bool SetMaxMoveSpeed(float InSpeed);
+	//获取最大移动速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxMoveSpeed();
+
+	//设置当前移动速度
+	bool SetCurrentlyMoveSpeed(float InSpeed);
+	//获取当前移动速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetCurrentlyMoveSpeed();
 
 /************************************相机***************************************************/
 protected:
@@ -114,6 +125,10 @@ protected:
 	//相机弹簧臂
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
+	//角色的控制点
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* CharacterControlPoint;
+
 /************************************输入绑定***************************************************/
 	//输入动作
 protected:
@@ -148,7 +163,7 @@ protected:
 	//视野
 	UFUNCTION()
 	void Look(const FInputActionValue& InputValue);
-/************************************方向相关***************************************************/
+/************************************旋转，方向相关***************************************************/
 protected:
 
 	//获取Actor向前向量
@@ -160,11 +175,12 @@ protected:
 	//获取Actor向上前向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector GetCharacterUpVector();
+	//获取当前角色旋转
+	UFUNCTION(BlueprintCallable,BlueprintPure)
+	FRotator GetCharacterRotation();
 	
 /************************************Tick相关***************************************************/
 private:
-	//当前角色的Yaw
-	float CurrentlyYaw;
 
 	//更新属性
 	void UpdateAttributes(float DeltaTime);
