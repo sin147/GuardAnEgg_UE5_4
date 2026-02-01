@@ -13,7 +13,7 @@
 #include "Peoples/SandBoxPeople_King.h"
 #include "EnhancedInputSubsystems.h"
 #include "SandBoxPeople.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Component/SandBoxMovementComponent.h"
 #include "Datas/CharacterAttributeDataAsset.h"
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
@@ -66,6 +66,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStateMachineBase> StateMachine;
+
 /************************************运动***************************************************/
 protected:
 	//设置角色运动类型
@@ -83,16 +84,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyYawRotatorSpeed();
 
-	//当前左右旋转
-	float PreYaw;
+	float YawDirection=1;
 	//设置最大左右旋转速度
 	bool SetMaxYawRotatorSpeed(float InRotatorSpeed);
 	//获取最大左右转向速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxYawRotatorSpeed();
 
-	//当前上下旋转
-	float PrePitch;
+	float PitchDirection = 1;
 	//设置上下旋转速度
 	bool SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed);
 	//获取上下旋转速度

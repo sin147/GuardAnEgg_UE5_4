@@ -28,25 +28,27 @@ ASandBoxCharacter::ASandBoxCharacter()
 	CharacterControlPoint = CreateDefaultSubobject<USceneComponent>(TEXT("CharacterControlPoint"));
 	CharacterControlPoint->SetupAttachment(RootComponent);
 	GetMesh()->SetupAttachment(CharacterControlPoint);
-	//初始化当前Yaw和Pitch用于计算旋转速度
-	PreYaw = GetCharacterRotation().Yaw;
-	PrePitch = GetCharacterRotation().Pitch;
+
 }
 
 void ASandBoxCharacter::InitAttribute()
 {
-	UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement();
-	//工具数据资产初始化属性
-	//飞行速度
-	CharacterMovementComponent->MaxFlySpeed = (*AttributeDataAsset)[ECharacterAttribute::FlySpeed].GetMaxValue();
-	//步行速度
-	CharacterMovementComponent->MaxWalkSpeed = (*AttributeDataAsset)[ECharacterAttribute::WalkSpeed].GetMaxValue();
-	//游泳速度
-	CharacterMovementComponent->MaxSwimSpeed = (*AttributeDataAsset)[ECharacterAttribute::SwimmingSpeed].GetMaxValue();
-	//左右旋转速度
-	CharacterMovementComponent->RotationRate.Yaw = (*AttributeDataAsset)[ECharacterAttribute::YawRotatorSpeed].GetMaxValue();
-	//上下旋转速度
-	CharacterMovementComponent->RotationRate.Pitch = (*AttributeDataAsset)[ECharacterAttribute::PitchRotatorSpeed].GetMaxValue();
+	USandBoxMovementComponent* CharacterMovementComponent =GetCharacterMovement<USandBoxMovementComponent>();
+	if (CharacterMovementComponent)
+	{
+		//工具数据资产初始化属性
+		//飞行速度
+		CharacterMovementComponent->MaxFlySpeed = (*AttributeDataAsset)[ECharacterAttribute::FlySpeed].GetMaxValue();
+		//步行速度
+		CharacterMovementComponent->MaxWalkSpeed = (*AttributeDataAsset)[ECharacterAttribute::WalkSpeed].GetMaxValue();
+		//游泳速度
+		CharacterMovementComponent->MaxSwimSpeed = (*AttributeDataAsset)[ECharacterAttribute::SwimmingSpeed].GetMaxValue();
+		//左右旋转速度
+		CharacterMovementComponent->MaxRotationRate.Yaw = (*AttributeDataAsset)[ECharacterAttribute::YawRotatorSpeed].GetMaxValue();
+		//上下旋转速度
+		CharacterMovementComponent->MaxRotationRate.Pitch = (*AttributeDataAsset)[ECharacterAttribute::PitchRotatorSpeed].GetMaxValue();
+	}
+
 }
 
 bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue,ECAVType InValueType)
@@ -121,14 +123,10 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 	//更新速度
 	SetCurrentlyMoveSpeed(GetVelocity().Length());
 	//更新左右旋转速度
-	SetCurrentlyYawRotatorSpeed((GetCharacterRotation().Yaw - PreYaw)/DeltaTime);
-	//UE_LOG(LogTemp, Log, TEXT("YawRotatorSpeed %lf %lf %lf "), GetCharacterRotation().Yaw,PreYaw,(GetCharacterRotation().Yaw - PreYaw) / DeltaTime);
-	PreYaw = GetCharacterRotation().Yaw;
+	SetCurrentlyYawRotatorSpeed(GetCharacterMovement<USandBoxMovementComponent>()->RotationRate.Yaw);
 
 	//更新上下速度旋转
-	SetCurrentlyPitchRotatorSpeed((GetCharacterRotation().Pitch - PrePitch) / DeltaTime);
-	//UE_LOG(LogTemp, Log, TEXT("PitchRotatorSpeed %lf %lf %lf "), GetCharacterRotation().Pitch, PrePitch, (GetCharacterRotation().Pitch - PrePitch) / DeltaTime);
-	PrePitch = GetCharacterRotation().Pitch;
+	SetCurrentlyPitchRotatorSpeed(GetCharacterMovement<USandBoxMovementComponent>()->RotationRate.Pitch);
 }
 
 bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
@@ -138,8 +136,7 @@ bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
 }
 float ASandBoxCharacter::GetCurrentlyYawRotatorSpeed()
 {
-	//UE_LOG(LogTemp, Log, TEXT("YawRotatorSpeed %lf "), GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed));
-	return GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed);
+	return  YawDirection*GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed);
 }
 bool ASandBoxCharacter::SetMaxYawRotatorSpeed(float InRotatorSpeed)
 {
@@ -156,8 +153,7 @@ bool ASandBoxCharacter::SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed)
 }
 float ASandBoxCharacter::GetCurrentlyPitchRotatorSpeed()
 {
-	//UE_LOG(LogTemp, Log, TEXT("PitchRotatorSpeed %lf "), GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed));
-	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed);
+	return PitchDirection*GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed);
 }
 
 bool ASandBoxCharacter::SetMaxPitchRotatorSpeed(float InRotatorSpeed)
@@ -167,6 +163,7 @@ bool ASandBoxCharacter::SetMaxPitchRotatorSpeed(float InRotatorSpeed)
 
 float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
 {
+	
 	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,ECAVType::CAVT_Max);
 }
 
@@ -281,6 +278,8 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	if (InputValue.Y != 0&& ControllerYawRotation.Equals(CharacterYawRotation,60))
 	{
 		AddControllerYawInput(InputValue.Y);
+		YawDirection = InputValue.Y;
+		GetCharacterMovement<USandBoxMovementComponent>()->bStartYawRotator = true;
 		if (InputValue.X == 0)
 		{
 			//飞行状态下的左右旋转速度
@@ -297,12 +296,16 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 		{
 			GetCharacterMovement()->RotationRate.Yaw = 100;
 		}
-
 	}
 	//左右旋转取消，清除控制器旋转差量
 	else if(!ControllerRotation.Equals(CharacterRotation,10))
 	{
+		if (InputValue.Y == 0&& Controller->GetControlRotation().Yaw == GetCharacterRotation().Yaw)
+		{
+			GetCharacterMovement<USandBoxMovementComponent>()->bStartYawRotator = false;
+		}
 		Controller->SetControlRotation(FRotator(ControllerRotation.Pitch, CharacterRotation.Yaw, ControllerRotation.Roll));
+
 	}
 
 	//上下旋转
@@ -310,11 +313,12 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	{
 		if (InputValue.X == 0)
 		{
-			AddControllerPitchInput(InputValue.Z);
 			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(ForwardDirection, 1);
 		}
 		AddControllerPitchInput(InputValue.Z);
+		YawDirection = InputValue.Z;
+		GetCharacterMovement<USandBoxMovementComponent>()->bStartPitchRotator = true;
 	}
 	//超过限制回归到限制范围
 	else
@@ -322,6 +326,11 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 		if (!ControllerPitchRotation.Equals(FRotator(PitchLimit* -InputValue.Z, 0, 0), 10))
 		{
 			Controller->SetControlRotation(FRotator(PitchLimit * -InputValue.Z, ControllerRotation.Yaw, ControllerRotation.Roll));
+			UE_LOG(LogTemp, Log, TEXT(" Be Hit, Current HP : %lf"), PitchLimit * -InputValue.Z);
+		}
+		if (InputValue.Z == 0&&Controller->GetControlRotation().Pitch==GetCharacterRotation().Pitch)
+		{
+			GetCharacterMovement<USandBoxMovementComponent>()->bStartPitchRotator = false;
 		}
 
 	}
