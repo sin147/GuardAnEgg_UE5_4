@@ -272,7 +272,7 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	if (InputValue.X != 0)
 	{
 		//设置上下偏转限制
-		PitchLimit = 60;
+		PitchLimit = 30;
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(ForwardDirection, InputValue.X);
 	}
