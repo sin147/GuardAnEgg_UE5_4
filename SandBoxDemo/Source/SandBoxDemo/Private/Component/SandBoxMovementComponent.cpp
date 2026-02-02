@@ -1,14 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Component/SandBoxMovementComponent.h"
 #include "GameFramework/Character.h"
+#include "SandBoxCharacter.h"
 void USandBoxMovementComponent::CalculateRotationRate(float DeltaTime)
 {
-	if (!RotationRate.Equals(MaxRotationRate)&& Acceleration.SizeSquared() >= UE_KINDA_SMALL_NUMBER)
+	
+	if (!RotationRate.Equals(MaxRotationRate)&& !Cast<ASandBoxCharacter>(GetCharacterOwner())->GetCharacterForwardVector().Equals(Acceleration.GetSafeNormal()))
 	{
 		RotationRate.Yaw = bStartYawRotator ?FMath::Clamp(RotationRate.Yaw + RotatorAcceleration.Yaw * DeltaTime, 0, MaxRotationRate.Yaw):0;
-		RotationRate.Pitch = bStartPitchRotator? FMath::Clamp(RotationRate.Pitch + RotatorAcceleration.Pitch * DeltaTime, 0, MaxRotationRate.Pitch):0;
+		RotationRate.Pitch = bStartPitchRotator ? FMath::Clamp(RotationRate.Pitch + RotatorAcceleration.Pitch * DeltaTime, 0, MaxRotationRate.Pitch):0;
 		//RotationRate.Roll = FMath::Clamp(RotationRate.Roll + RotatorAcceleration.Roll * DeltaTime, 0, MaxRotationRate.Roll);
 	}
 	else
@@ -31,7 +33,7 @@ void USandBoxMovementComponent::PhysicsRotation(float DeltaTime)
 	{
 		return;
 	}
-	//ÏÈ¼ÆËãÐý×ªËÙ¶È
+	//å…ˆè®¡ç®—æ—‹è½¬é€Ÿåº¦
 	CalculateRotationRate(DeltaTime);
 	Super::PhysicsRotation(DeltaTime);
 

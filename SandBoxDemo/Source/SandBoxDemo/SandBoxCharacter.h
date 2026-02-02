@@ -84,14 +84,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyYawRotatorSpeed();
 
-	float YawDirection=1;
 	//设置最大左右旋转速度
 	bool SetMaxYawRotatorSpeed(float InRotatorSpeed);
 	//获取最大左右转向速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxYawRotatorSpeed();
 
-	float PitchDirection = 1;
 	//设置上下旋转速度
 	bool SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed);
 	//获取上下旋转速度
@@ -163,14 +161,14 @@ protected:
 	UFUNCTION()
 	void Look(const FInputActionValue& InputValue);
 /************************************旋转，方向相关***************************************************/
-protected:
+public:
 
 	//获取Actor向前向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FVector GetCharacterForwardVector();
+	FVector GetCharacterRightVector();
 	//获取Actor右向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FVector GetCharacterRightVector();
+	FVector GetCharacterForwardVector();
 	//获取Actor向上前向量
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector GetCharacterUpVector();
