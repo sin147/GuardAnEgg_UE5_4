@@ -260,37 +260,120 @@ void ASandBoxCharacter::FarAttack()
 
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
-	FVector InputValue = Value.Get<FVector>();
+	switch (GetCharacterMovement()->MovementMode)
+	{
+	case MOVE_None:
+		break;
+	case MOVE_Walking:
+		WalkMove(Value);
+		break;
+	case MOVE_NavWalking:
+		break;
+	case MOVE_Falling:
+		break;
+	case MOVE_Swimming:
+		break;
+	case MOVE_Flying:
+		FlyMove(Value);
+		break;
+	case MOVE_Custom:
+		break;
+	case MOVE_MAX:
+		break;
+	default:
+		break;
+	}
+
+}
+
+void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
+{
+	FVector Value = InputValue.Get<FVector>();
 	if (!IsValid(Controller)) { return; }
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	const FRotator ControllerRotation = Controller->GetControlRotation();
-	const FRotator CharacterRotation= GetCharacterRotation();
+	const FRotator CharacterRotation = GetCharacterRotation();
 	// 应用前进和后退输入
-	if (InputValue.X != 0)
+	if (Value.X != 0)
 	{
 		//设置上下偏转限制
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(ForwardDirection, InputValue.X);
+		if (Value.X > 0)
+		{
+			AddMovementInput(ForwardDirection, Value.X);
+		}
+		else
+		{
+			AddMovementInput(ForwardDirection, Value.X);
+		}
+		SetCurrentlyMoveSpeed(Value.X * GetVelocity().Length());
 	}
 
 	//左右旋转
-	if (InputValue.Y != 0)
+	if (Value.Y != 0)
 	{
-		AddControllerYawInput(InputValue.Y);
-		if (InputValue.X == 0)
+		if (Value.X == 0)
 		{
+			AddControllerYawInput(Value.Y);
+			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(ForwardDirection, 0.5);
+
+		}
+		else
+		{
+			AddControllerYawInput(Value.X * Value.Y);
+		}
+	}
+}
+
+void ASandBoxCharacter::FlyMove(const FInputActionValue& InputValue)
+{
+	FVector Value = InputValue.Get<FVector>();
+	if (!IsValid(Controller)) { return; }
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	const FRotator ControllerRotation = Controller->GetControlRotation();
+	const FRotator CharacterRotation = GetCharacterRotation();
+	// 应用前进和后退输入
+	if (Value.X != 0)
+	{
+
+		//设置上下偏转限制
+		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
+		if (Value.X > 0)
+		{
+			AddMovementInput(ForwardDirection, Value.X);
+		}
+		else
+		{
+			AddMovementInput(ForwardDirection, Value.X);
+		}
+		SetCurrentlyMoveSpeed(Value.X * GetVelocity().Length());
+
+	}
+
+	//左右旋转
+	if (Value.Y != 0)
+	{
+
+		if (Value.X == 0)
+		{
+			AddControllerYawInput(Value.Y);
 			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(ForwardDirection, 0.0001);
 
 		}
+		else
+		{
+			AddControllerYawInput(Value.X * Value.Y);
+		}
 	}
 
 	//上下旋转
-	if (InputValue.Z != 0)
+	if (Value.Z != 0)
 	{
 
-		AddControllerPitchInput(InputValue.Z);
-		if (InputValue.X == 0)
+		AddControllerPitchInput(Value.Z);
+		if (Value.X == 0)
 		{
 			const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(ForwardDirection, 0.5);
@@ -300,7 +383,13 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 
 void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
 {
+	GetController()->SetControlRotation(GetCharacterRotation());
+}
 
+void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
+{
+	//起飞逻辑
+	UE_LOG(LogTemp, Log, TEXT("TakeOff"));
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
@@ -382,6 +471,7 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::Look);
 		EnhancedInputComponent->BindAction(CloseAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::CloseAttack);
 		EnhancedInputComponent->BindAction(FarAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::FarAttack);
+		EnhancedInputComponent->BindAction(TakeOffAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::TakeOff);
 	}
 	//添加输入映射上下文
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))

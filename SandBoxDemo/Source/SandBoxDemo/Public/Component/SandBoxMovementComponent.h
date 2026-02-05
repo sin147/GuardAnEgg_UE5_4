@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,18 +14,5 @@ class SANDBOXDEMO_API USandBoxMovementComponent : public UCharacterMovementCompo
 {
 	GENERATED_BODY()
 public:
-	//¿ªÊ¼×ªÏò¼ÓËÙ
-	bool bStartYawRotator=false;
-	bool bStartPitchRotator = false;
-	//×ªÏò¼ÓËÙ¶È
-	UPROPERTY(Category = "Character Movement (Rotation Settings)", EditAnywhere, BlueprintReadWrite)
-	FRotator RotatorAcceleration;
-	//×î´ó×ªÏòËÙÂÊ
-	UPROPERTY(Category = "Character Movement (Rotation Settings)", EditAnywhere, BlueprintReadWrite)
-	FRotator MaxRotationRate;
-protected:
-	//¼ÆËãµ±Ç°×ªÏòËÙ¶È
-	UFUNCTION(BlueprintCallable)
-	void CalculateRotationRate(float DeltaTime);
-	virtual void PhysicsRotation(float DeltaTime) override;
+
 };

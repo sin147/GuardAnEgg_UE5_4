@@ -4,37 +4,16 @@
 #include "Component/SandBoxMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "SandBoxCharacter.h"
-void USandBoxMovementComponent::CalculateRotationRate(float DeltaTime)
-{
-	
-	if (!RotationRate.Equals(MaxRotationRate)&& !Cast<ASandBoxCharacter>(GetCharacterOwner())->GetCharacterForwardVector().Equals(Acceleration.GetSafeNormal()))
-	{
-		RotationRate.Yaw = bStartYawRotator ?FMath::Clamp(RotationRate.Yaw + RotatorAcceleration.Yaw * DeltaTime, 0, MaxRotationRate.Yaw):0;
-		RotationRate.Pitch = bStartPitchRotator ? FMath::Clamp(RotationRate.Pitch + RotatorAcceleration.Pitch * DeltaTime, 0, MaxRotationRate.Pitch):0;
-		//RotationRate.Roll = FMath::Clamp(RotationRate.Roll + RotatorAcceleration.Roll * DeltaTime, 0, MaxRotationRate.Roll);
-	}
-	else
-	{
-		RotationRate = FRotator::ZeroRotator;
-		bStartYawRotator = false;
-		bStartPitchRotator = false;
-	}
 
-}
+//FRotator USandBoxMovementComponent::GetDeltaRotation(float DeltaTime) const
+//{
+//	
+//	FRotator RetRotator = Super::GetDeltaRotation(DeltaTime);
+//}
 
-void USandBoxMovementComponent::PhysicsRotation(float DeltaTime)
-{
-	if (!(bOrientRotationToMovement || bUseControllerDesiredRotation))
-	{
-		return;
-	}
-
-	if (!HasValidData() || (!CharacterOwner->Controller && !bRunPhysicsWithNoController))
-	{
-		return;
-	}
-	//先计算旋转速度
-	CalculateRotationRate(DeltaTime);
-	Super::PhysicsRotation(DeltaTime);
-
-}
+//FRotator USandBoxMovementComponent::ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const
+//{
+//	FRotator RetRotator= Super::ComputeOrientToMovementRotation(CurrentRotation, DeltaTime, DeltaRotation);
+//	//GetPawnOwner()->AddMovementInput
+//	return FRotator(RetRotator.Pitch, RetRotator.Yaw, RetRotator.Roll);
+//}

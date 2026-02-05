@@ -144,6 +144,13 @@ protected:
 	//查看输入
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* LookAction;
+	//跳跃
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* JumpAction;
+	//起飞
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* TakeOffAction;
+
 protected:
 	//近战攻击
 	UFUNCTION(BlueprintCallable, Category = "Attack")
@@ -155,7 +162,14 @@ protected:
 	UFUNCTION()
 	void Move(const FInputActionValue& InputValue);
 
+	void WalkMove(const FInputActionValue& InputValue);
+
+	void FlyMove(const FInputActionValue& InputValue);
+
 	void StopMove(const FInputActionValue& InputValue);
+	//起飞
+	UFUNCTION()
+	void TakeOff(const FInputActionValue& InputValue);
 
 	//视野
 	UFUNCTION()

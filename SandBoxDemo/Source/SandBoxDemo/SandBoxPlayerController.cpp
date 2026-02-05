@@ -21,8 +21,8 @@ void ASandBoxPlayerController::CalculateDeltaRotation(FRotator& InRotationInput,
 		else if(CurrentlyRotationRate.Yaw != 0)
 		{
 
-			CurrentlyRotationRate.Yaw = CurrentlyRotationRate.Yaw > 0 ? CurrentlyRotationRate.Yaw - 1 : CurrentlyRotationRate.Yaw + 1;
-			CurrentlyRotationRate.Yaw = FMath::IsNearlyEqual(CurrentlyRotationRate.Yaw, 0, 10) ? 0 : CurrentlyRotationRate.Yaw;
+			CurrentlyRotationRate.Yaw = CurrentlyRotationRate.Yaw > 0 ? CurrentlyRotationRate.Yaw - 3 : CurrentlyRotationRate.Yaw + 3;
+			CurrentlyRotationRate.Yaw = FMath::IsNearlyEqual(CurrentlyRotationRate.Yaw, 0, 1) ? 0 : CurrentlyRotationRate.Yaw;
 		}
 
 		if (InRotationInput.Pitch != 0)
@@ -33,7 +33,6 @@ void ASandBoxPlayerController::CalculateDeltaRotation(FRotator& InRotationInput,
 		{
 			
 			CurrentlyRotationRate.Pitch = FMath::IsNearlyEqual(GetControlRotation().Pitch, 90, 90)?-MaxRotationRate.Pitch: MaxRotationRate.Pitch;
-			UE_LOG(LogTemp, Log, TEXT("%lf"), CurrentlyRotationRate.Pitch);
 		}
 		else
 		{
@@ -47,7 +46,12 @@ void ASandBoxPlayerController::CalculateDeltaRotation(FRotator& InRotationInput,
 		else if (CurrentlyRotationRate.Roll != 0)
 		{
 			CurrentlyRotationRate.Roll = CurrentlyRotationRate.Roll > 0 ? CurrentlyRotationRate.Roll - 1 : CurrentlyRotationRate.Roll + 1;
-			CurrentlyRotationRate.Roll = FMath::IsNearlyEqual(CurrentlyRotationRate.Roll, 0, 10) ? 0 : CurrentlyRotationRate.Roll;
+			CurrentlyRotationRate.Roll = FMath::IsNearlyEqual(CurrentlyRotationRate.Roll, 0, 1) ? 0 : CurrentlyRotationRate.Roll;
+
 		}
-	InRotationInput=CurrentlyRotationRate * DeltaTime;
+		if (InRotationInput.Yaw || InRotationInput.Pitch || InRotationInput.Roll)
+		{
+			InRotationInput = CurrentlyRotationRate * DeltaTime;
+		}
+
 }
