@@ -28,8 +28,17 @@ ASandBoxCharacter::ASandBoxCharacter()
 	//角色控制点
 	CharacterControlPoint = CreateDefaultSubobject<USceneComponent>(TEXT("CharacterControlPoint"));
 	CharacterControlPoint->SetupAttachment(RootComponent);
+	//技能组件
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
 	GetMesh()->SetupAttachment(CharacterControlPoint);
 
+}
+
+bool ASandBoxCharacter::ActivateAbilityByTag(FGameplayTag AbilityTag)
+{
+	//AbilitySystemComponent->TryActivateAbilityByClass();
+	return false;
 }
 
 void ASandBoxCharacter::InitAttribute()
@@ -390,6 +399,7 @@ void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
 {
 	//起飞逻辑
 	UE_LOG(LogTemp, Log, TEXT("TakeOff"));
+	//AbilitySystemComponent->TryActivateAbilitiesByTag();
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)

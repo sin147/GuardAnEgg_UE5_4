@@ -17,6 +17,7 @@
 #include "Datas/CharacterAttributeDataAsset.h"
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
+#include "AbilitySystemComponent.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
 class ASandBox_Prop;
@@ -40,6 +41,16 @@ class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter
 public:
 	// Sets default values for this pawn's properties
 	ASandBoxCharacter();
+/************************************Start--技能***************************************************/
+protected:
+	//技能组件
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+	
+	//激活技能
+	bool ActivateAbilityByTag(FGameplayTag AbilityTag);
+
+public:
+/************************************End--技能***************************************************/
 /************************************属性***************************************************/
 private:
 	//角色属性配置表
