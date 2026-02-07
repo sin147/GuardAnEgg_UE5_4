@@ -14,7 +14,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "SandBoxPeople.h"
 #include "Component/SandBoxMovementComponent.h"
-#include "Datas/CharacterAttributeDataAsset.h"
+#include "Datas/CharacterDataAsset.h"
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
 #include "AbilitySystemComponent.h"
@@ -48,6 +48,8 @@ protected:
 	
 	//激活技能
 	bool ActivateAbilityByTag(FGameplayTag AbilityTag);
+	//初始化技能
+	void InitalAbility();
 
 public:
 /************************************End--技能***************************************************/
@@ -55,7 +57,7 @@ public:
 private:
 	//角色属性配置表
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UCharacterAttributeDataAsset> AttributeDataAsset;
+	TObjectPtr<UCharacterDataAsset> CharacterDataAsset;
 	//初始化属性
 	void InitAttribute();
 

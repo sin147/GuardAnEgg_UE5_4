@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GlobalEnums.h"
-#include "CharacterAttributeDataAsset.generated.h"
+#include "Abilities/GameplayAbility.h"
+#include "CharacterDataAsset.generated.h"
 
-//校色属性结构体
+//角色属性结构体
 USTRUCT(BlueprintType)
 struct FCharacterAttribute
 {
@@ -57,15 +58,19 @@ public:
  * 
  */
 UCLASS()
-class SANDBOXDEMO_API UCharacterAttributeDataAsset : public UDataAsset
+class SANDBOXDEMO_API UCharacterDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<TEnumAsByte<ECharacterAttribute>,FCharacterAttribute>  Attributes;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<FGameplayTag,TSubclassOf<UGameplayAbility>>  Abilities;
 	
-	FCharacterAttribute& operator[](ECharacterAttribute CharacterAttribute);
+	FCharacterAttribute& GetAttributeByEnum(ECharacterAttribute CharacterAttribute);
+	TSubclassOf<UGameplayAbility> GetAbility(FGameplayTag AbilityTag);
 
-	bool IsVaildKey(ECharacterAttribute CharacterAttribute);
+	bool IsVaildAttribute(ECharacterAttribute CharacterAttribute);
+	bool IsVaildAbility(FGameplayTag CharacterAttribute);
 
 };

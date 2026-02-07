@@ -6,6 +6,7 @@
 #include "Props/SandBox_Prop.h"
 #include "UI/UI_CharacterInfo.h"
 #include "Components/ArrowComponent.h"
+#include "GameplayTagContainer.h"
 #include "SandBoxPlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -21,7 +22,7 @@ ASandBoxCharacter::ASandBoxCharacter()
 	StateMachine = CreateDefaultSubobject<UStateMachineBase>(TEXT("CharacterStateMachine"));
 	//相机臂
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
-	SpringArmComponent->SetupAttachment(RootComponent);
+	SpringArmComponent->SetupAttachment(GetMesh(),FName("CG"));
 	//相机组件
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
@@ -37,47 +38,67 @@ ASandBoxCharacter::ASandBoxCharacter()
 
 bool ASandBoxCharacter::ActivateAbilityByTag(FGameplayTag AbilityTag)
 {
-	//AbilitySystemComponent->TryActivateAbilityByClass();
-	return false;
+	if (CharacterDataAsset->IsVaildAbility(AbilityTag)&&AbilitySystemComponent->TryActivateAbilityByClass(CharacterDataAsset->Abilities[AbilityTag], false))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Active %s"), *AbilityTag.GetTagName().ToString());
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Not Give %s"), *AbilityTag.GetTagName().ToString());
+		return false;
+	}
+	
+}
+
+void ASandBoxCharacter::InitalAbility()
+{
+	if (!IsValid(CharacterDataAsset)){return;}
+
+	TMap<FGameplayTag, TSubclassOf<UGameplayAbility>>  Abilities = CharacterDataAsset->Abilities;
+	for (TPair<FGameplayTag, TSubclassOf<UGameplayAbility>> Ability : Abilities)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability.Value));
+	}
 }
 
 void ASandBoxCharacter::InitAttribute()
 {
 	UCharacterMovementComponent* CharacterMovementComponent =GetCharacterMovement();
 	ASandBoxPlayerController* SandBoxPlayerController = GetController< ASandBoxPlayerController>();
-	if (CharacterMovementComponent)
+	if (CharacterDataAsset and CharacterMovementComponent)
 	{
 		//工具数据资产初始化属性
 		//飞行速度
-		CharacterMovementComponent->MaxFlySpeed = (*AttributeDataAsset)[ECharacterAttribute::FlySpeed].GetMaxValue();
+		CharacterMovementComponent->MaxFlySpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::FlySpeed).GetMaxValue();
 		//步行速度
-		CharacterMovementComponent->MaxWalkSpeed = (*AttributeDataAsset)[ECharacterAttribute::WalkSpeed].GetMaxValue();
+		CharacterMovementComponent->MaxWalkSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::WalkSpeed).GetMaxValue();
 		//游泳速度
-		CharacterMovementComponent->MaxSwimSpeed = (*AttributeDataAsset)[ECharacterAttribute::SwimmingSpeed].GetMaxValue();
+		CharacterMovementComponent->MaxSwimSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed).GetMaxValue();
 	}
-	if (SandBoxPlayerController)
+	if (CharacterDataAsset and SandBoxPlayerController)
 	{
 		//左右旋转速度
-		SandBoxPlayerController->MaxRotationRate.Yaw = (*AttributeDataAsset)[ECharacterAttribute::YawRotatorSpeed].GetMaxValue();
+		SandBoxPlayerController->MaxRotationRate.Yaw = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed).GetMaxValue();
 		//上下旋转速度
-		SandBoxPlayerController->MaxRotationRate.Pitch = (*AttributeDataAsset)[ECharacterAttribute::PitchRotatorSpeed].GetMaxValue();
+		SandBoxPlayerController->MaxRotationRate.Pitch = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed).GetMaxValue();
 	}
 
 }
 
 bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue,ECAVType InValueType)
 {
-	if (!AttributeDataAsset->IsVaildKey(Attribute)){ return false; }
+	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(Attribute)){ return false; }
 	switch (InValueType)
 	{
 	case CAVT_Max:
-		 (*AttributeDataAsset)[Attribute].SetMaxValue(NewValue);
+		 CharacterDataAsset->GetAttributeByEnum(Attribute).SetMaxValue(NewValue);
 		break;
 	case CAVT_Currently:
-		(*AttributeDataAsset)[Attribute].SetCurrentlyValue(NewValue);
+		CharacterDataAsset->GetAttributeByEnum(Attribute).SetCurrentlyValue(NewValue);
 		break;
 	case CAVT_Min:
-		(*AttributeDataAsset)[Attribute].SetMinValue(NewValue);
+		CharacterDataAsset->GetAttributeByEnum(Attribute).SetMinValue(NewValue);
 		break;
 	default:
 		return false;
@@ -88,19 +109,18 @@ bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute Attribute, float 
 float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType)
 {
 
-	if (!AttributeDataAsset->IsVaildKey(Attribute)) { return 0; }
+	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(Attribute)) { return 0; }
 	switch (InValueType)
 	{
 	case CAVT_Max:
-		return (*AttributeDataAsset)[Attribute].GetMaxValue();
+		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMaxValue();
 	case CAVT_Currently:
-		return (*AttributeDataAsset)[Attribute].GetCurrentlyValue();
+		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue();
 	case CAVT_Min:
-		return (*AttributeDataAsset)[Attribute].GetMinValue();
+		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMinValue();
 	default:
 		return 0;
 	}
-	
 }
 
 bool ASandBoxCharacter::SetCurrentlyHP(float NewHP)
@@ -398,8 +418,8 @@ void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
 void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
 {
 	//起飞逻辑
-	UE_LOG(LogTemp, Log, TEXT("TakeOff"));
-	//AbilitySystemComponent->TryActivateAbilitiesByTag();
+
+	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.TakeOff")));
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
@@ -441,6 +461,7 @@ void ASandBoxCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitAttribute();
+	InitalAbility();
 }
 
 void ASandBoxCharacter::BeHit(float Damage)
