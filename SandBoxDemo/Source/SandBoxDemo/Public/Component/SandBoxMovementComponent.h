@@ -13,6 +13,8 @@ UCLASS()
 class SANDBOXDEMO_API USandBoxMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
+private:
+	bool IsBack;
 public:
-
+	virtual FRotator ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const override;
 };

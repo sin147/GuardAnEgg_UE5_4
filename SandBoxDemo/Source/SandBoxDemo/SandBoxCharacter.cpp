@@ -70,11 +70,11 @@ void ASandBoxCharacter::InitAttribute()
 	{
 		//工具数据资产初始化属性
 		//飞行速度
-		CharacterMovementComponent->MaxFlySpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::FlySpeed).GetMaxValue();
+		CharacterMovementComponent->MaxFlySpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::FlySpeed).GetMaxValue()* CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		//步行速度
-		CharacterMovementComponent->MaxWalkSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::WalkSpeed).GetMaxValue();
+		CharacterMovementComponent->MaxWalkSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::WalkSpeed).GetMaxValue() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		//游泳速度
-		CharacterMovementComponent->MaxSwimSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed).GetMaxValue();
+		CharacterMovementComponent->MaxSwimSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed).GetMaxValue() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 	}
 	if (CharacterDataAsset and SandBoxPlayerController)
 	{
@@ -83,6 +83,7 @@ void ASandBoxCharacter::InitAttribute()
 		//上下旋转速度
 		SandBoxPlayerController->MaxRotationRate.Pitch = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed).GetMaxValue();
 	}
+	SetCurrentlyMoveMode(EMovementMode::MOVE_Walking);
 
 }
 
@@ -135,9 +136,15 @@ float ASandBoxCharacter::GetCurrentlyHP()
 
 void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
-	if (GetCurrentlyMoveSpeed() != 0)
+	//根据当前移MovementMode判断状态
+	float AbsMoveSpeed = FMath::Abs(GetCurrentlyMoveSpeed());
+	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxMoveSpeed()*CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed)
 	{
 		StateMachine->EnterState(EState::S_Move);
+	}
+	else if(AbsMoveSpeed > GetMaxMoveSpeed() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed)
+	{
+		StateMachine->EnterState(EState::S_QuickMove);
 	}
 	else
 	{
@@ -155,7 +162,17 @@ TEnumAsByte<EState> ASandBoxCharacter::GetCurrentlyChracterState()
 void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 {
 	//更新速度
-	SetCurrentlyMoveSpeed(GetVelocity().Length());
+	switch (MovementMode)
+	{
+	case MOVE_Flying:
+		SetCurrentlyMoveSpeed(FVector::DotProduct(GetVelocity(), GetCharacterForwardVector()));
+		//UE_LOG(LogTemp, Log, TEXT("%lf"), FVector::DotProduct(GetVelocity(), GetCharacterForwardVector()));
+		break;
+	default:
+		SetCurrentlyMoveSpeed(FVector::DotProduct(FVector(GetVelocity().X, GetVelocity().Y, 0), GetCharacterForwardVector()));
+		//UE_LOG(LogTemp, Log, TEXT("%lf"), FVector::DotProduct(FVector(GetVelocity().X, GetVelocity().Y, 0), GetCharacterForwardVector()));
+		break;
+	}
 	//更新左右旋转速度
 	SetCurrentlyYawRotatorSpeed(GetController<ASandBoxPlayerController>()->CurrentlyRotationRate.Yaw);
 
@@ -203,22 +220,26 @@ float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
 
 bool ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (MovementMode)
 	{
 	case MOVE_Walking:
-		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InSpeed,ECAVType::CAVT_Max);
+		GetCharacterMovement()->MaxWalkSpeed = InSpeed;
+		break;
 	case MOVE_Swimming:
-		return SetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, InSpeed, ECAVType::CAVT_Max);
+		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
+		break;
 	case MOVE_Flying:
-		return SetAttributeByEnum(ECharacterAttribute::FlySpeed, InSpeed, ECAVType::CAVT_Max);
+		GetCharacterMovement()->MaxFlySpeed = InSpeed;
+		break;
 	default:
 		return false;
 	}
+	return true;
 }
 
 float ASandBoxCharacter::GetMaxMoveSpeed()
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (MovementMode)
 	{
 	case MOVE_Walking:
 		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed, ECAVType::CAVT_Max);
@@ -233,7 +254,7 @@ float ASandBoxCharacter::GetMaxMoveSpeed()
 
 bool ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (MovementMode)
 	{
 	case MOVE_Walking:
 		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InSpeed);
@@ -248,7 +269,7 @@ bool ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
 
 float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (MovementMode)
 	{
 	case MOVE_Walking:
 		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
@@ -264,13 +285,13 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
-	MoveMode = InMoveState;
+	MovementMode = InMoveState;
 	GetCharacterMovement()->SetMovementMode(InMoveState);
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
 {
-	return MoveMode;
+	return MovementMode;
 }
 
 void ASandBoxCharacter::OnMoveModeChange()
@@ -290,7 +311,7 @@ void ASandBoxCharacter::FarAttack()
 
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (MovementMode)
 	{
 	case MOVE_None:
 		break;
@@ -336,7 +357,6 @@ void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
 		{
 			AddMovementInput(ForwardDirection, Value.X);
 		}
-		SetCurrentlyMoveSpeed(Value.X * GetVelocity().Length());
 	}
 
 	//左右旋转
@@ -377,7 +397,6 @@ void ASandBoxCharacter::FlyMove(const FInputActionValue& InputValue)
 		{
 			AddMovementInput(ForwardDirection, Value.X);
 		}
-		SetCurrentlyMoveSpeed(Value.X * GetVelocity().Length());
 
 	}
 
@@ -419,6 +438,16 @@ void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
 void ASandBoxCharacter::StartJump()
 {
 	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.Jump")));
+}
+
+void ASandBoxCharacter::StartQuick()
+{
+	SetMaxMoveSpeed(GetMaxMoveSpeed());
+}
+
+void ASandBoxCharacter::StopQuick()
+{
+	SetMaxMoveSpeed(GetMaxMoveSpeed()* CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed);
 }
 
 void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
@@ -516,6 +545,8 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(TakeOffAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::TakeOff);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::StartJump);
 		EnhancedInputComponent->BindAction(LandAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::Land);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &ASandBoxCharacter::StartQuick);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::StopQuick);
 	}
 	//添加输入映射上下文
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))

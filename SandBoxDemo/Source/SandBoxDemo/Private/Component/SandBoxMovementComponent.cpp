@@ -4,16 +4,30 @@
 #include "Component/SandBoxMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "SandBoxCharacter.h"
+#include "PhysicsReplication.h"
 
-//FRotator USandBoxMovementComponent::GetDeltaRotation(float DeltaTime) const
-//{
-//	
-//	FRotator RetRotator = Super::GetDeltaRotation(DeltaTime);
-//}
+FRotator USandBoxMovementComponent::ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const
+{
+	if (Acceleration.SizeSquared() < UE_KINDA_SMALL_NUMBER)
+	{
+		// AI path following request can orient us in that direction (it's effectively an acceleration)
+		if (bHasRequestedVelocity && RequestedVelocity.SizeSquared() > UE_KINDA_SMALL_NUMBER)
+		{
+			return RequestedVelocity.GetSafeNormal().Rotation();
+		}
 
-//FRotator USandBoxMovementComponent::ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const
-//{
-//	FRotator RetRotator= Super::ComputeOrientToMovementRotation(CurrentRotation, DeltaTime, DeltaRotation);
-//	//GetPawnOwner()->AddMovementInput
-//	return FRotator(RetRotator.Pitch, RetRotator.Yaw, RetRotator.Roll);
-//}
+		// Don't change rotation if there is no acceleration.
+		return CurrentRotation;
+	}
+
+	// Rotate toward direction of acceleration.
+	if (true)
+	{
+		return /*FRotator::ZeroRotator;*/(Acceleration).GetSafeNormal().Rotation();
+	}
+	else
+	{
+		return /*FRotator::ZeroRotator;*/(-1 * Acceleration).GetSafeNormal().Rotation();
+	}
+
+}

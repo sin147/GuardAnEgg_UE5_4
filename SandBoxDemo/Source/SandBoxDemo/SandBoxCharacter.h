@@ -41,7 +41,7 @@ class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter
 public:
 	// Sets default values for this pawn's properties
 	ASandBoxCharacter();
-/************************************Start--技能***************************************************/
+/************************************技能***************************************************/
 protected:
 	//技能组件
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -51,8 +51,6 @@ protected:
 	//初始化技能
 	void InitalAbility();
 
-public:
-/************************************End--技能***************************************************/
 /************************************属性***************************************************/
 private:
 	//角色属性配置表
@@ -82,7 +80,7 @@ protected:
 
 /************************************运动***************************************************/
 protected:
-	EMovementMode MoveMode;
+	EMovementMode MovementMode;
 
 protected:
 	//设置角色运动类型
@@ -170,7 +168,9 @@ protected:
 	//着陆
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* LandAction;
-
+	//开始跑
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* RunAction;
 protected:
 	//近战攻击
 	UFUNCTION(BlueprintCallable, Category = "Attack")
@@ -189,6 +189,10 @@ protected:
 	void StopMove(const FInputActionValue& InputValue);
 
 	void StartJump();
+
+	void StartQuick();
+
+	void StopQuick();
 	//起飞
 	UFUNCTION()
 	void TakeOff(const FInputActionValue& InputValue);

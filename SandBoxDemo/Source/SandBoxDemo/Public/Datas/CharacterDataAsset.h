@@ -62,6 +62,9 @@ class SANDBOXDEMO_API UCharacterDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"))
+	float QuickMoveSpeedRateByMaxMoveSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<TEnumAsByte<ECharacterAttribute>,FCharacterAttribute>  Attributes;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
