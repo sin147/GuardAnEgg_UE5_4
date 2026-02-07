@@ -82,7 +82,11 @@ protected:
 
 /************************************运动***************************************************/
 protected:
+	EMovementMode MoveMode;
+
+protected:
 	//设置角色运动类型
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentlyMoveMode(EMovementMode InMoveState);
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)
@@ -163,6 +167,9 @@ protected:
 	//起飞
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* TakeOffAction;
+	//着陆
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LandAction;
 
 protected:
 	//近战攻击
@@ -180,9 +187,13 @@ protected:
 	void FlyMove(const FInputActionValue& InputValue);
 
 	void StopMove(const FInputActionValue& InputValue);
+
+	void StartJump();
 	//起飞
 	UFUNCTION()
 	void TakeOff(const FInputActionValue& InputValue);
+
+	void Land(const FInputActionValue& InputValue);
 
 	//视野
 	UFUNCTION()

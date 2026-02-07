@@ -264,12 +264,13 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
+	MoveMode = InMoveState;
 	GetCharacterMovement()->SetMovementMode(InMoveState);
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
 {
-	return GetCharacterMovement()->MovementMode;
+	return MoveMode;
 }
 
 void ASandBoxCharacter::OnMoveModeChange()
@@ -415,11 +416,21 @@ void ASandBoxCharacter::StopMove(const FInputActionValue& InputValue)
 	GetController()->SetControlRotation(GetCharacterRotation());
 }
 
+void ASandBoxCharacter::StartJump()
+{
+	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.Jump")));
+}
+
 void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
 {
 	//起飞逻辑
 
 	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.TakeOff")));
+}
+
+void ASandBoxCharacter::Land(const FInputActionValue& InputValue)
+{
+	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.Land")));
 }
 
 void ASandBoxCharacter::Look(const FInputActionValue& Value)
@@ -503,6 +514,8 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(CloseAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::CloseAttack);
 		EnhancedInputComponent->BindAction(FarAttackAction, ETriggerEvent::Triggered, this, &ASandBoxCharacter::FarAttack);
 		EnhancedInputComponent->BindAction(TakeOffAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::TakeOff);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::StartJump);
+		EnhancedInputComponent->BindAction(LandAction, ETriggerEvent::Completed, this, &ASandBoxCharacter::Land);
 	}
 	//添加输入映射上下文
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))

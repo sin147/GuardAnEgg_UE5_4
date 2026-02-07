@@ -29,10 +29,11 @@ void ASandBoxPlayerController::CalculateDeltaRotation(FRotator& InRotationInput,
 		{
 			CurrentlyRotationRate.Pitch = FMath::Clamp(CurrentlyRotationRate.Pitch + RotatorAcceleration.Pitch * DeltaTime * InRotationInput.Pitch, -MaxRotationRate.Pitch, MaxRotationRate.Pitch);
 		}
-		else if (!FMath::IsNearlyEqual( GetControlRotation().Pitch,0,10))
+		else if (!FMath::IsNearlyEqual( GetControlRotation().Pitch,0,1))
 		{
 			
 			CurrentlyRotationRate.Pitch = FMath::IsNearlyEqual(GetControlRotation().Pitch, 90, 90)?-MaxRotationRate.Pitch: MaxRotationRate.Pitch;
+			InRotationInput.Pitch = CurrentlyRotationRate.Pitch * DeltaTime;
 		}
 		else
 		{
