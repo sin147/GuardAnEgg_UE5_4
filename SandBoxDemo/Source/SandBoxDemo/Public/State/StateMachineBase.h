@@ -21,7 +21,6 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	//当进入状态
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

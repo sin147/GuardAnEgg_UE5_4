@@ -38,7 +38,7 @@ ASandBoxCharacter::ASandBoxCharacter()
 
 bool ASandBoxCharacter::ActivateAbilityByTag(FGameplayTag AbilityTag)
 {
-	if (CharacterDataAsset->IsVaildAbility(AbilityTag)&&AbilitySystemComponent->TryActivateAbilityByClass(CharacterDataAsset->Abilities[AbilityTag], false))
+	if (CharacterDataAsset->IsVaildAbility(AbilityTag) && AbilitySystemComponent->TryActivateAbilityByClass(CharacterDataAsset->Abilities[AbilityTag], false))
 	{
 		UE_LOG(LogTemp, Log, TEXT("Active %s"), *AbilityTag.GetTagName().ToString());
 		return true;
@@ -307,6 +307,7 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
 	MovementMode = InMoveState;
+	SetMaxMoveSpeed(GetMaxMoveSpeed());
 	GetCharacterMovement()->SetMovementMode(InMoveState);
 }
 
@@ -472,7 +473,6 @@ void ASandBoxCharacter::StopSwim()
 void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
 {
 	//起飞逻辑
-
 	ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.TakeOff")));
 }
 

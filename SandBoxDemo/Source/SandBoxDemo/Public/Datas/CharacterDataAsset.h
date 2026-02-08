@@ -62,11 +62,13 @@ class SANDBOXDEMO_API UCharacterDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
+	//正常移动和快速移动比例  --Todo
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"))
 	float QuickMoveSpeedRateByMaxMoveSpeed;
-
+	//属性配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<TEnumAsByte<ECharacterAttribute>,FCharacterAttribute>  Attributes;
+	//技能配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FGameplayTag,TSubclassOf<UGameplayAbility>>  Abilities;
 	
