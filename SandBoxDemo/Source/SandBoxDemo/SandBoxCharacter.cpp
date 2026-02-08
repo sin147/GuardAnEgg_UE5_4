@@ -138,11 +138,11 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
 	//根据当前移MovementMode判断状态
 	float AbsMoveSpeed = FMath::Abs(GetCurrentlyMoveSpeed());
-	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxMoveSpeed()*CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed)
+	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxMoveSpeed())
 	{
 		StateMachine->EnterState(EState::S_Move);
 	}
-	else if(AbsMoveSpeed > GetMaxMoveSpeed() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed)
+	else if(AbsMoveSpeed > GetMaxMoveSpeed())
 	{
 		StateMachine->EnterState(EState::S_QuickMove);
 	}
@@ -164,6 +164,7 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 	//更新速度
 	switch (MovementMode)
 	{
+	case MOVE_Swimming:
 	case MOVE_Flying:
 		SetCurrentlyMoveSpeed(FVector::DotProduct(GetVelocity(), GetCharacterForwardVector()));
 		//UE_LOG(LogTemp, Log, TEXT("%lf"), FVector::DotProduct(GetVelocity(), GetCharacterForwardVector()));
@@ -237,7 +238,7 @@ bool ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
 	return true;
 }
 
-float ASandBoxCharacter::GetMaxMoveSpeed()
+float ASandBoxCharacter::GetMaxQuickMoveSpeed()
 {
 	switch (MovementMode)
 	{
@@ -250,6 +251,26 @@ float ASandBoxCharacter::GetMaxMoveSpeed()
 	default:
 		return 0;
 	}
+}
+
+float ASandBoxCharacter::GetMaxMoveSpeed()
+{
+	float MoveSpeed;
+	switch (MovementMode)
+	{
+	case MOVE_Walking:
+		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::WalkSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		break;
+	case MOVE_Swimming:
+		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		break;
+	case MOVE_Flying:
+		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max);
+		break;
+	default:
+		return 0;
+	}
+	return MoveSpeed;
 }
 
 bool ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
@@ -323,7 +344,6 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 	case MOVE_Falling:
 		break;
 	case MOVE_Swimming:
-		break;
 	case MOVE_Flying:
 		FlyMove(Value);
 		break;
@@ -349,14 +369,7 @@ void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
 	{
 		//设置上下偏转限制
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
-		if (Value.X > 0)
-		{
-			AddMovementInput(ForwardDirection, Value.X);
-		}
-		else
-		{
-			AddMovementInput(ForwardDirection, Value.X);
-		}
+		AddMovementInput(ForwardDirection, Value.X);
 	}
 
 	//左右旋转
@@ -389,15 +402,7 @@ void ASandBoxCharacter::FlyMove(const FInputActionValue& InputValue)
 
 		//设置上下偏转限制
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
-		if (Value.X > 0)
-		{
-			AddMovementInput(ForwardDirection, Value.X);
-		}
-		else
-		{
-			AddMovementInput(ForwardDirection, Value.X);
-		}
-
+		AddMovementInput(ForwardDirection, Value.X);
 	}
 
 	//左右旋转
@@ -442,12 +447,26 @@ void ASandBoxCharacter::StartJump()
 
 void ASandBoxCharacter::StartQuick()
 {
-	SetMaxMoveSpeed(GetMaxMoveSpeed());
+	SetMaxMoveSpeed(GetMaxQuickMoveSpeed());
 }
 
 void ASandBoxCharacter::StopQuick()
 {
-	SetMaxMoveSpeed(GetMaxMoveSpeed()* CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed);
+	SetMaxMoveSpeed(GetMaxMoveSpeed());
+}
+
+void ASandBoxCharacter::StartSwim()
+{
+	SetCurrentlyMoveMode(EMovementMode::MOVE_Swimming);
+}
+
+void ASandBoxCharacter::StopSwim()
+{
+	if (GetCurrentlyMoveMode() == EMovementMode::MOVE_Swimming)
+	{
+		SetCurrentlyMoveMode(EMovementMode::MOVE_Walking);
+	}
+
 }
 
 void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)

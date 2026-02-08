@@ -121,6 +121,9 @@ public:
 	bool SetMaxMoveSpeed(float InSpeed);
 	//获取最大移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxQuickMoveSpeed();
+	//获取最大移动速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxMoveSpeed();
 
 	//设置当前移动速度
@@ -193,6 +196,7 @@ protected:
 	void StartQuick();
 
 	void StopQuick();
+
 	//起飞
 	UFUNCTION()
 	void TakeOff(const FInputActionValue& InputValue);
@@ -202,6 +206,12 @@ protected:
 	//视野
 	UFUNCTION()
 	void Look(const FInputActionValue& InputValue);
+public:
+		UFUNCTION(BlueprintCallable)
+		void StartSwim();
+
+		UFUNCTION(BlueprintCallable)
+		void StopSwim();
 /************************************旋转，方向相关***************************************************/
 public:
 
