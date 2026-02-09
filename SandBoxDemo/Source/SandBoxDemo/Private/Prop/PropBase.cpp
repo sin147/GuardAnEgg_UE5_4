@@ -14,6 +14,7 @@ APropBase::APropBase()
 	{
 		PropInfo.GUID = FGuid::NewGuid();
 	}
+	PropMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,TEXT("/ControlRig/Controls/ControlRig_Box_solid")));
 }
 
 void APropBase::InitInfo(int InPropID)

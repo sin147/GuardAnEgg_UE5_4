@@ -6,17 +6,22 @@
 UPropSubsystem::UPropSubsystem()
 {
 	UE_LOG(LogTemp, Log, TEXT("Inital PropSubsystem"));
+	PropDataAsset = LoadObject<UPropDataAsset>(nullptr, TEXT("/Game/Datas/PropDatas.PropDatas"));
 	if (IsValid(PropDataAsset))
 	{
 		PropDataAsset = DuplicateObject<UPropDataAsset>(PropDataAsset, UPropSubsystem::StaticClass());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PropSubsystem:Do Not Set PropDataAsset"));
 	}
 }
 
 bool UPropSubsystem::DropProp(int PropID, FVector InLocation)
 {
-	if (PropDataAsset->PropConfig.Find(PropID))
+	if (IsValid(PropDataAsset) and PropDataAsset->PropConfig.Find(PropID))
 	{
-		APropBase* NewProp=GetWorld()->SpawnActorDeferred<APropBase>(PropDataAsset->PropConfig[PropID].PropClass->StaticClass(),FTransform(FRotator(FMath::Rand() % 360, 0, 0),InLocation));
+		APropBase* NewProp=GetWorld()->SpawnActorDeferred<APropBase>(PropDataAsset->PropConfig[PropID].PropClass,FTransform(FRotator(FMath::Rand() % 360, 0, 0),InLocation));
 		if (NewProp)
 		{
 			Props.Add(NewProp->GetGUID(), NewProp);
