@@ -31,6 +31,8 @@ ASandBoxCharacter::ASandBoxCharacter()
 	CharacterControlPoint->SetupAttachment(RootComponent);
 	//技能组件
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	//数据资产
+	CharacterDataAsset = DuplicateObject<UCharacterDataAsset>(CharacterDataAsset, GetTransientPackage());
 
 	GetMesh()->SetupAttachment(CharacterControlPoint);
 
@@ -174,11 +176,16 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 		//UE_LOG(LogTemp, Log, TEXT("%lf"), FVector::DotProduct(FVector(GetVelocity().X, GetVelocity().Y, 0), GetCharacterForwardVector()));
 		break;
 	}
-	//更新左右旋转速度
-	SetCurrentlyYawRotatorSpeed(GetController<ASandBoxPlayerController>()->CurrentlyRotationRate.Yaw);
+	ASandBoxPlayerController* PlayController = GetController<ASandBoxPlayerController>();
+	if (PlayController)
+	{
+		//更新左右旋转速度
+		SetCurrentlyYawRotatorSpeed(GetController<ASandBoxPlayerController>()->CurrentlyRotationRate.Yaw);
 
-	//更新上下速度旋转
-	SetCurrentlyPitchRotatorSpeed(GetController<ASandBoxPlayerController>()->CurrentlyRotationRate.Pitch);
+		//更新上下速度旋转
+		SetCurrentlyPitchRotatorSpeed(GetController<ASandBoxPlayerController>()->CurrentlyRotationRate.Pitch);
+	}
+
 }
 
 bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
