@@ -124,7 +124,7 @@ void ASandBoxPeople::Tick(float DeltaTime)
 		AttackDetection();
 	}
 	//将HPWidget始终对准相机
-	if (HPBarWidget)
+	if (HPBarWidget&& GetWorld()->GetFirstPlayerController())
 	{
 		HPBarWidget->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(HPBarWidget->GetComponentLocation(), HPBarWidget->GetComponentLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector() * 100));
 	}

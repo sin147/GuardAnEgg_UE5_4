@@ -63,6 +63,14 @@ protected:
 	//设置属性
 	UFUNCTION()
 	bool SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType =ECAVType::CAVT_Currently);
+	//服务器设置属性值
+	UFUNCTION(Server,Reliable)
+	void Server_SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType = ECAVType::CAVT_Currently);
+	//服务器设置属性值
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType = ECAVType::CAVT_Currently);
+
+	
 	//获取属性
 	UFUNCTION()
 	float GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType = ECAVType::CAVT_Currently);
@@ -174,6 +182,10 @@ protected:
 	//开始跑
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* RunAction;
+	//交互
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* InteractAction;
+
 protected:
 	//近战攻击
 	UFUNCTION(BlueprintCallable, Category = "Attack")
@@ -196,6 +208,8 @@ protected:
 	void StartQuick();
 
 	void StopQuick();
+
+	void Interact();
 
 	//起飞
 	UFUNCTION()

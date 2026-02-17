@@ -96,10 +96,10 @@ bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute InAttribute, floa
 	{
 		return false;
 	}
-	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-	//}
+	if (InValueType == ECharacterAttribute::YawRotatorSpeed)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
+	}
 
 	Server_SetAttributeByEnum(InAttribute, InNewValue,InValueType);
 	return true;
@@ -128,10 +128,6 @@ void ASandBoxCharacter::Server_SetAttributeByEnum_Implementation(ECharacterAttri
 void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAttribute InAttribute, float InNewValue, ECAVType InValueType)
 {
 	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(InAttribute)) { return; }
-	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-	//}
 	switch (InValueType)
 	{
 	case CAVT_Max:
@@ -152,10 +148,6 @@ float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVT
 {
 
 	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(Attribute)) { return 0; }
-	if (Attribute == ECharacterAttribute::YawRotatorSpeed)
-	{
-		UE_LOG(LogTemp, Log, TEXT("%lf"), CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue());
-	}
 	switch (InValueType)
 	{
 	case CAVT_Max:
@@ -167,7 +159,6 @@ float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVT
 	default:
 		return 0;
 	}
-
 }
 
 bool ASandBoxCharacter::SetCurrentlyHP(float NewHP)

@@ -13,8 +13,16 @@ UCLASS()
 class SANDBOXDEMO_API UInteractiveSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+protected:
+	//UPROPERTY(Replicated)
+	//TMap<ACharacter*, TArray<int>> PreInteractiveActor;
+public:
+	//ÇëÇó½»»¥
+	void RequestInteract(ACharacter* InCharacter);
 	
-	
+	//½»»¥Âß¼­
+
+
 	
 	
 };

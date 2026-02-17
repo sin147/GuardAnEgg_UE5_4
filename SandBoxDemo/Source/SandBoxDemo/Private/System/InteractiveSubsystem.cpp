@@ -3,6 +3,7 @@
 
 #include "System/InteractiveSubsystem.h"
 
+void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
+{
 
-
-
+}

@@ -36,3 +36,13 @@ bool UCharacterDataAsset::IsVaildAbility(FGameplayTag CharacterAttribute)
         return false;
     }
 }
+
+UCharacterDataAsset* UCharacterDataAsset::DeepCopy(UCharacterDataAsset* Source)
+{
+    UCharacterDataAsset* NewDataAsset = DuplicateObject<UCharacterDataAsset>(Source, GetTransientPackage());
+    if (NewDataAsset && Source)
+    {
+        NewDataAsset->Attributes = Source->Attributes;
+    }
+    return NewDataAsset;
+}

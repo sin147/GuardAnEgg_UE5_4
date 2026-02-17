@@ -78,4 +78,7 @@ public:
 	bool IsVaildAttribute(ECharacterAttribute CharacterAttribute);
 	bool IsVaildAbility(FGameplayTag CharacterAttribute);
 
+	//深拷贝
+	static UCharacterDataAsset* DeepCopy(UCharacterDataAsset* Source);
+
 };
