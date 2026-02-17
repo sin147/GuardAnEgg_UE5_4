@@ -2,6 +2,7 @@
 
 
 #include "SandBoxPlayerController.h"
+#include "Net/UnrealNetwork.h"
 #include "SandBoxCharacter.h"
 
 void ASandBoxPlayerController::UpdateRotation(float DeltaTime)
@@ -55,4 +56,13 @@ void ASandBoxPlayerController::CalculateDeltaRotation(FRotator& InRotationInput,
 			InRotationInput = CurrentlyRotationRate * DeltaTime;
 		}
 
+}
+
+void ASandBoxPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// These used to only replicate if PlayerCameraManager->GetViewTargetPawn() != GetPawn()
+	// But, since they also don't update unless that condition is true, these values won't change, thus won't send
+	// This is a little less efficient, but fits into the new condition system well, and shouldn't really add much overhead
+	DOREPLIFETIME(ASandBoxPlayerController, CurrentlyRotationRate);
 }

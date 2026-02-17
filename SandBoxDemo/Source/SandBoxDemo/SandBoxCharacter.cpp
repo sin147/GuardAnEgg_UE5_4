@@ -123,6 +123,10 @@ void ASandBoxCharacter::Server_SetAttributeByEnum_Implementation(ECharacterAttri
 		break;
 	}
 	Multicast_SetAttributeByEnum(InAttribute, InNewValue,  InValueType);
+	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
+	//}
 }
 
 void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAttribute InAttribute, float InNewValue, ECAVType InValueType)
@@ -138,6 +142,10 @@ void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAt
 		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMaxValue(InNewValue);
 		break;
 	case CAVT_Currently:
+//		if (InAttribute == ECharacterAttribute::WalkSpeed)
+//{
+//		UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
+//}
 		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetCurrentlyValue(InNewValue);
 		break;
 	case CAVT_Min:
@@ -152,15 +160,15 @@ float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVT
 {
 
 	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(Attribute)) { return 0; }
-	if (Attribute == ECharacterAttribute::YawRotatorSpeed)
-	{
-		UE_LOG(LogTemp, Log, TEXT("%lf"), CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue());
-	}
 	switch (InValueType)
 	{
 	case CAVT_Max:
 		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMaxValue();
 	case CAVT_Currently:
+		//if (Attribute == ECharacterAttribute::YawRotatorSpeed)
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("%lf"), CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue());
+		//}
 		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue();
 	case CAVT_Min:
 		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMinValue();
@@ -236,12 +244,10 @@ bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
 {
 	if (SetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, InRotatorSpeed))
 	{
-		UE_LOG(LogTemp, Log, TEXT("true"));
 		return true;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("false"));
 		return false;
 	}
 
