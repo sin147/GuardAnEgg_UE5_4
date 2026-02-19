@@ -142,10 +142,10 @@ void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAt
 		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMaxValue(InNewValue);
 		break;
 	case CAVT_Currently:
-//		if (InAttribute == ECharacterAttribute::WalkSpeed)
-//{
-//		UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-//}
+		if (InAttribute == ECharacterAttribute::WalkSpeed)
+{
+		UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
+}
 		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetCurrentlyValue(InNewValue);
 		break;
 	case CAVT_Min:
@@ -285,7 +285,12 @@ float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
 	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,ECAVType::CAVT_Max);
 }
 
-bool ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
+void ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
+{
+	Server_SetMaxMoveSpeed(InSpeed);
+}
+
+void ASandBoxCharacter::Server_SetMaxMoveSpeed_Implementation(float InSpeed)
 {
 	switch (MovementMode)
 	{
@@ -299,9 +304,27 @@ bool ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
 		GetCharacterMovement()->MaxFlySpeed = InSpeed;
 		break;
 	default:
-		return false;
+		return;
 	}
-	return true;
+	Multicast_SetMaxMoveSpeed(InSpeed);
+}
+
+void ASandBoxCharacter::Multicast_SetMaxMoveSpeed_Implementation(float InSpeed)
+{
+	switch (MovementMode)
+	{
+	case MOVE_Walking:
+		GetCharacterMovement()->MaxWalkSpeed = InSpeed;
+		break;
+	case MOVE_Swimming:
+		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
+		break;
+	case MOVE_Flying:
+		GetCharacterMovement()->MaxFlySpeed = InSpeed;
+		break;
+	default:
+		return;
+	}
 }
 
 float ASandBoxCharacter::GetMaxQuickMoveSpeed()
@@ -371,6 +394,19 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
+{
+	Server_SetCurrentlyMoveMode_Implementation(InMoveState);
+}
+
+void ASandBoxCharacter::Server_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
+{
+	MovementMode = InMoveState;
+	SetMaxMoveSpeed(GetMaxMoveSpeed());
+	GetCharacterMovement()->SetMovementMode(InMoveState);
+	Multicast_SetCurrentlyMoveMode(InMoveState);
+}
+
+void ASandBoxCharacter::Multicast_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
 {
 	MovementMode = InMoveState;
 	SetMaxMoveSpeed(GetMaxMoveSpeed());
@@ -606,17 +642,18 @@ void ASandBoxCharacter::BeHit(float Damage)
 void ASandBoxCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//更新速度
-	UpdateAttributes(DeltaTime);
+	if (IsLocallyControlled())
+	{
+		//更新速度
+		UpdateAttributes(DeltaTime);
+		//更新控制器Rotation
+		if (GetVelocity().Equals(FVector::ZeroVector, 10)/*&&!GetCharacterRotation().Equals(GetControlRotation(),10)*/)
+		{
+			AddMovementInput(GetCharacterForwardVector(), 0.0001);
+		}
+	}
 	//更新角色状态
 	UpdateCharacterState(DeltaTime);
-	//更新控制器Rotation
-	if (GetVelocity().Equals(FVector::ZeroVector, 10)/*&&!GetCharacterRotation().Equals(GetControlRotation(),10)*/)
-	{
-		AddMovementInput(GetCharacterForwardVector(), 0.0001);
-	}
-	
-
 }
 
 // Called to bind functionality to input

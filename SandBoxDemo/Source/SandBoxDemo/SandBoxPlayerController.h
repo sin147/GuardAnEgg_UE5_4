@@ -31,7 +31,16 @@ public:
 
 protected:
 	//当前转向速率
+	//UPROPERTY(Replicated)
 	FRotator CurrentlyRotationRate;
+	FRotator Client_CurrentlyRotationRate;
+	//同步转向速率到服务器
+	UFUNCTION(Server,Reliable)
+	void Server_SyncRotationRate(FRotator InRotation);
+	//同步到所有客户端
+	UFUNCTION(NetMulticast,Reliable)
+	void NetMulticast_SyncRotationRate(FRotator InRotation);
+
 	//计算当前转向速度
 	UFUNCTION(BlueprintCallable)
 	void CalculateDeltaRotation(FRotator& InRotationInput, float DeltaTime);

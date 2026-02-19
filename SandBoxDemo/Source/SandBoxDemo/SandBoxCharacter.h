@@ -94,6 +94,12 @@ protected:
 	//设置角色运动类型
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentlyMoveMode(EMovementMode InMoveState);
+private:
+	UFUNCTION(Server,Reliable)
+	void Server_SetCurrentlyMoveMode(EMovementMode InMoveState);
+	UFUNCTION(NetMulticast,Reliable)
+	void Multicast_SetCurrentlyMoveMode(EMovementMode InMoveState);
+protected:
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	EMovementMode GetCurrentlyMoveMode();
@@ -126,7 +132,16 @@ public:
 	float GetMaxPitchRotatorSpeed();
 
 	//设置最大移动速度
-	bool SetMaxMoveSpeed(float InSpeed);
+	void SetMaxMoveSpeed(float InSpeed);
+private:
+	//设置最大移动速度
+	UFUNCTION(Server,Reliable)
+	void Server_SetMaxMoveSpeed(float InSpeed);
+	//设置最大移动速度
+	UFUNCTION(NetMulticast,Reliable)
+	void Multicast_SetMaxMoveSpeed(float InSpeed);
+public:
+
 	//获取最大移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxQuickMoveSpeed();
