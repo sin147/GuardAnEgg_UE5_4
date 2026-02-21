@@ -1,0 +1,70 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "InteractiveActor.h"
+#include "GameFramework/Character.h"
+#include "Components/BoxComponent.h"
+#include "InteractiveSubsystem.h"
+#include "InteractiveSubsystem.h"
+
+// Sets default values
+AInteractiveActor::AInteractiveActor()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	//创建触发框组件
+	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
+	TriggerBox->SetupAttachment(RootComponent);
+
+}
+
+// Called when the game starts or when spawned
+void AInteractiveActor::BeginPlay()
+{
+	Super::BeginPlay();
+	//绑定触发事件
+	if (TriggerBox)
+	{
+		TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AInteractiveActor::OnTriggerBoxOverlapBegin);
+		TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AInteractiveActor::OnTriggerBoxOverlapEnd);
+	}
+	
+}
+
+void AInteractiveActor::OnTriggerBoxOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	//将角色和交互对象的注册到交互系统中
+	if (Other && Other->IsA<ACharacter>())
+	{
+		ACharacter* Character = Cast<ACharacter>(Other);
+		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
+		if (InteractiveSubsystem)
+		{
+			InteractiveSubsystem->PaddingInteractiveActor(Character,this->GetActorGuid());
+		}
+	}
+}
+
+void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+}
+
+// Called every frame
+void AInteractiveActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AInteractiveActor::Interact(ACharacter* InCharacter)
+{
+	IInteract::Interact(InCharacter);
+	UE_LOG(LogTemp, Warning, TEXT("%s Interact %s"),*InCharacter->GetActorNameOrLabel(), *GetName());
+}
+
+bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
+{
+	//Todo:添加交互条件
+	return true;
+}
+

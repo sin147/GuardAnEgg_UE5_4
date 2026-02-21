@@ -31,8 +31,6 @@ private:
 	//GUID
 
 	FPropInfo PropInfo;
-	UPROPERTY(Config, EditAnywhere)
-	int a;
 public:
 	FGuid GetGUID();
 	int GetPropID();
