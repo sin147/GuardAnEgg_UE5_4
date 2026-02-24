@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interact.h"
+#include "Interface/Interact.h"
 #include "InteractiveActor.generated.h"
 
 UENUM(BlueprintType)
@@ -17,7 +17,7 @@ enum EInteractiveType : uint8
 
 
 UCLASS()
-class UNITYINTERACTIVE_API AInteractiveActor : public AActor, public IInteract
+class SANDBOXDEMO_API AInteractiveActor : public AActor, public IInteract
 {
 	GENERATED_BODY()
 	
@@ -30,10 +30,12 @@ protected:
 	virtual void BeginPlay() override;
 	//交互触发框
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interactive")
-	class UBoxComponent* TriggerBox;
+	class USphereComponent* TriggerBox;
 	//交互触发类型
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive")
 	TEnumAsByte<EInteractiveType> InteractiveType=EInteractiveType::IT_None;
+	//交互范围
+
 	//交互触发事件
 	UFUNCTION()
 	void OnTriggerBoxOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -17,7 +17,7 @@ class UInteract : public UInterface
 /**
  * 
  */
-class UNITYINTERACTIVE_API IInteract
+class SANDBOXDEMO_API IInteract
 {
 	GENERATED_BODY()
 

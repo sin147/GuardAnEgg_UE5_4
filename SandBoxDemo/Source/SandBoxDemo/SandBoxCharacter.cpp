@@ -8,7 +8,7 @@
 #include "Components/ArrowComponent.h"
 #include "GameplayTagContainer.h"
 #include "SandBoxPlayerController.h"
-#include "InteractiveSubsystem.h"
+#include "System/InteractiveSubsystem.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
