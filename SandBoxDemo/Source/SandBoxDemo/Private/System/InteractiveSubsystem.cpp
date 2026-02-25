@@ -144,7 +144,7 @@ void UInteractiveSubsystem::Multicast_Interact_Implementation(ACharacter* InChar
 
 void UInteractiveSubsystem::Tick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem Tick"));
+	//if(CharacterInteractiveInfos[Getplayer])
 }
 
 ETickableTickType UInteractiveSubsystem::GetTickableTickType() const

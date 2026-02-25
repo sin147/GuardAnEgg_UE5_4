@@ -4,6 +4,7 @@
 #include "SandBoxGameMode.h"
 #include "SandBoxPlayerController.h"
 #include "SandBoxCharacter.h"
+#include "System/MessageSystem.h"
 #include "SandBoxHUD.h"
 
 ASandBoxGameMode::ASandBoxGameMode()
@@ -16,4 +17,6 @@ ASandBoxGameMode::ASandBoxGameMode()
 void ASandBoxGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+	//广播玩家GUID
+
 }
