@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2008, 2024, Oracle and/or its affiliates.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,7 +73,7 @@ public:
 
 } /* namespace sql */
 
-
+#undef check
 CPPCONN_PUBLIC_FUNC void check(const std::string &);
 CPPCONN_PUBLIC_FUNC void check(const std::map<std::string,std::string> &);
 
@@ -103,5 +103,7 @@ extern "C"
     return get_driver_instance_by_name("");
   }
 }
-
+#ifndef check
+#define check(expr)				UE_CHECK_IMPL(expr)
+#endif
 #endif /* _SQL_DRIVER_H_ */
