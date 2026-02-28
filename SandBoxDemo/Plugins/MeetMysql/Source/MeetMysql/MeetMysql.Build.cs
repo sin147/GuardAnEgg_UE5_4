@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 using System.IO;
 using UnrealBuildTool;
@@ -16,14 +16,14 @@ public class MeetMysql : ModuleRules
 			new string[] {
 				// ... add public include paths required here ...
 				Path.Combine(ModuleDirectory,"ThirdParty", "include")
-			}
+            }
 			);
 		
 		PublicSystemLibraryPaths.Add(Path.Combine(ModuleDirectory,"ThirdParty", "lib"));
 
-		//Ìí¼Ó¾²Ì¬¿â
+		//æ·»åŠ é™æ€åº“
 		PublicSystemLibraries.Add(Path.Combine(ModuleDirectory,"ThirdParty", "lib", "mysqlcppconn-static.lib"));
-		// //¼ÓÈë¶¯Ì¬¿â
+		// //åŠ å…¥åŠ¨æ€åº“
 		RuntimeDependencies.Add(Path.Combine(ModuleDirectory,"ThirdParty", "lib", "libcrypto-3-x64.dll"));
 		RuntimeDependencies.Add(Path.Combine(ModuleDirectory,"ThirdParty", "lib", "libssl-3-x64.dll"));
 				
