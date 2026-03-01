@@ -110,6 +110,11 @@ bool UMYSQLDataBase::Execute(FString sql)
 	try
 	{
 		std::string sqlString(TCHAR_TO_UTF8(*sql));
+		if (!stamt)
+		{
+				UE_LOG(LogTemp, Error, TEXT("Failed to create statement object after reconnecting"));
+				return false;
+		}
 		stamt->execute(sqlString);
 		return true;
 	}
@@ -140,8 +145,13 @@ bool UMYSQLDataBase::ExecuteQuery(FString sql,TArray<FString>& resultStr)
 		std::string sqlString(TCHAR_TO_UTF8(*sql));
 		
 		sql::ResultSet *res;
+
+		if (!stamt)
+		{
+				 UE_LOG(LogTemp, Error, TEXT("Failed to create statement object after reconnecting"));
+				 return false;
+		}
 		res = stamt->executeQuery(sqlString);
-		
 		//TODO 返回查询结果
 		// 获取结果集的元数据
 		sql::ResultSetMetaData* res_meta = res->getMetaData();
@@ -206,6 +216,11 @@ bool UMYSQLDataBase::ExecuteUpdate(FString sql)
 	try
 	{
 		std::string sqlString(TCHAR_TO_UTF8(*sql));
+		if (!stamt)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create statement object after reconnecting"));
+			return false;
+		}
 		stamt->executeUpdate(sqlString);
 		return true;
 	}

@@ -7,8 +7,13 @@ ULogSubsystem::ULogSubsystem()
 {
 	//初始化数据库连接
 	LogSql = NewObject<UMYSQLDataBase>();
-	LogSql->Connect(TEXT("43.139.151.189"), TEXT("JapeZhu"), TEXT("2002319Ab@"),3306);
-	LogSql->SelectDataBase(TEXT("GuardAnEgg"));
+}
+
+void ULogSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	LogSql->Connect(Host, User, Password, 3306);
+	LogSql->SelectDataBase(DataBaseName);
 }
 
 bool ULogSubsystem::PlayerLogin(FString InUserID, FString InPassword)
@@ -29,6 +34,14 @@ bool ULogSubsystem::PlayerLogin(FString InUserID, FString InPassword)
 			return true;
 		}
 	}
+	else
+	{
+		//重新连接数据库
+		LogSql->Connect(Host, User, Password, 3306);
+		LogSql->SelectDataBase(DataBaseName);
+		LogSql->ExecuteQuery(FString::Printf(TEXT("SELECT * FROM UserInfo WHERE UserId='%s' AND Password='%s'"), *InUserID, *InPassword), result);
+			return true;
+	}
 
     return false;
 }
@@ -38,6 +51,14 @@ bool ULogSubsystem::PlayerRegister(FString InUserName, FString InUserID, FString
 	if (IsValid(LogSql) && LogSql->ExecuteUpdate(FString::Printf(TEXT("INSERT INTO UserInfo (UserId, Password, UserName) VALUES (%s,'%s','%s')"), *InUserID, *InPassword, *InUserName)))
 	{
 			UE_LOG(LogTemp, Log, TEXT("Register And Login successful for user: %s"), *InUserName);
+			return true;
+	}
+	else
+	{
+		//重新连接数据库
+		LogSql->Connect(Host, User, Password, 3306);
+		LogSql->SelectDataBase(DataBaseName);
+		LogSql->ExecuteUpdate(FString::Printf(TEXT("INSERT INTO UserInfo (UserId, Password, UserName) VALUES (%s,'%s','%s')"), *InUserID, *InPassword, *InUserName));
 			return true;
 	}
 	UE_LOG(LogTemp, Log, TEXT("Register And Login failed for user: %s"), *InUserName);

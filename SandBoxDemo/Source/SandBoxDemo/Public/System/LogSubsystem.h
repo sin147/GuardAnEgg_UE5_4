@@ -14,8 +14,15 @@ UCLASS()
 class SANDBOXDEMO_API ULogSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+private:
+	FString Host= "43.139.151.189";
+	FString User= "JapeZhu";
+	FString Password= "2002319Ab@";
+	int Port= 3306;
+	FString DataBaseName = "GuardAnEgg";
 public:
 	ULogSubsystem();
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	//数据库
 	TObjectPtr<UMYSQLDataBase> LogSql;
 	

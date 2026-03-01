@@ -108,6 +108,10 @@ protected:
 	//客户端多播交互
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Interact(ACharacter* InCharacter);
+	//角色过滤
+	UFUNCTION()
+	TArray<FGuid> CharacterFilterRule(TArray<FGuid> InInteractiveGUIDS);
+
 public:
 	// ========== FTickableGameObject接口（必须实现） ==========
 // 帧更新逻辑（核心Tick函数）

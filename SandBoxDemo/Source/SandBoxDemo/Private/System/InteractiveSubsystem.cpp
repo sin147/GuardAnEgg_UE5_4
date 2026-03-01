@@ -79,32 +79,14 @@ bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 
 TArray<FGuid> UInteractiveSubsystem::FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const
 {
-	//TArray<FGuid> FilteredInteractiveActorGUIDs;
+	TArray<FGuid> FilteredInteractiveActorGUIDs;
 	//switch (EFilterType)
 	//{
 	//case FT_None:
 	//	break;
 	//	//角色交互只能与一个交互对象交互
 	//case FT_Character:
-	//	////返回距离角色最近的交互对象
-	//	//if (FilteredInteractiveActorGUIDs.Num == 1)
-	//	//{
-	//	//	FilteredInteractiveActorGUIDs = InInteractiveActorGUID;
-	//	//}
-	//	//for(FGuid InteractiveActorGUID:InInteractiveActorGUID)
-	//	//{
-	//	//	AInteractiveActor* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
-	//	//	if (InteractiveActor)
-	//	//	{
-	//	//		//计算玩家相机向前的向量和交互对象的向量的夹角，如果夹角小于设定值，则认为玩家正在看着交互对象
-	//	//		FVector CharacterForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
-	//	//		FVector CharacterToInteractiveActorVector = InteractiveActor->GetActorLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
-	//	//		float Angle = FMath::Acos(FVector::DotProduct(CharacterForwardVector.GetSafeNormal(), CharacterToInteractiveActorVector.GetSafeNormal()));
-	//	//		
-	//	//		break;
-	//	//	}
-	//	//}
-
+	//	
 	//	break;
 	//	//设置交互可根据交互设置与多个交互对象交互
 	//case FT_Setting:
@@ -140,6 +122,31 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 
 void UInteractiveSubsystem::Multicast_Interact_Implementation(ACharacter* InCharacter)
 {
+}
+
+TArray<FGuid> UInteractiveSubsystem::CharacterFilterRule(TArray<FGuid> InInteractiveGUIDS)
+{
+	//获取相机的向前向量
+	FVector CameraForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
+	TArray<FGuid> FilteredInteractiveGUIDs;
+	TPair<FGuid, float> ClosestInteractive;
+	for (FGuid InteractiveGUID:InInteractiveGUIDS )
+	{
+		//获取物品到相机的向量
+		FVector ItemToCameraVector = GetInteractiveActorByGUID(InteractiveGUID)->GetActorLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
+		//计算物品与相机的夹角
+		float dotProduct = FVector::DotProduct(CameraForwardVector.GetSafeNormal(), ItemToCameraVector.GetSafeNormal());
+		//获取最小夹角的物品
+		if (ClosestInteractive.Value< dotProduct)
+		{
+			ClosestInteractive.Key = InteractiveGUID;
+			ClosestInteractive.Value = dotProduct;
+			UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::CharacterFilterRule InteractiveGUID %s dotProduct %f"), *InteractiveGUID.ToString(), dotProduct);
+		}
+
+	}
+	FilteredInteractiveGUIDs.Add(ClosestInteractive.Key);
+	return FilteredInteractiveGUIDs;
 }
 
 void UInteractiveSubsystem::Tick(float DeltaTime)
