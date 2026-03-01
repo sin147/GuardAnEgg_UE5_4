@@ -21,7 +21,11 @@ public:
 	
 	//玩家登录
 	UFUNCTION(BlueprintCallable, Category = "LogSubsystem")
-	bool PlayerLogin(FString username, FString password);
+	bool PlayerLogin(FString InUserId, FString InPassword);
+
+	//玩家登录
+	UFUNCTION(BlueprintCallable, Category = "LogSubsystem")
+	bool PlayerRegister(FString InUserName,FString InUserID, FString InPassword);
 
 
 };
