@@ -11,6 +11,7 @@ AInteractiveActor::AInteractiveActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	RootComponent=CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	//创建触发框组件
 	TriggerBox = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger"));
 	TriggerBox->SetupAttachment(RootComponent);
@@ -76,13 +77,13 @@ void AInteractiveActor::Tick(float DeltaTime)
 
 void AInteractiveActor::Interact(ACharacter* InCharacter)
 {
-	IInteract::Interact(InCharacter);
-	UE_LOG(LogTemp, Warning, TEXT("%s Interact %s"),*InCharacter->GetActorNameOrLabel(), *GetName());
+	UE_LOG(LogTemp, Log, TEXT("%s:Interact With %s"), * GetName(),*InCharacter->GetActorNameOrLabel());
 }
 
 bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
 {
+	
 	//Todo:添加交互条件
-	return true;
+	return IInteract::CanInteract(InCharacter);
 }
 

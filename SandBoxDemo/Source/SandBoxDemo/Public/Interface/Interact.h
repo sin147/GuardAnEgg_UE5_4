@@ -24,12 +24,17 @@ class SANDBOXDEMO_API IInteract
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	//是否可以交互
-	virtual bool CanInteract(ACharacter* InCharacter) { return true; }
+	virtual bool CanInteract(ACharacter* InCharacter) 
+	{
+		if (InCharacter == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
 
 	//交互接口
-	virtual void Interact(ACharacter* InCharacter)
-	{
-		if(!CanInteract(InCharacter)){return;}
-	}
+	virtual void Interact(ACharacter* InCharacter)= 0;
 	
 };

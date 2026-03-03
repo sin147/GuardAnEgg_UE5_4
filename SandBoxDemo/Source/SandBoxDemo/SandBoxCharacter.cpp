@@ -144,7 +144,7 @@ void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAt
 	case CAVT_Currently:
 		if (InAttribute == ECharacterAttribute::WalkSpeed)
 {
-		UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
+		//UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
 }
 		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetCurrentlyValue(InNewValue);
 		break;

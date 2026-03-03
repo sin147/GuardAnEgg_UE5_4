@@ -63,7 +63,6 @@ AInteractiveActor* UInteractiveSubsystem::GetInteractiveActorByGUID(FGuid InGUID
 			return InteractiveActor;
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::GetInteractiveActorByGUID InteractiveActor with GUID %s not found"), *InGUID.ToString());
 	return nullptr;
 }
 
@@ -72,6 +71,7 @@ bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 	//是否存在可交互对象
 	if (CharacterInteractiveInfos.Find(InCharacter) == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID : %s not InteractiveActors"), *InCharacter->GetActorNameOrLabel());
 		return false;
 	}
 	return true;
@@ -116,7 +116,7 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s not found"), *InCharacter->GetActorNameOrLabel());
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID : %s not InteractiveActors"), *InCharacter->GetActorNameOrLabel());
 	}
 }
 
@@ -186,4 +186,6 @@ void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor_Implementation(AIn
 FCharacterInteractiveInfo::FCharacterInteractiveInfo(TObjectPtr<ACharacter> InCharacter)
 {
 	Character = InCharacter;
+	//TODO:先遍历一遍场景的InteractiveActor存储
+
 }
