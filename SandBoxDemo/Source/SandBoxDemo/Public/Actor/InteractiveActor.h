@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interface/Interact.h"
+#include "../State/StateMachineBase.h"
 #include "InteractiveActor.generated.h"
 
 UENUM(BlueprintType)
@@ -24,7 +25,22 @@ class SANDBOXDEMO_API AInteractiveActor : public AActor, public IInteract
 public:	
 	// Sets default values for this actor's properties
 	AInteractiveActor();
+private:
+	//交互状态机
+	TObjectPtr<UStateMachineBase> InteractiveStateMachine;
+	//当前交互玩家
+	TArray<ASandBoxCharacter> InteractiveCharacters;
+	//交互已经进行的时间
+	float InteractTime;
 
+	//交互准备完成时间
+	float PreInteractFinishTime=0;
+	//交互完成时间
+	float InteractFinishTime=0;
+	//交互结束完成时间
+	float InteractOverFinishTime=0;
+	//交互中断完成时间
+	float InteractBreakFinishTime=0;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,7 +58,14 @@ protected:
 	//交互结束事件
 	UFUNCTION()
 	void OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	//准备交互
+	void PreInteract(float DeltaTime);
+	//交互中
+	void Interactting(float DeltaTime);
+	//交互完成
+	void InteractOver(float DeltaTime);
+	//交互中断
+	void InteractBreak(float DeltaTime);
 public:	
 	//获取当前交互类型
 	UFUNCTION(BlueprintCallable, Category = "Interactive")

@@ -19,11 +19,19 @@ public:
 UENUM(BlueprintType)
 enum EState : uint8
 {
+
 	S_None UMETA(DisplayName = "无"),
+	//玩家运动状态
 	S_Move UMETA(DisplayName = "移动"),
 	S_QuickMove UMETA(DisplayName = "快速移动"),
 	S_Idle UMETA(DisplayName = "待机"),
 	S_Interactive UMETA(DisplayName = "交互"),
+
+	//交互对象状态
+	S_InteractiveActor_Start UMETA(DisplayName = "交互对象开始交互"),
+	S_InteractiveActor_Interacting UMETA(DisplayName = "交互对象交互中"),
+	S_InteractiveActor_Break UMETA(DisplayName = "交互对象中断"),
+	S_InteractiveActor_Finish UMETA(DisplayName = "交互对象完成"),
 };
 
 //角色属性

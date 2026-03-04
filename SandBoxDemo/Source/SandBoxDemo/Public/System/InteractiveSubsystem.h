@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "../Actor/InteractiveActor.h"
 #include "InteractiveSubsystem.generated.h"
 
 class AInteractiveActor;
@@ -36,9 +37,12 @@ protected:
 	//交互角色GUID
 	UPROPERTY(BlueprintReadOnly)
 	 TObjectPtr<ACharacter> Character;
-	//交互对象
+	//被动交互对象
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FGuid> InteractiveActorGUIDs;
+	TArray<FGuid> PassiveInteractiveActorGUIDs;
+	//主动交互对象
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FGuid> ActiveInteractiveActorGUIDs;
 	//当前交互状态
 
 
@@ -46,27 +50,57 @@ public:
 	FCharacterInteractiveInfo() = default;
 	FCharacterInteractiveInfo(TObjectPtr<ACharacter> Character);
 	//添加交互对象
-	bool AddInteractiveActor(FGuid InGUID)
+	bool AddInteractiveActor(EInteractiveType InInteractiveType, FGuid InGUID)
 	{
-		if (!InteractiveActorGUIDs.Contains(InGUID))
+		switch (InInteractiveType)
 		{
-			return InteractiveActorGUIDs.Add(InGUID)>=0;
+		case IT_None:
+			break;
+		case IT_Active:
+			if (!ActiveInteractiveActorGUIDs.Contains(InGUID))
+			{
+				return ActiveInteractiveActorGUIDs.Add(InGUID) >= 0;
+			}
+			break;
+		case IT_Passive:
+			if (!PassiveInteractiveActorGUIDs.Contains(InGUID))
+			{
+				return PassiveInteractiveActorGUIDs.Add(InGUID) >= 0;
+			}
+			break;
+		default:
+			break;
 		}
 		return false;
 	}
 	//移除交互对象
 	bool RemoveInteractiveActor(FGuid InGUID)
 	{
-		if (InteractiveActorGUIDs.Contains(InGUID))
+		if (PassiveInteractiveActorGUIDs.Contains(InGUID))
 		{
-			return InteractiveActorGUIDs.Remove(InGUID)>=0;
+			return PassiveInteractiveActorGUIDs.Remove(InGUID)>=0;
+		}
+		else if (ActiveInteractiveActorGUIDs.Contains(InGUID))
+		{
+			return ActiveInteractiveActorGUIDs.Remove(InGUID) >= 0;
 		}
 		return false;
 	}
 	//获取交互对象列表
-	TArray<FGuid> GetInteractiveActorGUIDs() const
+	TArray<FGuid> GetInteractiveActorGUIDs(EInteractiveType InInteractiveType) const
 	{
-		return InteractiveActorGUIDs;
+		switch (InInteractiveType)
+		{
+		case IT_None:
+			break;
+		case IT_Active:
+			return ActiveInteractiveActorGUIDs;
+		case IT_Passive:
+			return PassiveInteractiveActorGUIDs;
+		default:
+			break;
+		}
+		return nullptr;
 	}
 };
 
@@ -97,6 +131,11 @@ public:
 
 	//获取交互对象通过GUID
 	AInteractiveActor* GetInteractiveActorByGUID(FGuid InGUID) const;
+	//通过GUID获取交互对象们
+	TArray<AInteractiveActor*> GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs ) const;
+	//销毁交互对象
+	void DestoryInteractiveActorByGuid(FGuid Guid);
+
 protected:
 	//CanInteract过滤交互对象列表
 	bool CanInteractFilter(ACharacter* InCharacter) const;

@@ -15,6 +15,8 @@ AInteractiveActor::AInteractiveActor()
 	//创建触发框组件
 	TriggerBox = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger"));
 	TriggerBox->SetupAttachment(RootComponent);
+	//交互姿态机
+	InteractiveStateMachine = CreateDefaultSubobject<UStateMachineBase>( TEXT("InteractiveStateMachine"));
 
 }
 
@@ -68,15 +70,77 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 
 }
 
+void AInteractiveActor::PreInteract(float DeltaTime)
+{
+	if (InteractTime >= PreInteractFinishTime)
+	{
+		InteractTime = 0.f;
+		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
+	}
+}
+
+void AInteractiveActor::Interactting(float DeltaTime)
+{
+
+	if (InteractTime >= InteractFinishTime)
+	{
+		InteractTime = 0.f;
+		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Finish);
+	}
+}
+
+void AInteractiveActor::InteractOver(float DeltaTime)
+{
+	if (InteractTime >= InteractOverFinishTime)
+	{
+		InteractTime = 0.f;
+		InteractiveStateMachine->EnterState(EState::S_None);
+	}
+}
+
+void AInteractiveActor::InteractBreak(float DeltaTime)
+{
+	if (InteractTime >= InteractBreakFinishTime)
+	{
+		InteractTime = 0.f;
+		InteractiveStateMachine->EnterState(EState::S_None);
+	}
+}
+
 // Called every frame
 void AInteractiveActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (InteractiveStateMachine->GetCurrentlyState() != S_None)
+	{
+		InteractTime += DeltaTime;
+	}
+	switch (InteractiveStateMachine->GetCurrentlyState())
+	{
+	case S_None:
+		break;
+	case S_InteractiveActor_Start:
+		PreInteract();
+		break;
+	case S_InteractiveActor_Interacting:
+		Interactting();
+		break;
+	case S_InteractiveActor_Break:
+		InteractBreak()
+		break;
+	case S_InteractiveActor_Finish:
+		InteractOver();
+		break;
+	default:
+		break;
+	}
 
 }
 
 void AInteractiveActor::Interact(ACharacter* InCharacter)
 {
+	InteractiveCharacters.Add(InCharacter);
+	InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Start);
 	UE_LOG(LogTemp, Log, TEXT("%s:Interact With %s"), * GetName(),*InCharacter->GetActorNameOrLabel());
 }
 

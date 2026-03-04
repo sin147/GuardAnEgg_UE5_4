@@ -8,7 +8,6 @@
 
 void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
-	if (!CanInteractFilter(InCharacter)) { return; }
 	Server_Interact(InCharacter);
 }
 
@@ -66,6 +65,23 @@ AInteractiveActor* UInteractiveSubsystem::GetInteractiveActorByGUID(FGuid InGUID
 	return nullptr;
 }
 
+TArray<AInteractiveActor*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
+{
+	TArray<AInteractiveActor*> RetInteractiveActors;
+	for (FGuid Guid : InGUIDs)
+	{
+		RetInteractiveActors.Add(GetInteractiveActorByGUID(Guid));
+	}
+	return RetInteractiveActors;
+}
+
+void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
+{
+	AInteractiveActor* InteractiveActor = GetInteractiveActorByGUID(Guid);
+	InteractiveActors.Remove(InteractiveActor);
+	InteractiveActor->Destroy();
+}
+
 bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 {
 	//是否存在可交互对象
@@ -104,15 +120,16 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info)
 	{
-		TArray<FGuid> FilterInteractiveActorGUIDs = FilterInteractiveActor(Info->GetInteractiveActorGUIDs());
-		for (FGuid InteractiveActorGUID : FilterInteractiveActorGUIDs)
+		TArray<FGuid> ActiveInteractiveActorGuids = Info->GetInteractiveActorGUIDs(EInteractiveType::IT_Active);
+		for (FGuid InteractiveActorGUID : ActiveInteractiveActorGuids)
 		{
-			if (GetInteractiveActorByGUID(InteractiveActorGUID))
+			AInteractiveActor* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
+			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
-				GetInteractiveActorByGUID(InteractiveActorGUID)->Interact(InCharacter);
+				InteractiveActor->Interact(InCharacter);
 			}
 		}
-		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), FilterInteractiveActorGUIDs.Num());
+		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
 	}
 	else
 	{
