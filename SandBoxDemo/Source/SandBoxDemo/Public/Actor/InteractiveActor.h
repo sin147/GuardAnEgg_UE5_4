@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -12,8 +12,8 @@ UENUM(BlueprintType)
 enum EInteractiveType : uint8
 {
 	IT_None UMETA(DisplayName = "None"),
-	IT_Active  UMETA(DisplayName = "Ö÷¶¯"),
-	IT_Passive UMETA(DisplayName = "±»¶¯"),
+	IT_Active  UMETA(DisplayName = "Active"),
+	IT_Passive UMETA(DisplayName = "Passive"),
 };
 
 
@@ -26,56 +26,72 @@ public:
 	// Sets default values for this actor's properties
 	AInteractiveActor();
 private:
-	//½»»¥×´Ì¬»ú
+	//äº¤äº’çŠ¶æ€æœº
 	TObjectPtr<UStateMachineBase> InteractiveStateMachine;
-	//µ±Ç°½»»¥Íæ¼Ò
-	TArray<ASandBoxCharacter> InteractiveCharacters;
-	//½»»¥ÒÑ¾­½øĞĞµÄÊ±¼ä
+	//å½“å‰äº¤äº’ç©å®¶
+	TArray<TObjectPtr<ACharacter>> InteractiveCharacters;
+	//äº¤äº’å·²ç»è¿›è¡Œçš„æ—¶é—´
 	float InteractTime;
 
-	//½»»¥×¼±¸Íê³ÉÊ±¼ä
-	float PreInteractFinishTime=0;
-	//½»»¥Íê³ÉÊ±¼ä
-	float InteractFinishTime=0;
-	//½»»¥½áÊøÍê³ÉÊ±¼ä
-	float InteractOverFinishTime=0;
-	//½»»¥ÖĞ¶ÏÍê³ÉÊ±¼ä
-	float InteractBreakFinishTime=0;
+	//äº¤äº’å‡†å¤‡å®Œæˆæ—¶é—´
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess=true))
+	float PreInteractDuration=0;
+	//äº¤äº’å®Œæˆæ—¶é—´
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
+	float InteractDuration=0;
+	//äº¤äº’ç»“æŸå®Œæˆæ—¶é—´
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
+	float InteractOverDuration=0;
+	//äº¤äº’ä¸­æ–­å®Œæˆæ—¶é—´
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
+	float InteractBreakDuration=0;
+	//å‡†å¤‡äº¤äº’
+	void PreInteract(float DeltaTime);
+	//äº¤äº’ä¸­
+	void Interactting(float DeltaTime);
+	//äº¤äº’å®Œæˆ
+	void InteractOver(float DeltaTime);
+	//äº¤äº’ä¸­æ–­
+	void InteractBreak(float DeltaTime);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	//½»»¥´¥·¢¿ò
+	//äº¤äº’è§¦å‘æ¡†
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interactive")
 	class USphereComponent* TriggerBox;
-	//½»»¥´¥·¢ÀàĞÍ
+	//äº¤äº’è§¦å‘ç±»å‹
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive")
-	TEnumAsByte<EInteractiveType> InteractiveType=EInteractiveType::IT_None;
-	//½»»¥·¶Î§
-
-	//½»»¥´¥·¢ÊÂ¼ş
+	TEnumAsByte<EInteractiveType> InteractiveType=EInteractiveType::IT_Active;
+	//äº¤äº’è§¦å‘äº‹ä»¶
 	UFUNCTION()
 	void OnTriggerBoxOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//½»»¥½áÊøÊÂ¼ş
+	//äº¤äº’ç»“æŸäº‹ä»¶
 	UFUNCTION()
 	void OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	//×¼±¸½»»¥
-	void PreInteract(float DeltaTime);
-	//½»»¥ÖĞ
-	void Interactting(float DeltaTime);
-	//½»»¥Íê³É
-	void InteractOver(float DeltaTime);
-	//½»»¥ÖĞ¶Ï
-	void InteractBreak(float DeltaTime);
+	//å‡†å¤‡äº¤äº’å®ç°
+	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
+	void PreInteractImp(float DeltaTime);
+	//äº¤äº’å®ç°
+	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
+	void InteracttingImp(float DeltaTime);
+	//äº¤äº’å®Œæˆå®ç°
+	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
+	void InteractOverImp(float DeltaTime);
+	//äº¤äº’ä¸­æ–­å®ç°
+	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
+	void InteractBreakImp(float DeltaTime);
+	//è·å–å½“å‰äº¤äº’çš„ç©å®¶ç»„
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Interact")
+	TArray<ACharacter*> GetInteractiveCharacters();
+
 public:	
-	//»ñÈ¡µ±Ç°½»»¥ÀàĞÍ
+	//è·å–å½“å‰äº¤äº’ç±»å‹
 	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	EInteractiveType GetInteractiveType() const { return InteractiveType; }
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	//½»»¥½Ó¿ÚÊµÏÖ
-	virtual void Interact(ACharacter* InCharacter) override;
-	//ÊÇ·ñ¿ÉÒÔ½»»¥
+	//äº¤äº’æ¥å£å®ç°
+	void Interact(ACharacter* InCharacter);
+	//æ˜¯å¦å¯ä»¥äº¤äº’
 	virtual bool CanInteract(ACharacter* InCharacter) override;
-	
-	
 };

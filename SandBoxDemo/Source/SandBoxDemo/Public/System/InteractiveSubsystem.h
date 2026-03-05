@@ -100,7 +100,7 @@ public:
 		default:
 			break;
 		}
-		return nullptr;
+		return TArray<FGuid>();
 	}
 };
 

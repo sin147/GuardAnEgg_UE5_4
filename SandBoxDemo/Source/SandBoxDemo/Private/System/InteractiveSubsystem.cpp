@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "System/InteractiveSubsystem.h"
@@ -13,7 +13,7 @@ void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 
 bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID)
 {
-	if (!InCharacter || !InInteractiveActorGUID.IsValid()) { return false; }
+	if (!GetInteractiveActorByGUID(InInteractiveActorGUID)||!InCharacter || !InInteractiveActorGUID.IsValid()) { return false; }
 
 	FCharacterInteractiveInfo*Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info==nullptr)
@@ -22,12 +22,12 @@ bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCha
 		CharacterInteractiveInfos.Add(InCharacter, NewInfo);
 		Info = CharacterInteractiveInfos.Find(InCharacter);
 	}
-	return Info->AddInteractiveActor(InInteractiveActorGUID);
+	return Info->AddInteractiveActor(GetInteractiveActorByGUID(InInteractiveActorGUID)->GetInteractiveType(), InInteractiveActorGUID);
 }
 
 bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID)
 {
-	if (!InCharacter || !InInteractiveActorGUID.IsValid()) { return false; }
+	if (!GetInteractiveActorByGUID(InInteractiveActorGUID)||!InCharacter || !InInteractiveActorGUID.IsValid()) { return false; }
 
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info == nullptr)
@@ -84,7 +84,7 @@ void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
 
 bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 {
-	//ÊÇ·ñ´æÔÚ¿É½»»¥¶ÔÏó
+	//æ˜¯å¦å­˜åœ¨å¯äº¤äº’å¯¹è±¡
 	if (CharacterInteractiveInfos.Find(InCharacter) == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID : %s not InteractiveActors"), *InCharacter->GetActorNameOrLabel());
@@ -100,11 +100,11 @@ TArray<FGuid> UInteractiveSubsystem::FilterInteractiveActor(const TArray<FGuid> 
 	//{
 	//case FT_None:
 	//	break;
-	//	//½ÇÉ«½»»¥Ö»ÄÜÓëÒ»¸ö½»»¥¶ÔÏó½»»¥
+	//	//è§’è‰²äº¤äº’åªèƒ½ä¸ä¸€ä¸ªäº¤äº’å¯¹è±¡äº¤äº’
 	//case FT_Character:
 	//	
 	//	break;
-	//	//ÉèÖÃ½»»¥¿É¸ù¾İ½»»¥ÉèÖÃÓë¶à¸ö½»»¥¶ÔÏó½»»¥
+	//	//è®¾ç½®äº¤äº’å¯æ ¹æ®äº¤äº’è®¾ç½®ä¸å¤šä¸ªäº¤äº’å¯¹è±¡äº¤äº’
 	//case FT_Setting:
 	//	
 	//	break;
@@ -143,17 +143,17 @@ void UInteractiveSubsystem::Multicast_Interact_Implementation(ACharacter* InChar
 
 TArray<FGuid> UInteractiveSubsystem::CharacterFilterRule(TArray<FGuid> InInteractiveGUIDS)
 {
-	//»ñÈ¡Ïà»úµÄÏòÇ°ÏòÁ¿
+	//è·å–ç›¸æœºçš„å‘å‰å‘é‡
 	FVector CameraForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
 	TArray<FGuid> FilteredInteractiveGUIDs;
 	TPair<FGuid, float> ClosestInteractive;
 	for (FGuid InteractiveGUID:InInteractiveGUIDS )
 	{
-		//»ñÈ¡ÎïÆ·µ½Ïà»úµÄÏòÁ¿
+		//è·å–ç‰©å“åˆ°ç›¸æœºçš„å‘é‡
 		FVector ItemToCameraVector = GetInteractiveActorByGUID(InteractiveGUID)->GetActorLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
-		//¼ÆËãÎïÆ·ÓëÏà»úµÄ¼Ğ½Ç
+		//è®¡ç®—ç‰©å“ä¸ç›¸æœºçš„å¤¹è§’
 		float dotProduct = FVector::DotProduct(CameraForwardVector.GetSafeNormal(), ItemToCameraVector.GetSafeNormal());
-		//»ñÈ¡×îĞ¡¼Ğ½ÇµÄÎïÆ·
+		//è·å–æœ€å°å¤¹è§’çš„ç‰©å“
 		if (ClosestInteractive.Value< dotProduct)
 		{
 			ClosestInteractive.Key = InteractiveGUID;
@@ -168,7 +168,24 @@ TArray<FGuid> UInteractiveSubsystem::CharacterFilterRule(TArray<FGuid> InInterac
 
 void UInteractiveSubsystem::Tick(float DeltaTime)
 {
-	//if(CharacterInteractiveInfos[Getplayer])
+	//è¢«åŠ¨äº¤äº’å¯¹è±¡äº¤äº’(æœåŠ¡å™¨ä¸‹æ‰§è¡Œ)
+	if (GetWorld() ? (GetWorld()->GetNetMode() != NM_Client) : false)
+	{
+		TArray<ACharacter*> CharacterArray;
+		CharacterInteractiveInfos.GetKeys(CharacterArray);
+		for (ACharacter* Character : CharacterArray)
+		{
+			TArray<FGuid>InteractiveActorGUIDs = CharacterInteractiveInfos[Character].GetInteractiveActorGUIDs(EInteractiveType::IT_Passive);
+			TArray<AInteractiveActor*> PassiveInteractiveActors = GetInteractiveActorsByGUIDs(InteractiveActorGUIDs);
+			for (AInteractiveActor* InteractiveActor : PassiveInteractiveActors)
+			{
+				InteractiveActor->Interact(Character);
+			}
+
+		}
+	}
+
+	
 }
 
 ETickableTickType UInteractiveSubsystem::GetTickableTickType() const
@@ -203,6 +220,6 @@ void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor_Implementation(AIn
 FCharacterInteractiveInfo::FCharacterInteractiveInfo(TObjectPtr<ACharacter> InCharacter)
 {
 	Character = InCharacter;
-	//TODO:ÏÈ±éÀúÒ»±é³¡¾°µÄInteractiveActor´æ´¢
+	//TODO:å…ˆéå†ä¸€éåœºæ™¯çš„InteractiveActorå­˜å‚¨
 
 }
