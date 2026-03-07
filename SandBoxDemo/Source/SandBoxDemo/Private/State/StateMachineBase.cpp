@@ -49,6 +49,20 @@ bool UStateMachineBase::CanEnterStates(EState InState)
 	return true;
 }
 
+void UStateMachineBase::EnterState(EState InState)
+{
+	if (!CanEnterStates(InState))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Cannot Enter State:%d"), InState);
+		return;
+	}
+	EState OldState = CurrentlyState;
+	EState NewState = InState;
+	CurrentlyState = NewState;
+	OnExitState(OldState);
+	OnEnterState(NewState);
+}
+
 TEnumAsByte<EState> UStateMachineBase::GetCurrentlyState()
 {
 	return CurrentlyState;

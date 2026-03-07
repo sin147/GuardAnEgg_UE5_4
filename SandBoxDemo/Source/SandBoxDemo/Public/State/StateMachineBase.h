@@ -41,19 +41,7 @@ protected:
 
 public:	
 	//进入状态
-	void EnterState(EState InState)
-	{
-		if (!CanEnterStates(InState))
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Cannot Enter State:%d"), InState);
-			return;
-		}
-		EState OldState = CurrentlyState;
-		EState NewState = InState;
-		CurrentlyState= NewState;
-		OnExitState(OldState);
-		OnEnterState(NewState);
-	}
+	void EnterState(EState InState);
 
 	//获得当前状态
 	TEnumAsByte<EState> GetCurrentlyState();

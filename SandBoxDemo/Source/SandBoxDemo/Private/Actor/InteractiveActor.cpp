@@ -185,4 +185,16 @@ bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
 	//Todo:添加交互条件
 	return IInteract::CanInteract(InCharacter);
 }
+void AInteractiveActor::InteractBreak(ACharacter* InCharacter)
+{
 
+	InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Break);
+}
+TEnumAsByte<EState> AInteractiveActor::GetCurrentlyState()
+{
+	if (InteractiveStateMachine)
+	{
+		return InteractiveStateMachine->GetCurrentlyState();
+	}
+	return S_None;
+}

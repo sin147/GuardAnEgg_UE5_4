@@ -83,15 +83,27 @@ protected:
 	//获取当前交互的玩家组
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Interact")
 	TArray<ACharacter*> GetInteractiveCharacters();
-
 public:	
+	//获取交互准备时间
+	float GetPreInteractDuration() const { return PreInteractDuration; }
+	//获取交互时间
+	float GetInteractDuration() const { return InteractDuration; }
+	//获取交互结束时间
+	float GetInteractOverDuration() const { return InteractOverDuration; }
+	//获取交互中断时间
+	float GetInteractBreakDuration() const { return InteractBreakDuration; }
 	//获取当前交互类型
 	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	EInteractiveType GetInteractiveType() const { return InteractiveType; }
+	//获取当前状态
+	UPROPERTY(BlueprintCallable, Category = "Interactive")
+	TEnumAsByte<EState> GetCurrentlyState();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	//交互接口实现
 	void Interact(ACharacter* InCharacter);
 	//是否可以交互
 	virtual bool CanInteract(ACharacter* InCharacter) override;
+	//交互中断接口实现
+	void InteractBreak(ACharacter* InCharacter);
 };
