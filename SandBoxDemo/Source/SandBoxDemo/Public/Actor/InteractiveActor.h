@@ -8,13 +8,7 @@
 #include "../State/StateMachineBase.h"
 #include "InteractiveActor.generated.h"
 
-UENUM(BlueprintType)
-enum EInteractiveType : uint8
-{
-	IT_None UMETA(DisplayName = "None"),
-	IT_Active  UMETA(DisplayName = "Active"),
-	IT_Passive UMETA(DisplayName = "Passive"),
-};
+
 
 
 UCLASS()
@@ -96,7 +90,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	EInteractiveType GetInteractiveType() const { return InteractiveType; }
 	//获取当前状态
-	UPROPERTY(BlueprintCallable, Category = "Interactive")
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	TEnumAsByte<EState> GetCurrentlyState();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

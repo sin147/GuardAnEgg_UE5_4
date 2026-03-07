@@ -42,7 +42,7 @@ void AInteractiveActor::OnTriggerBoxOverlapBegin(UPrimitiveComponent* Overlapped
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			InteractiveSubsystem->PaddingInteractiveActor(Character,this->GetActorGuid());
+			InteractiveSubsystem->PaddingInteractiveActor(Character, this->GetInteractiveType(), this->GetActorGuid());
 		}
 		else
 		{

@@ -11,7 +11,7 @@ void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 	Server_Interact(InCharacter);
 }
 
-bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID)
+bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter,EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID)
 {
 	if (!GetInteractiveActorByGUID(InInteractiveActorGUID)||!InCharacter || !InInteractiveActorGUID.IsValid()) { return false; }
 
@@ -22,7 +22,7 @@ bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCha
 		CharacterInteractiveInfos.Add(InCharacter, NewInfo);
 		Info = CharacterInteractiveInfos.Find(InCharacter);
 	}
-	return Info->AddInteractiveActor(GetInteractiveActorByGUID(InInteractiveActorGUID)->GetInteractiveType(), InInteractiveActorGUID);
+	return Info->AddInteractiveActor(InInteractiveType, InInteractiveActorGUID);
 }
 
 bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID)
@@ -38,36 +38,50 @@ bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InC
 	return Info->RemoveInteractiveActor(InInteractiveActorGUID);
 }
 
-void UInteractiveSubsystem::SpawnInteractiveActor_Implementation(TSubclassOf<AInteractiveActor> ActorClass,FVector InLocaltion,FRotator InRotation)
+void UInteractiveSubsystem::SpawnInteractiveActor_Implementation(TSubclassOf<AActor> ActorClass,FVector InLocation,FRotator InRotation)
 {
-	if (IsValid(ActorClass))
+	// 1. 基础有效性检查：World/ActorClass 不能为空
+	UWorld* World = GetWorld();
+	if (!World || !IsValid(ActorClass))
 	{
-		AInteractiveActor* NewInteractiveActor = GetWorld()->SpawnActor<AInteractiveActor>(ActorClass, InLocaltion, InRotation);
-		InteractiveActors.Add(NewInteractiveActor);
-		Multicast_OnSpawnInteractiveActor(NewInteractiveActor);
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Invalid World or ActorClass!"));
+		return;
+	}
+
+	// 2. 关键：检测 ActorClass 是否实现了 IInteract 接口（运行期反射检查）
+	if (!ActorClass->ImplementsInterface(UInteract::StaticClass()))
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: ActorClass %s does NOT implement IInteract interface!"), *ActorClass->GetName());
+		return;
+	}
+
+	// 3. 生成 Actor 对象
+	AActor* NewActor = World->SpawnActor<AActor>(ActorClass, InLocation, InRotation);
+	if (!NewActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Failed to spawn Actor!"));
+		return;
+	}
+
+	// 4. 二次验证：将 Actor 转换为 IInteract 接口指针（双重保险）
+	IInteract* NewInteractiveActor = Cast<IInteract>(NewActor);
+	if (NewInteractiveActor)
+	{
+		InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
+		Multicast_OnSpawnInteractiveActor(NewActor);
+		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Spawned valid interactive actor %s"), *NewActor->GetName());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor Invalid ActorClass"));
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Actor %s implements IInteract but cast failed!"), *NewActor->GetName());
+		NewActor->Destroy(); // 销毁无效 Actor
 	}
 
 }
 
-AInteractiveActor* UInteractiveSubsystem::GetInteractiveActorByGUID(FGuid InGUID) const
+TArray<IInteract*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
 {
-	for (AInteractiveActor* InteractiveActor : InteractiveActors)
-	{
-		if (InteractiveActor && InteractiveActor->GetActorGuid() == InGUID)
-		{
-			return InteractiveActor;
-		}
-	}
-	return nullptr;
-}
-
-TArray<AInteractiveActor*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
-{
-	TArray<AInteractiveActor*> RetInteractiveActors;
+	TArray<IInteract*> RetInteractiveActors;
 	for (FGuid Guid : InGUIDs)
 	{
 		RetInteractiveActors.Add(GetInteractiveActorByGUID(Guid));
@@ -77,9 +91,9 @@ TArray<AInteractiveActor*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TA
 
 void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
 {
-	AInteractiveActor* InteractiveActor = GetInteractiveActorByGUID(Guid);
+	IInteract* InteractiveActor = GetInteractiveActorByGUID(Guid);
 	InteractiveActors.Remove(InteractiveActor);
-	InteractiveActor->Destroy();
+	Cast<AActor>(InteractiveActor)->Destroy();
 }
 
 bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
@@ -123,7 +137,7 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 		TArray<FGuid> ActiveInteractiveActorGuids = Info->GetInteractiveActorGUIDs(EInteractiveType::IT_Active);
 		for (FGuid InteractiveActorGUID : ActiveInteractiveActorGuids)
 		{
-			AInteractiveActor* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
+			IInteract* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
 				InteractiveActor->Interact(InCharacter);
@@ -141,31 +155,6 @@ void UInteractiveSubsystem::Multicast_Interact_Implementation(ACharacter* InChar
 {
 }
 
-TArray<FGuid> UInteractiveSubsystem::CharacterFilterRule(TArray<FGuid> InInteractiveGUIDS)
-{
-	//获取相机的向前向量
-	FVector CameraForwardVector = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetActorForwardVector();
-	TArray<FGuid> FilteredInteractiveGUIDs;
-	TPair<FGuid, float> ClosestInteractive;
-	for (FGuid InteractiveGUID:InInteractiveGUIDS )
-	{
-		//获取物品到相机的向量
-		FVector ItemToCameraVector = GetInteractiveActorByGUID(InteractiveGUID)->GetActorLocation() - GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
-		//计算物品与相机的夹角
-		float dotProduct = FVector::DotProduct(CameraForwardVector.GetSafeNormal(), ItemToCameraVector.GetSafeNormal());
-		//获取最小夹角的物品
-		if (ClosestInteractive.Value< dotProduct)
-		{
-			ClosestInteractive.Key = InteractiveGUID;
-			ClosestInteractive.Value = dotProduct;
-			UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::CharacterFilterRule InteractiveGUID %s dotProduct %f"), *InteractiveGUID.ToString(), dotProduct);
-		}
-
-	}
-	FilteredInteractiveGUIDs.Add(ClosestInteractive.Key);
-	return FilteredInteractiveGUIDs;
-}
-
 void UInteractiveSubsystem::Tick(float DeltaTime)
 {
 	//被动交互对象交互(服务器下执行)
@@ -176,8 +165,8 @@ void UInteractiveSubsystem::Tick(float DeltaTime)
 		for (ACharacter* Character : CharacterArray)
 		{
 			TArray<FGuid>InteractiveActorGUIDs = CharacterInteractiveInfos[Character].GetInteractiveActorGUIDs(EInteractiveType::IT_Passive);
-			TArray<AInteractiveActor*> PassiveInteractiveActors = GetInteractiveActorsByGUIDs(InteractiveActorGUIDs);
-			for (AInteractiveActor* InteractiveActor : PassiveInteractiveActors)
+			TArray<IInteract*> PassiveInteractiveActors = GetInteractiveActorsByGUIDs(InteractiveActorGUIDs);
+			for (IInteract* InteractiveActor : PassiveInteractiveActors)
 			{
 				InteractiveActor->Interact(Character);
 			}
@@ -206,14 +195,14 @@ TStatId UInteractiveSubsystem::GetStatId() const
 void UInteractiveSubsystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UInteractiveSubsystem, InteractiveActors);
+	//DOREPLIFETIME(UInteractiveSubsystem, InteractiveActors);
 }
 
-void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor_Implementation(AInteractiveActor* NewInteractiveActor)
+void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor_Implementation(AActor* NewInteractiveActor)
 {
-	if (NewInteractiveActor)
+	if (IsValid(NewInteractiveActor)&& Cast<IInteract>(NewInteractiveActor)!=nullptr)
 	{
-		InteractiveActors.Add(NewInteractiveActor);
+		InteractiveActors.Add(Cast<IInteract>(NewInteractiveActor));
 	}
 }
 

@@ -1,31 +1,29 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "../Actor/InteractiveActor.h"
+#include "../Interface/Interact.h"
 #include "InteractiveSubsystem.generated.h"
-
-class AInteractiveActor;
 
 UENUM(BlueprintType)
 enum EInteractiveState :uint8
 {
-	IS_None  UMETA(DisplayName = "ÎŞ½»»¥"),
-	IS_Start UMETA(DisplayName = "¿ªÊ¼½»»¥"),
-	IS_Interacting UMETA(DisplayName = "½»»¥ÖĞ"),
-	IS_Break UMETA(DisplayName = "ÖĞ¶Ï"),
-	IS_Finish UMETA(DisplayName = "½»»¥Íê³É"),
+	IS_None  UMETA(DisplayName = "æ— äº¤äº’"),
+	IS_Start UMETA(DisplayName = "å¼€å§‹äº¤äº’"),
+	IS_Interacting UMETA(DisplayName = "äº¤äº’ä¸­"),
+	IS_Break UMETA(DisplayName = "ä¸­æ–­"),
+	IS_Finish UMETA(DisplayName = "äº¤äº’å®Œæˆ"),
 
 };
-//¹ıÂËÀàĞÍ
+//è¿‡æ»¤ç±»å‹
 UENUM(BlueprintType)
 enum EFilterType:uint8
 {
-	FT_None UMETA(DisplayName = "ÎŞ¹ıÂË"),
-	FT_Character UMETA(DisplayName = "½ÇÉ«¹ıÂË"),
-	FT_Setting UMETA(DisplayName = "ÉèÖÃ¹ıÂË"),
+	FT_None UMETA(DisplayName = "æ— è¿‡æ»¤"),
+	FT_Character UMETA(DisplayName = "è§’è‰²è¿‡æ»¤"),
+	FT_Setting UMETA(DisplayName = "è®¾ç½®è¿‡æ»¤"),
 
 };
 
@@ -34,22 +32,22 @@ struct FCharacterInteractiveInfo
 {
 	GENERATED_BODY()
 protected:
-	//½»»¥½ÇÉ«GUID
+	//äº¤äº’è§’è‰²GUID
 	UPROPERTY(BlueprintReadOnly)
 	 TObjectPtr<ACharacter> Character;
-	//±»¶¯½»»¥¶ÔÏó
+	//è¢«åŠ¨äº¤äº’å¯¹è±¡
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FGuid> PassiveInteractiveActorGUIDs;
-	//Ö÷¶¯½»»¥¶ÔÏó
+	//ä¸»åŠ¨äº¤äº’å¯¹è±¡
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FGuid> ActiveInteractiveActorGUIDs;
-	//µ±Ç°½»»¥×´Ì¬
+	//å½“å‰äº¤äº’çŠ¶æ€
 
 
 public:
 	FCharacterInteractiveInfo() = default;
 	FCharacterInteractiveInfo(TObjectPtr<ACharacter> Character);
-	//Ìí¼Ó½»»¥¶ÔÏó
+	//æ·»åŠ äº¤äº’å¯¹è±¡
 	bool AddInteractiveActor(EInteractiveType InInteractiveType, FGuid InGUID)
 	{
 		switch (InInteractiveType)
@@ -73,7 +71,7 @@ public:
 		}
 		return false;
 	}
-	//ÒÆ³ı½»»¥¶ÔÏó
+	//ç§»é™¤äº¤äº’å¯¹è±¡
 	bool RemoveInteractiveActor(FGuid InGUID)
 	{
 		if (PassiveInteractiveActorGUIDs.Contains(InGUID))
@@ -86,7 +84,7 @@ public:
 		}
 		return false;
 	}
-	//»ñÈ¡½»»¥¶ÔÏóÁĞ±í
+	//è·å–äº¤äº’å¯¹è±¡åˆ—è¡¨
 	TArray<FGuid> GetInteractiveActorGUIDs(EInteractiveType InInteractiveType) const
 	{
 		switch (InInteractiveType)
@@ -112,58 +110,67 @@ class SANDBOXDEMO_API UInteractiveSubsystem : public UGameInstanceSubsystem,publ
 {
 	GENERATED_BODY()
 protected:
-	//½»»¥½ÇÉ«ĞÅÏ¢
+	//äº¤äº’è§’è‰²ä¿¡æ¯
 	UPROPERTY(BlueprintReadOnly)
 	TMap<ACharacter*,FCharacterInteractiveInfo> CharacterInteractiveInfos;
-	//½»»¥¶ÔÏó×é
-	UPROPERTY(Replicated)
-	TArray<TObjectPtr<AInteractiveActor>> InteractiveActors;
+	//äº¤äº’å¯¹è±¡ç»„
+	TArray<IInteract*> InteractiveActors;
 public:
-	//ÇëÇó½»»¥
+	//è¯·æ±‚äº¤äº’
 	void RequestInteract(ACharacter* InCharacter);
-	//Ìî³ä½»»¥¶ÔÏó
-	bool PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID);
-	//Ìî³ä½»»¥¶ÔÏó
+	//å¡«å……äº¤äº’å¯¹è±¡
+	bool PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID);
+	//å¡«å……äº¤äº’å¯¹è±¡
 	bool UnPaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID);
-	//Éú³É½»»¥¶ÔÏó
+	//ç”Ÿæˆäº¤äº’å¯¹è±¡
 	UFUNCTION(Server,Reliable,BlueprintCallable)
-	void SpawnInteractiveActor(TSubclassOf<AInteractiveActor>ActorClass,FVector InLocaltion, FRotator InRotation);
+	void SpawnInteractiveActor(TSubclassOf<AActor> ActorClass,FVector InLocation, FRotator InRotation);
 
-	//»ñÈ¡½»»¥¶ÔÏóÍ¨¹ıGUID
-	AInteractiveActor* GetInteractiveActorByGUID(FGuid InGUID) const;
-	//Í¨¹ıGUID»ñÈ¡½»»¥¶ÔÏóÃÇ
-	TArray<AInteractiveActor*> GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs ) const;
-	//Ïú»Ù½»»¥¶ÔÏó
+	//è·å–äº¤äº’å¯¹è±¡é€šè¿‡GUID
+	template<typename T=IInteract>
+	T* GetInteractiveActorByGUID(FGuid InGUID) const
+	{
+		for (IInteract* Interactable : InteractiveActors)
+		{
+			// ä¸€æ­¥ Cast åˆ° T*ï¼ŒåŒæ—¶æ£€æŸ¥ Interactable æ˜¯å¦æœ‰æ•ˆã€æ˜¯å¦æ˜¯ç›®æ ‡ç±»å‹
+			AActor* TargetActor = Cast<AActor>(Interactable);
+			if (TargetActor && TargetActor->GetActorGuid() == InGUID)
+			{
+				return Cast<T>(TargetActor);
+			}
+		}
+		return nullptr;
+	}
+	//é€šè¿‡GUIDè·å–äº¤äº’å¯¹è±¡ä»¬
+	TArray<IInteract*> GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs ) const;
+	//é”€æ¯äº¤äº’å¯¹è±¡
 	void DestoryInteractiveActorByGuid(FGuid Guid);
 
 protected:
-	//CanInteract¹ıÂË½»»¥¶ÔÏóÁĞ±í
+	//CanInteractè¿‡æ»¤äº¤äº’å¯¹è±¡åˆ—è¡¨
 	bool CanInteractFilter(ACharacter* InCharacter) const;
 
 	TArray<FGuid> FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const;
-	//·şÎñÆ÷½»»¥
+	//æœåŠ¡å™¨äº¤äº’
 	UFUNCTION(Server, Reliable)
 	void Server_Interact(ACharacter* InCharacter);
-	//¿Í»§¶Ë¶à²¥½»»¥
+	//å®¢æˆ·ç«¯å¤šæ’­äº¤äº’
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Interact(ACharacter* InCharacter);
-	//½ÇÉ«¹ıÂË
-	UFUNCTION()
-	TArray<FGuid> CharacterFilterRule(TArray<FGuid> InInteractiveGUIDS);
 
 public:
-	// ========== FTickableGameObject½Ó¿Ú£¨±ØĞëÊµÏÖ£© ==========
-// Ö¡¸üĞÂÂß¼­£¨ºËĞÄTickº¯Êı£©
+	// ========== FTickableGameObjectæ¥å£ï¼ˆå¿…é¡»å®ç°ï¼‰ ==========
+// å¸§æ›´æ–°é€»è¾‘ï¼ˆæ ¸å¿ƒTickå‡½æ•°ï¼‰
 	virtual void Tick(float DeltaTime) override;
-	// »ñÈ¡TickµÄÓÅÏÈ¼¶£¨ÖµÔ½Ğ¡ÓÅÏÈ¼¶Ô½¸ß£¬Ä¬ÈÏ0¼´¿É£©
+	// è·å–Tickçš„ä¼˜å…ˆçº§ï¼ˆå€¼è¶Šå°ä¼˜å…ˆçº§è¶Šé«˜ï¼Œé»˜è®¤0å³å¯ï¼‰
 	virtual ETickableTickType GetTickableTickType() const override;
-	// »ñÈ¡µ±Ç°¶ÔÏóµÄWorld£¨GameInstanceSubsystem¹ØÁªGameInstanceµÄWorld£©
+	// è·å–å½“å‰å¯¹è±¡çš„Worldï¼ˆGameInstanceSubsystemå…³è”GameInstanceçš„Worldï¼‰
 	virtual UWorld* GetTickableGameObjectWorld() const override;
 	TStatId GetStatId() const override;
 protected:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//µ±·şÎñÆ÷Éú³É½»»¥¶ÔÏóÊ±£¬Í¨Öª¿Í»§¶Ë¸üĞÂ½»»¥¶ÔÏóÁĞ±í
+	//å½“æœåŠ¡å™¨ç”Ÿæˆäº¤äº’å¯¹è±¡æ—¶ï¼Œé€šçŸ¥å®¢æˆ·ç«¯æ›´æ–°äº¤äº’å¯¹è±¡åˆ—è¡¨
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnSpawnInteractiveActor(AInteractiveActor* NewInteractiveActor);
+	void Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor);
 };
