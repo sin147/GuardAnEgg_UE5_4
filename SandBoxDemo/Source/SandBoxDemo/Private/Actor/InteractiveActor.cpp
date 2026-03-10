@@ -17,7 +17,6 @@ AInteractiveActor::AInteractiveActor()
 	TriggerBox->SetupAttachment(RootComponent);
 	//交互姿态机
 	InteractiveStateMachine = CreateDefaultSubobject<UStateMachineBase>( TEXT("InteractiveStateMachine"));
-
 }
 
 // Called when the game starts or when spawned
@@ -42,7 +41,10 @@ void AInteractiveActor::OnTriggerBoxOverlapBegin(UPrimitiveComponent* Overlapped
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			InteractiveSubsystem->PaddingInteractiveActor(Character, this->GetInteractiveType(), this->GetActorGuid());
+			if (InteractiveSubsystem->PaddingInteractiveActor(Character, this->GetInteractiveType(), this->GetActorGuid())&& InteractiveStateMachine ->GetCurrentlyState() == S_None)
+			{
+				InteractiveStateMachine->EnterState(S_InteractiveActor_Pre);
+			}
 		}
 		else
 		{
@@ -60,8 +62,11 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			InteractiveSubsystem->UnPaddingInteractiveActor(Character,this->GetActorGuid());
-			InteractiveCharacters.Remove(Character);
+			if (InteractiveSubsystem->UnPaddingInteractiveActor(Character, this->GetActorGuid());
+				InteractiveCharacters.Remove(Character)&& InteractiveStateMachine->GetCurrentlyState()==S_InteractiveActor_Pre)
+			{
+				InteractiveStateMachine->EnterState(S_None);
+			}
 		}
 		else
 		{
@@ -74,6 +79,11 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 void AInteractiveActor::PreInteractImp_Implementation(float DeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:PreInteractImp"), *GetName());
+}
+
+void AInteractiveActor::StartInteractImp_Implementation(float DeltaTime)
+{
+	UE_LOG(LogTemp, Log, TEXT("%s:StartInteractImp"), *GetName());
 }
 
 void AInteractiveActor::InteracttingImp_Implementation(float DeltaTime)
@@ -95,6 +105,16 @@ void AInteractiveActor::PreInteract(float DeltaTime)
 {
 	PreInteractImp(DeltaTime);
 	if (InteractTime >= PreInteractDuration)
+	{
+		InteractTime = 0.f;
+		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
+	} 
+}
+
+void AInteractiveActor::StartInteract(float DeltaTime)
+{
+	StartInteractImp(DeltaTime);
+	if (InteractTime >= StartInteractDuration)
 	{
 		InteractTime = 0.f;
 		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
@@ -149,8 +169,11 @@ void AInteractiveActor::Tick(float DeltaTime)
 	{
 	case S_None:
 		break;
-	case S_InteractiveActor_Start:
+	case S_InteractiveActor_Pre:
 		PreInteract(DeltaTime);
+		break;
+	case S_InteractiveActor_Start:
+		StartInteract(DeltaTime);
 		break;
 	case S_InteractiveActor_Interacting:
 		Interactting(DeltaTime);

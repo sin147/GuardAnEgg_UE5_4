@@ -28,6 +28,7 @@ enum EState : uint8
 	S_Interactive UMETA(DisplayName = "交互"),
 
 	//交互对象状态
+	S_InteractiveActor_Pre UMETA(DisplayName = "交互对象准备交互"),
 	S_InteractiveActor_Start UMETA(DisplayName = "交互对象开始交互"),
 	S_InteractiveActor_Interacting UMETA(DisplayName = "交互对象交互中"),
 	S_InteractiveActor_Break UMETA(DisplayName = "交互对象中断"),

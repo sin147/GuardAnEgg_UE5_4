@@ -26,10 +26,12 @@ private:
 	TArray<TObjectPtr<ACharacter>> InteractiveCharacters;
 	//交互已经进行的时间
 	float InteractTime;
-
 	//交互准备完成时间
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
+	float PreInteractDuration = 999;
+	//交互开始完成时间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess=true))
-	float PreInteractDuration=0;
+	float StartInteractDuration=0;
 	//交互完成时间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
 	float InteractDuration=0;
@@ -39,8 +41,11 @@ private:
 	//交互中断完成时间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
 	float InteractBreakDuration=0;
-	//准备交互
+	//预开始交互
 	void PreInteract(float DeltaTime);
+
+	//准备交互
+	void StartInteract(float DeltaTime);
 	//交互中
 	void Interactting(float DeltaTime);
 	//交互完成
@@ -62,9 +67,12 @@ protected:
 	//交互结束事件
 	UFUNCTION()
 	void OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	//准备交互实现
+	//预准备交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
 	void PreInteractImp(float DeltaTime);
+	//准备交互实现
+	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
+	void StartInteractImp(float DeltaTime);
 	//交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
 	void InteracttingImp(float DeltaTime);
@@ -79,7 +87,7 @@ protected:
 	TArray<ACharacter*> GetInteractiveCharacters();
 public:	
 	//获取交互准备时间
-	float GetPreInteractDuration() const { return PreInteractDuration; }
+	float GetPreInteractDuration() const { return StartInteractDuration; }
 	//获取交互时间
 	float GetInteractDuration() const { return InteractDuration; }
 	//获取交互结束时间
