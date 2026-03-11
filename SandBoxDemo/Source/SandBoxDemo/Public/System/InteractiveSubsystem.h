@@ -156,7 +156,7 @@ protected:
 	void Server_Interact(ACharacter* InCharacter);
 	//客户端多播交互
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Interact(ACharacter* InCharacter);
+	void Multicast_Interact(AActor*InActor, ACharacter* InCharacter);
 
 public:
 	// ========== FTickableGameObject接口（必须实现） ==========

@@ -46,7 +46,7 @@ void UStateMachineBase::OnExitState(EState InState)
 
 bool UStateMachineBase::CanEnterStates(EState InState)
 {
-	return true;
+	return CurrentlyState != InState;
 }
 
 void UStateMachineBase::EnterState(EState InState)

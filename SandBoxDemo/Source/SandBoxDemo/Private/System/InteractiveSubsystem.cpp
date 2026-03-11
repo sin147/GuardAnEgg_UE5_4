@@ -141,6 +141,7 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
 				InteractiveActor->Interact(InCharacter);
+				Multicast_Interact(Cast<AActor>(InteractiveActor), InCharacter);
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
@@ -151,8 +152,13 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 	}
 }
 
-void UInteractiveSubsystem::Multicast_Interact_Implementation(ACharacter* InCharacter)
+void UInteractiveSubsystem::Multicast_Interact_Implementation(AActor* InActor,ACharacter* InCharacter)
 {
+	IInteract* InteractiveActor = Cast<IInteract>(InActor);
+	if (InteractiveActor)
+	{
+		InteractiveActor->Interact(InCharacter);
+	}
 }
 
 void UInteractiveSubsystem::Tick(float DeltaTime)

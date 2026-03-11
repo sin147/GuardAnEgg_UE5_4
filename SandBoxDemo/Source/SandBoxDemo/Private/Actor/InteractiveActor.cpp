@@ -62,11 +62,11 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			if (InteractiveSubsystem->UnPaddingInteractiveActor(Character, this->GetActorGuid());
-				InteractiveCharacters.Remove(Character)&& InteractiveStateMachine->GetCurrentlyState()==S_InteractiveActor_Pre)
+			if (InteractiveSubsystem->UnPaddingInteractiveActor(Character, this->GetActorGuid())&& InteractiveStateMachine->GetCurrentlyState()==S_InteractiveActor_Pre)
 			{
 				InteractiveStateMachine->EnterState(S_None);
 			}
+			InteractiveCharacters.Remove(Character);
 		}
 		else
 		{
@@ -104,7 +104,7 @@ void AInteractiveActor::InteractBreakImp_Implementation(float DeltaTime)
 void AInteractiveActor::PreInteract(float DeltaTime)
 {
 	PreInteractImp(DeltaTime);
-	if (InteractTime >= PreInteractDuration)
+	if (InteractTime >= PreInteractDuration&&InteractiveType==IT_Passive)
 	{
 		InteractTime = 0.f;
 		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
@@ -161,10 +161,6 @@ TArray<ACharacter*> AInteractiveActor::GetInteractiveCharacters()
 void AInteractiveActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (InteractiveStateMachine->GetCurrentlyState() != S_None)
-	{
-		InteractTime += DeltaTime;
-	}
 	switch (InteractiveStateMachine->GetCurrentlyState())
 	{
 	case S_None:
@@ -187,16 +183,14 @@ void AInteractiveActor::Tick(float DeltaTime)
 	default:
 		break;
 	}
-
+	if (InteractiveStateMachine->GetCurrentlyState() != S_None)
+	{
+		InteractTime += DeltaTime;
+	}
 }
 
 void AInteractiveActor::Interact(ACharacter* InCharacter)
 {
-
-	if(InteractiveCharacters.Find(InCharacter)!= INDEX_NONE) 
-	{ 
-		return;
-	}
 	InteractiveCharacters.Add(InCharacter);
 	InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Start);
 	UE_LOG(LogTemp, Log, TEXT("%s:Interact With %s"), * GetName(),*InCharacter->GetActorNameOrLabel());
@@ -204,9 +198,10 @@ void AInteractiveActor::Interact(ACharacter* InCharacter)
 
 bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
 {
-	
 	//Todo:添加交互条件
-	return IInteract::CanInteract(InCharacter);
+	return IInteract::CanInteract(InCharacter)&&IsValid(InCharacter)&&(InteractiveCharacters.Find(InCharacter) == INDEX_NONE);
+
+
 }
 void AInteractiveActor::InteractBreak(ACharacter* InCharacter)
 {
