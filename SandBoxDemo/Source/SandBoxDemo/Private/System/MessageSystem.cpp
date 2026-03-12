@@ -61,3 +61,24 @@ FString UMessageSystem::GetLocalPlayerId()
 {
 	return GetGameInstance()->GetFirstLocalPlayerController()->PlayerState->GetUniqueId().ToString();
 }
+
+void UMessageSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	//生成网络代理
+	if (GetWorld() && GetWorld()->GetNetMode() != NM_Client)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		MessageProxyActor = GetWorld()->SpawnActor<AMessageProxyActor>(AMessageProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (MessageProxyActor)
+		{
+			UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::Initialize: Spawned MessageProxyActor successfully."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::Initialize: Failed to spawn MessageProxyActor!"));
+		}
+	}
+}

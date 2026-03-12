@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GlobalEnums.h"
+#include "NetworkProxyActor/MessageProxyActor.h"
 #include "MessageSystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FNativeEventDelegate);
@@ -18,6 +19,10 @@ class SANDBOXDEMO_API UMessageSystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	//todo
+private:
+	//代理Actor
+	TObjectPtr<AMessageProxyActor> MessageProxyActor;
+
 public:
 /************************************本地事件************************************************/
 	//本地事件映射
@@ -84,4 +89,5 @@ public:
 	 //打印当前玩家啊Id
 	 UFUNCTION(BlueprintCallable)
 	 FString GetLocalPlayerId();
+	 virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 };

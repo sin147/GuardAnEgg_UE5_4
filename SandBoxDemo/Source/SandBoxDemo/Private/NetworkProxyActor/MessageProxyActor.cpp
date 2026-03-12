@@ -1,10 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "NetworkProxyActor/InteractiveProxyActor.h"
+#include "NetworkProxyActor/MessageProxyActor.h"
+
 
 // Sets default values
-AInteractiveProxyActor::AInteractiveProxyActor()
+AMessageProxyActor::AMessageProxyActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,21 +13,20 @@ AInteractiveProxyActor::AInteractiveProxyActor()
 }
 
 // Called when the game starts or when spawned
-void AInteractiveProxyActor::BeginPlay()
+void AMessageProxyActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void AInteractiveProxyActor::Tick(float DeltaTime)
+void AMessageProxyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AInteractiveProxyActor::PostNetInit()
+void AMessageProxyActor::PostNetInit()
 {
-	Super::PostNetInit();
 }
 

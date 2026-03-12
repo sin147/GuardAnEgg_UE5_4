@@ -96,6 +96,27 @@ void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
 	Cast<AActor>(InteractiveActor)->Destroy();
 }
 
+void UInteractiveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	//生成网络代理
+	if (GetWorld() && GetWorld()->GetNetMode() != NM_Client)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		InteractiveProxy = GetWorld()->SpawnActor<AInteractiveProxyActor>(AInteractiveProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (InteractiveProxy)
+		{
+			UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::Initialize: Spawned InteractiveProxyActor successfully."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::Initialize: Failed to spawn InteractiveProxyActor!"));
+		}
+	}
+}
+
 bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 {
 	//是否存在可交互对象

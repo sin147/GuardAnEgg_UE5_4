@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "InteractiveProxyActor.generated.h"
+#include "MessageProxyActor.generated.h"
 
 UCLASS()
-class SANDBOXDEMO_API AInteractiveProxyActor : public AActor
+class SANDBOXDEMO_API AMessageProxyActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AInteractiveProxyActor();
+	AMessageProxyActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,5 +23,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostNetInit() override;
-
+	
+	
 };

@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "../Interface/Interact.h"
+#include "NetworkProxyActor/InteractiveProxyActor.h"
+#include "Interface/Interact.h"
 #include "InteractiveSubsystem.generated.h"
 
 UENUM(BlueprintType)
@@ -109,6 +110,9 @@ UCLASS()
 class SANDBOXDEMO_API UInteractiveSubsystem : public UGameInstanceSubsystem,public FTickableGameObject
 {
 	GENERATED_BODY()
+private:
+	//网络代理
+	TObjectPtr<AInteractiveProxyActor> InteractiveProxy;
 protected:
 	//交互角色信息
 	UPROPERTY(BlueprintReadOnly)
@@ -145,7 +149,8 @@ public:
 	TArray<IInteract*> GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs ) const;
 	//销毁交互对象
 	void DestoryInteractiveActorByGuid(FGuid Guid);
-
+	//初始化
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 protected:
 	//CanInteract过滤交互对象列表
 	bool CanInteractFilter(ACharacter* InCharacter) const;
