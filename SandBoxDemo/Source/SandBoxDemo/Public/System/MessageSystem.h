@@ -18,11 +18,17 @@ UCLASS()
 class SANDBOXDEMO_API UMessageSystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+
+	friend class AMessageProxyActor;
 	//todo
 private:
 	//代理Actor
 	TObjectPtr<AMessageProxyActor> MessageProxyActor;
-
+protected:
+	void SetMessageProxyActor(AMessageProxyActor* InActor)
+	{
+		MessageProxyActor = InActor;
+	}
 public:
 /************************************本地事件************************************************/
 	//本地事件映射

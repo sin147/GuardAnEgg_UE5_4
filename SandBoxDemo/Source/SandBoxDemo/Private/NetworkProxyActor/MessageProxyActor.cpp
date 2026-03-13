@@ -2,7 +2,7 @@
 
 
 #include "NetworkProxyActor/MessageProxyActor.h"
-
+#include "System/MessageSystem.h"
 
 // Sets default values
 AMessageProxyActor::AMessageProxyActor()
@@ -16,7 +16,7 @@ AMessageProxyActor::AMessageProxyActor()
 void AMessageProxyActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GetGameInstance()->GetSubsystem<UMessageSystem>()->SetMessageProxyActor(this);
 }
 
 // Called every frame

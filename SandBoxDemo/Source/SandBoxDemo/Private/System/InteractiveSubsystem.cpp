@@ -8,7 +8,8 @@
 
 void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
-	Server_Interact(InCharacter);
+	//TODO 代理到服务器
+	InteractiveProxy->Server_Interact(InCharacter);
 }
 
 bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter,EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID)
@@ -38,45 +39,16 @@ bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InC
 	return Info->RemoveInteractiveActor(InInteractiveActorGUID);
 }
 
-void UInteractiveSubsystem::SpawnInteractiveActor_Implementation(TSubclassOf<AActor> ActorClass,FVector InLocation,FRotator InRotation)
+void UInteractiveSubsystem::SpawnInteractiveActor(TSubclassOf<AActor> ActorClass,FVector InLocation,FRotator InRotation)
 {
-	// 1. 基础有效性检查：World/ActorClass 不能为空
-	UWorld* World = GetWorld();
-	if (!World || !IsValid(ActorClass))
+	if(IsValid(InteractiveProxy))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Invalid World or ActorClass!"));
-		return;
-	}
-
-	// 2. 关键：检测 ActorClass 是否实现了 IInteract 接口（运行期反射检查）
-	if (!ActorClass->ImplementsInterface(UInteract::StaticClass()))
-	{
-		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: ActorClass %s does NOT implement IInteract interface!"), *ActorClass->GetName());
-		return;
-	}
-
-	// 3. 生成 Actor 对象
-	AActor* NewActor = World->SpawnActor<AActor>(ActorClass, InLocation, InRotation);
-	if (!NewActor)
-	{
-		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Failed to spawn Actor!"));
-		return;
-	}
-
-	// 4. 二次验证：将 Actor 转换为 IInteract 接口指针（双重保险）
-	IInteract* NewInteractiveActor = Cast<IInteract>(NewActor);
-	if (NewInteractiveActor)
-	{
-		InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
-		Multicast_OnSpawnInteractiveActor(NewActor);
-		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Spawned valid interactive actor %s"), *NewActor->GetName());
+		InteractiveProxy->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Actor %s implements IInteract but cast failed!"), *NewActor->GetName());
-		NewActor->Destroy(); // 销毁无效 Actor
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: InteractiveProxy is not valid! Cannot spawn interactive actor."));
 	}
-
 }
 
 TArray<IInteract*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
@@ -99,21 +71,17 @@ void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
 void UInteractiveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	//生成网络代理
-	if (GetWorld() && GetWorld()->GetNetMode() != NM_Client)
+}
+
+void UInteractiveSubsystem::SetInteractiveProxy(AInteractiveProxyActor* InProxy)
+{
+	if (InProxy)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.bNoFail = true;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		InteractiveProxy = GetWorld()->SpawnActor<AInteractiveProxyActor>(AInteractiveProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-		if (InteractiveProxy)
-		{
-			UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::Initialize: Spawned InteractiveProxyActor successfully."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::Initialize: Failed to spawn InteractiveProxyActor!"));
-		}
+		InteractiveProxy = InProxy;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SetInteractiveProxy: Invalid proxy actor!"));
 	}
 }
 
@@ -131,26 +99,10 @@ bool UInteractiveSubsystem::CanInteractFilter(ACharacter* InCharacter) const
 TArray<FGuid> UInteractiveSubsystem::FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const
 {
 	TArray<FGuid> FilteredInteractiveActorGUIDs;
-	//switch (EFilterType)
-	//{
-	//case FT_None:
-	//	break;
-	//	//角色交互只能与一个交互对象交互
-	//case FT_Character:
-	//	
-	//	break;
-	//	//设置交互可根据交互设置与多个交互对象交互
-	//case FT_Setting:
-	//	
-	//	break;
-	//default:
-	//	break;
-	//}
-
 	return InInteractiveActorGUID;
 }
 
-void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharacter)
+void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 {
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info)
@@ -162,7 +114,7 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
 				InteractiveActor->Interact(InCharacter);
-				Multicast_Interact(Cast<AActor>(InteractiveActor), InCharacter);
+				InteractiveProxy->Muticast_Interact(Cast<AActor>(InteractiveActor), InCharacter);
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
@@ -173,7 +125,7 @@ void UInteractiveSubsystem::Server_Interact_Implementation(ACharacter* InCharact
 	}
 }
 
-void UInteractiveSubsystem::Multicast_Interact_Implementation(AActor* InActor,ACharacter* InCharacter)
+void UInteractiveSubsystem::Multicast_Interact(AActor* InActor,ACharacter* InCharacter)
 {
 	IInteract* InteractiveActor = Cast<IInteract>(InActor);
 	if (InteractiveActor)
@@ -219,18 +171,54 @@ TStatId UInteractiveSubsystem::GetStatId() const
 	return TStatId();
 }
 
-void UInteractiveSubsystem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	//DOREPLIFETIME(UInteractiveSubsystem, InteractiveActors);
+	IInteract* CastedInteractiveActor = Cast<IInteract>(NewInteractiveActor);
+	if (CastedInteractiveActor!=nullptr&& InteractiveActors.Find(CastedInteractiveActor))
+	{
+		InteractiveActors.Add(CastedInteractiveActor);
+	}
 }
 
-void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor_Implementation(AActor* NewInteractiveActor)
+void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation)
 {
-	if (IsValid(NewInteractiveActor)&& Cast<IInteract>(NewInteractiveActor)!=nullptr)
+	// 1. 基础有效性检查：World/ActorClass 不能为空
+	UWorld* World = GetWorld();
+	if (!World || !IsValid(ActorClass))
 	{
-		InteractiveActors.Add(Cast<IInteract>(NewInteractiveActor));
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Invalid World or ActorClass!"));
+		return;
 	}
+
+	// 2. 关键：检测 ActorClass 是否实现了 IInteract 接口（运行期反射检查）
+	if (!ActorClass->ImplementsInterface(UInteract::StaticClass()))
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: ActorClass %s does NOT implement IInteract interface!"), *ActorClass->GetName());
+		return;
+	}
+
+	// 3. 生成 Actor 对象
+	AActor* NewActor = World->SpawnActor<AActor>(ActorClass, InLocation, InRotation);
+	if (!NewActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Failed to spawn Actor!"));
+		return;
+	}
+
+	// 4. 二次验证：将 Actor 转换为 IInteract 接口指针（双重保险）
+	IInteract* NewInteractiveActor = Cast<IInteract>(NewActor);
+	if (NewInteractiveActor)
+	{
+		InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
+		InteractiveProxy->Muticast_OnSpawnInteractiveActor(NewActor); // 通知客户端更新交互对象列表
+		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Spawned valid interactive actor %s"), *NewActor->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Actor %s implements IInteract but cast failed!"), *NewActor->GetName());
+		NewActor->Destroy(); // 销毁无效 Actor
+	}
+
 }
 
 FCharacterInteractiveInfo::FCharacterInteractiveInfo(TObjectPtr<ACharacter> InCharacter)

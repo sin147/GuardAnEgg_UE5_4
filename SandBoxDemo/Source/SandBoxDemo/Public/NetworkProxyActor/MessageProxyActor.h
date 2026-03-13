@@ -10,6 +10,7 @@ UCLASS()
 class SANDBOXDEMO_API AMessageProxyActor : public AActor
 {
 	GENERATED_BODY()
+	friend class UMessageSystem;
 	
 public:	
 	// Sets default values for this actor's properties

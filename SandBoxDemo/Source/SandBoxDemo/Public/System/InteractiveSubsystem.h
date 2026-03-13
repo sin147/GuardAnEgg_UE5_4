@@ -111,6 +111,7 @@ class SANDBOXDEMO_API UInteractiveSubsystem : public UGameInstanceSubsystem,publ
 {
 	GENERATED_BODY()
 private:
+	friend class AInteractiveProxyActor;
 	//网络代理
 	TObjectPtr<AInteractiveProxyActor> InteractiveProxy;
 protected:
@@ -126,8 +127,7 @@ public:
 	bool PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID);
 	//填充交互对象
 	bool UnPaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter, FGuid InInteractiveActorGUID);
-	//生成交互对象
-	UFUNCTION(Server,Reliable,BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	void SpawnInteractiveActor(TSubclassOf<AActor> ActorClass,FVector InLocation, FRotator InRotation);
 
 	//获取交互对象通过GUID
@@ -151,18 +151,19 @@ public:
 	void DestoryInteractiveActorByGuid(FGuid Guid);
 	//初始化
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 protected:
 	//CanInteract过滤交互对象列表
 	bool CanInteractFilter(ACharacter* InCharacter) const;
 
 	TArray<FGuid> FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const;
-	//服务器交互
-	UFUNCTION(Server, Reliable)
 	void Server_Interact(ACharacter* InCharacter);
-	//客户端多播交互
-	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Interact(AActor*InActor, ACharacter* InCharacter);
+	void Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor);
+	void Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation);
 
+	//设置代理Actor
+	void SetInteractiveProxy(AInteractiveProxyActor* InProxy);
 public:
 	// ========== FTickableGameObject接口（必须实现） ==========
 // 帧更新逻辑（核心Tick函数）
@@ -172,10 +173,4 @@ public:
 	// 获取当前对象的World（GameInstanceSubsystem关联GameInstance的World）
 	virtual UWorld* GetTickableGameObjectWorld() const override;
 	TStatId GetStatId() const override;
-protected:
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	//当服务器生成交互对象时，通知客户端更新交互对象列表
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor);
 };
