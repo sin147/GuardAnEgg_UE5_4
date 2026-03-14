@@ -111,6 +111,8 @@ protected:
 	//交互对象组
 	TArray<IInteract*> InteractiveActors;
 public:
+	//存储交互对象
+	bool StoreInteract(IInteract* InInteractiveActor);
 	//请求交互
 	void RequestInteract(ACharacter* InCharacter);
 	//填充交互对象

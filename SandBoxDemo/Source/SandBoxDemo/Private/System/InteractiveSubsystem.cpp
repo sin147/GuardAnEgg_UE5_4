@@ -6,6 +6,16 @@
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
+bool UInteractiveSubsystem::StoreInteract(IInteract* InteractiveActor)
+{
+	if (!InteractiveActors.Contains(InteractiveActor))
+	{
+		InteractiveActors.Add(InteractiveActor);
+		return true;
+	}
+	return false;
+}
+
 void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
 	//TODO 代理到服务器
@@ -65,7 +75,6 @@ void UInteractiveSubsystem::DestoryInteractiveActorByGuid(FGuid Guid)
 {
 	IInteract* InteractiveActor = GetInteractiveActorByGUID(Guid);
 	InteractiveActors.Remove(InteractiveActor);
-	Cast<AActor>(InteractiveActor)->Destroy();
 }
 
 void UInteractiveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -209,8 +218,8 @@ void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> Act
 	IInteract* NewInteractiveActor = Cast<IInteract>(NewActor);
 	if (NewInteractiveActor)
 	{
-		InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
-		InteractiveProxy->Muticast_OnSpawnInteractiveActor(NewActor); // 通知客户端更新交互对象列表
+		//InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
+		//InteractiveProxy->Muticast_OnSpawnInteractiveActor(NewActor); // 通知客户端更新交互对象列表
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Spawned valid interactive actor %s"), *NewActor->GetName());
 	}
 	else

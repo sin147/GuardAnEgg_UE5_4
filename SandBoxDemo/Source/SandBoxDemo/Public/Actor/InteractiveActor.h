@@ -115,4 +115,7 @@ public:
 	virtual bool CanInteract(ACharacter* InCharacter) override;
 	//交互中断接口实现
 	void InteractBreak(ACharacter* InCharacter);
+	//销毁
+	UFUNCTION(BlueprintCallable)
+	bool Destroy();
 };

@@ -72,7 +72,7 @@ protected:
 
 	
 	//获取属性
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	float GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType = ECAVType::CAVT_Currently);
 public:
 	//设置血量
@@ -99,6 +99,7 @@ private:
 	void Server_SetCurrentlyMoveMode(EMovementMode InMoveState);
 	UFUNCTION(NetMulticast,Reliable)
 	void Multicast_SetCurrentlyMoveMode(EMovementMode InMoveState);
+
 protected:
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)

@@ -23,6 +23,7 @@ AInteractiveActor::AInteractiveActor()
 void AInteractiveActor::BeginPlay()
 {
 	Super::BeginPlay();
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->StoreInteract(Cast<IInteract>(this));
 	//绑定触发事件
 	if (TriggerBox)
 	{
@@ -207,6 +208,11 @@ bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
 void AInteractiveActor::InteractBreak(ACharacter* InCharacter)
 {
 	EnterState(EState::S_InteractiveActor_Break);
+}
+bool AInteractiveActor::Destroy()
+{
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->DestoryInteractiveActorByGuid(GetActorGuid());
+	return Super::Destroy();
 }
 TEnumAsByte<EState> AInteractiveActor::GetCurrentlyState()
 {

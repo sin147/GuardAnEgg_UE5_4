@@ -64,7 +64,10 @@ class SANDBOXDEMO_API UCharacterDataAsset : public UDataAsset
 public:
 	//正常移动和快速移动比例  --Todo
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"))
-	float QuickMoveSpeedRateByMaxMoveSpeed;
+	float QuickMoveSpeedRateByMaxMoveSpeed=0.25;
+	//奔跑体力消耗
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float QuickMoveEnduranceConsumptionValue=10;
 	//属性配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<TEnumAsByte<ECharacterAttribute>,FCharacterAttribute>  Attributes;

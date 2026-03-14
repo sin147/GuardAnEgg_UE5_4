@@ -195,15 +195,38 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxMoveSpeed())
 	{
 		StateMachine->EnterState(EState::S_Move);
+
 	}
 	else if(AbsMoveSpeed > GetMaxMoveSpeed())
 	{
-		StateMachine->EnterState(EState::S_QuickMove);
+		if (GetAttributeByEnum(ECharacterAttribute::EnduranceValue) <= 0)
+		{
+			StopQuick();
+		}
+		else
+		{
+
+
+			StateMachine->EnterState(EState::S_QuickMove);
+		}
+
+
 	}
 	else
 	{
 		StateMachine->EnterState(EState::S_Idle);
 	}
+
+	//快速移动的体力消耗
+	if (StateMachine->GetCurrentlyState() != EState::S_QuickMove)
+	{
+		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) + CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime* (AbsMoveSpeed/GetMaxQuickMoveSpeed()));
+	}
+	else
+	{
+		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) - CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime);
+	}
+
 	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
 }
 

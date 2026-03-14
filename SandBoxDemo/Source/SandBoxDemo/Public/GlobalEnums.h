@@ -60,6 +60,9 @@ enum ECharacterAttribute : uint8
 	//上下旋转速度 
 	PitchRotatorSpeed UMETA(DisplayName = "上下转向速度"),
 
+	//耐力
+	EnduranceValue UMETA(DisplayName = "耐力"),
+
 };
 
 //本地事件枚举
