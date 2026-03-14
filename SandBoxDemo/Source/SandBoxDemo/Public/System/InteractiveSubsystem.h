@@ -8,16 +8,6 @@
 #include "Interface/Interact.h"
 #include "InteractiveSubsystem.generated.h"
 
-UENUM(BlueprintType)
-enum EInteractiveState :uint8
-{
-	IS_None  UMETA(DisplayName = "无交互"),
-	IS_Start UMETA(DisplayName = "开始交互"),
-	IS_Interacting UMETA(DisplayName = "交互中"),
-	IS_Break UMETA(DisplayName = "中断"),
-	IS_Finish UMETA(DisplayName = "交互完成"),
-
-};
 //过滤类型
 UENUM(BlueprintType)
 enum EFilterType:uint8

@@ -136,22 +136,22 @@ void UInteractiveSubsystem::Multicast_Interact(AActor* InActor,ACharacter* InCha
 
 void UInteractiveSubsystem::Tick(float DeltaTime)
 {
-	//被动交互对象交互(服务器下执行)
-	if (GetWorld() ? (GetWorld()->GetNetMode() != NM_Client) : false)
-	{
-		TArray<ACharacter*> CharacterArray;
-		CharacterInteractiveInfos.GetKeys(CharacterArray);
-		for (ACharacter* Character : CharacterArray)
-		{
-			TArray<FGuid>InteractiveActorGUIDs = CharacterInteractiveInfos[Character].GetInteractiveActorGUIDs(EInteractiveType::IT_Passive);
-			TArray<IInteract*> PassiveInteractiveActors = GetInteractiveActorsByGUIDs(InteractiveActorGUIDs);
-			for (IInteract* InteractiveActor : PassiveInteractiveActors)
-			{
-				InteractiveActor->Interact(Character);
-			}
+	////被动交互对象交互(服务器下执行)
+	//if (GetWorld() ? (GetWorld()->GetNetMode() != NM_Client) : false)
+	//{
+	//	TArray<ACharacter*> CharacterArray;
+	//	CharacterInteractiveInfos.GetKeys(CharacterArray);
+	//	for (ACharacter* Character : CharacterArray)
+	//	{
+	//		TArray<FGuid>InteractiveActorGUIDs = CharacterInteractiveInfos[Character].GetInteractiveActorGUIDs(EInteractiveType::IT_Passive);
+	//		TArray<IInteract*> PassiveInteractiveActors = GetInteractiveActorsByGUIDs(InteractiveActorGUIDs);
+	//		for (IInteract* InteractiveActor : PassiveInteractiveActors)
+	//		{
+	//			InteractiveActor->Interact(Character);
+	//		}
 
-		}
-	}
+	//	}
+	//}
 
 	
 }

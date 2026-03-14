@@ -476,7 +476,7 @@ void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
 	}
 
 	//左右旋转
-	if (Value.Y != 0)
+	if (Value.Y != 0&&UKismetMathLibrary::NearlyEqual_FloatFloat(GetVelocity().Z,0,1))
 	{
 		if (Value.X == 0)
 		{
@@ -550,11 +550,13 @@ void ASandBoxCharacter::StartJump()
 
 void ASandBoxCharacter::StartQuick()
 {
+	//GetCharacterMovement()->MaxAcceleration = 0;
 	SetMaxMoveSpeed(GetMaxQuickMoveSpeed());
 }
 
 void ASandBoxCharacter::StopQuick()
 {
+	//GetCharacterMovement()->MaxAcceleration = 2048;
 	SetMaxMoveSpeed(GetMaxMoveSpeed());
 }
 

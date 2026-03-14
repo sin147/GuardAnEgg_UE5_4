@@ -42,16 +42,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
 	float InteractBreakDuration=0;
 	//预开始交互
-	void PreInteract(float DeltaTime);
+	void PreInteract(float InCurrentlyStateTime, float InTotalDurationTime);
 
 	//准备交互
-	void StartInteract(float DeltaTime);
+	void StartInteract(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互中
-	void Interactting(float DeltaTime);
+	void Interactting(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互完成
-	void InteractOver(float DeltaTime);
+	void InteractOver(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互中断
-	void InteractBreak(float DeltaTime);
+	void InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,30 +69,37 @@ protected:
 	void OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	//预准备交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void PreInteractImp(float DeltaTime);
+	void PreInteractImp(float InCurrentlyStateTime,float InTotalDurationTime);
 	//准备交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void StartInteractImp(float DeltaTime);
+	void StartInteractImp(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteracttingImp(float DeltaTime);
+	void InteracttingImp(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互完成实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteractOverImp(float DeltaTime);
+	void InteractOverImp(float InCurrentlyStateTime, float InTotalDurationTime);
 	//交互中断实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteractBreakImp(float DeltaTime);
+	void InteractBreakImp(float InCurrentlyStateTime, float InTotalDurationTime);
 	//获取当前交互的玩家组
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Interact")
 	TArray<ACharacter*> GetInteractiveCharacters();
+	//进入状态
+	void EnterState(EState InState);
+
 public:	
 	//获取交互准备时间
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	float GetPreInteractDuration() const { return StartInteractDuration; }
 	//获取交互时间
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	float GetInteractDuration() const { return InteractDuration; }
 	//获取交互结束时间
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	float GetInteractOverDuration() const { return InteractOverDuration; }
 	//获取交互中断时间
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
 	float GetInteractBreakDuration() const { return InteractBreakDuration; }
 	//获取当前交互类型
 	UFUNCTION(BlueprintCallable, Category = "Interactive")

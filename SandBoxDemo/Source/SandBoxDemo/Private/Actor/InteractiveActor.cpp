@@ -41,9 +41,9 @@ void AInteractiveActor::OnTriggerBoxOverlapBegin(UPrimitiveComponent* Overlapped
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			if (InteractiveSubsystem->PaddingInteractiveActor(Character, this->GetInteractiveType(), this->GetActorGuid())&& InteractiveStateMachine ->GetCurrentlyState() == S_None)
+			if (InteractiveSubsystem->PaddingInteractiveActor(Character, this->GetInteractiveType(), this->GetActorGuid())&&( InteractiveStateMachine ->GetCurrentlyState() == S_None || InteractiveStateMachine->GetCurrentlyState() == S_InteractiveActor_Break))
 			{
-				InteractiveStateMachine->EnterState(S_InteractiveActor_Pre);
+				EnterState(S_InteractiveActor_Pre);
 			}
 		}
 		else
@@ -62,9 +62,9 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 		UInteractiveSubsystem* InteractiveSubsystem = GetGameInstance()->GetSubsystem<UInteractiveSubsystem>();
 		if (InteractiveSubsystem)
 		{
-			if (InteractiveSubsystem->UnPaddingInteractiveActor(Character, this->GetActorGuid())&& InteractiveStateMachine->GetCurrentlyState()==S_InteractiveActor_Pre)
+			if (InteractiveSubsystem->UnPaddingInteractiveActor(Character, this->GetActorGuid()))
 			{
-				InteractiveStateMachine->EnterState(S_None);
+				EnterState(S_InteractiveActor_Break);
 			}
 			InteractiveCharacters.Remove(Character);
 		}
@@ -76,85 +76,86 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 
 }
 
-void AInteractiveActor::PreInteractImp_Implementation(float DeltaTime)
+void AInteractiveActor::PreInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:PreInteractImp"), *GetName());
 }
 
-void AInteractiveActor::StartInteractImp_Implementation(float DeltaTime)
+void AInteractiveActor::StartInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:StartInteractImp"), *GetName());
 }
 
-void AInteractiveActor::InteracttingImp_Implementation(float DeltaTime)
+void AInteractiveActor::InteracttingImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteracttingImp"), *GetName());
 }
 
-void AInteractiveActor::InteractOverImp_Implementation(float DeltaTime)
+void AInteractiveActor::InteractOverImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteractOverImp"), *GetName());
 }
 
-void AInteractiveActor::InteractBreakImp_Implementation(float DeltaTime)
+void AInteractiveActor::InteractBreakImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteractBreakImp"), *GetName());
 }
 
-void AInteractiveActor::PreInteract(float DeltaTime)
+void AInteractiveActor::PreInteract(float InCurrentlyStateTime, float InTotalDurationTime)
 {
-	PreInteractImp(DeltaTime);
+	PreInteractImp(InCurrentlyStateTime, InTotalDurationTime);
 	if (InteractTime >= PreInteractDuration&&InteractiveType==IT_Passive)
 	{
-		InteractTime = 0.f;
-		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
+		EnterState(EState::S_InteractiveActor_Interacting);
 	} 
 }
 
-void AInteractiveActor::StartInteract(float DeltaTime)
+void AInteractiveActor::StartInteract(float InCurrentlyStateTime, float InTotalDurationTime)
 {
-	StartInteractImp(DeltaTime);
+	StartInteractImp(InCurrentlyStateTime, InTotalDurationTime);
 	if (InteractTime >= StartInteractDuration)
 	{
-		InteractTime = 0.f;
-		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Interacting);
+		EnterState(EState::S_InteractiveActor_Interacting);
 	}
 }
 
-void AInteractiveActor::Interactting(float DeltaTime)
+void AInteractiveActor::Interactting(float InCurrentlyStateTime, float InTotalDurationTime)
 {
-	InteracttingImp(DeltaTime);
+	InteracttingImp(InCurrentlyStateTime, InTotalDurationTime);
 	if (InteractTime >= InteractDuration)
 	{
-		InteractTime = 0.f;
-		InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Finish);
+		EnterState(EState::S_InteractiveActor_Finish);
 	}
 }
 
-void AInteractiveActor::InteractOver(float DeltaTime)
+void AInteractiveActor::InteractOver(float InCurrentlyStateTime, float InTotalDurationTime)
 {
-	InteractOverImp(DeltaTime);
+	InteractOverImp(InCurrentlyStateTime, InTotalDurationTime);
 	if (InteractTime >= InteractOverDuration)
 	{
-		InteractTime = 0.f;
-		InteractiveStateMachine->EnterState(EState::S_None);
+		EnterState(EState::S_None);
 		InteractiveCharacters.Empty();
 	}
 }
 
-void AInteractiveActor::InteractBreak(float DeltaTime)
+void AInteractiveActor::InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime)
 {
-	InteractBreakImp(DeltaTime);
+	InteractBreakImp(InCurrentlyStateTime, InTotalDurationTime);
 	if (InteractTime >= InteractBreakDuration)
 	{
-		InteractTime = 0.f;
-		InteractiveStateMachine->EnterState(EState::S_None);
+		EnterState(EState::S_None);
 	}
 }
 
 TArray<ACharacter*> AInteractiveActor::GetInteractiveCharacters()
 {
 	return InteractiveCharacters;
+}
+
+void AInteractiveActor::EnterState(EState InState)
+{
+	InteractTime = 0.f;
+	InteractiveStateMachine->EnterState(InState);
 }
 
 // Called every frame
@@ -166,19 +167,19 @@ void AInteractiveActor::Tick(float DeltaTime)
 	case S_None:
 		break;
 	case S_InteractiveActor_Pre:
-		PreInteract(DeltaTime);
+		PreInteract(InteractTime,PreInteractDuration);
 		break;
 	case S_InteractiveActor_Start:
-		StartInteract(DeltaTime);
+		StartInteract(InteractTime,StartInteractDuration);
 		break;
 	case S_InteractiveActor_Interacting:
-		Interactting(DeltaTime);
+		Interactting(InteractTime,InteractDuration);
 		break;
 	case S_InteractiveActor_Break:
-		InteractBreak(DeltaTime);
+		InteractBreak(InteractTime,InteractBreakDuration);
 		break;
 	case S_InteractiveActor_Finish:
-		InteractOver(DeltaTime);
+		InteractOver(InteractTime,InteractOverDuration);
 		break;
 	default:
 		break;
@@ -192,7 +193,7 @@ void AInteractiveActor::Tick(float DeltaTime)
 void AInteractiveActor::Interact(ACharacter* InCharacter)
 {
 	InteractiveCharacters.Add(InCharacter);
-	InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Start);
+	EnterState(EState::S_InteractiveActor_Start);
 	UE_LOG(LogTemp, Log, TEXT("%s:Interact With %s"), * GetName(),*InCharacter->GetActorNameOrLabel());
 }
 
@@ -205,8 +206,7 @@ bool AInteractiveActor::CanInteract(ACharacter* InCharacter)
 }
 void AInteractiveActor::InteractBreak(ACharacter* InCharacter)
 {
-
-	InteractiveStateMachine->EnterState(EState::S_InteractiveActor_Break);
+	EnterState(EState::S_InteractiveActor_Break);
 }
 TEnumAsByte<EState> AInteractiveActor::GetCurrentlyState()
 {
