@@ -46,13 +46,13 @@ enum ECharacterAttribute : uint8
 	HP UMETA(DisplayName = "血量"),
 
 	//行走速度
-	WalkSpeed UMETA(DisplayName = "行走速度"),
+	WalkSpeed UMETA(DisplayName = "行走速度（快速移动速度）"),
 
 	//飞行速度
-	FlySpeed UMETA(DisplayName = "飞行速度"),
+	FlySpeed UMETA(DisplayName = "飞行速度（快速移动速度）"),
 
 	//游泳速度
-	SwimmingSpeed UMETA(DisplayName = "游泳速度"),
+	SwimmingSpeed UMETA(DisplayName = "游泳速度（快速移动速度）"),
 
 	//左右转向速度
 	YawRotatorSpeed UMETA(DisplayName = "左右转向速度"),

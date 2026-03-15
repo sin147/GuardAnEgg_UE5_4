@@ -192,12 +192,12 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
 	//根据当前移MovementMode判断状态
 	float AbsMoveSpeed = FMath::Abs(GetCurrentlyMoveSpeed());
-	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxMoveSpeed())
+	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxNormalMoveSpeed())
 	{
 		StateMachine->EnterState(EState::S_Move);
 
 	}
-	else if(AbsMoveSpeed > GetMaxMoveSpeed())
+	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed())
 	{
 		if (GetAttributeByEnum(ECharacterAttribute::EnduranceValue) <= 0)
 		{
@@ -205,12 +205,8 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 		}
 		else
 		{
-
-
 			StateMachine->EnterState(EState::S_QuickMove);
 		}
-
-
 	}
 	else
 	{
@@ -220,11 +216,11 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	//快速移动的体力消耗
 	if (StateMachine->GetCurrentlyState() != EState::S_QuickMove)
 	{
-		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) + CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime* (AbsMoveSpeed/GetMaxQuickMoveSpeed()));
+		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) + GetAttributeByEnum(ECharacterAttribute::EnduranceValue,ECAVType::CAVT_Max) *CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime);
 	}
 	else
 	{
-		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) - CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime);
+		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) - GetAttributeByEnum(ECharacterAttribute::EnduranceValue, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime * (AbsMoveSpeed / GetMaxQuickMoveSpeed()));
 	}
 
 	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
@@ -365,7 +361,7 @@ float ASandBoxCharacter::GetMaxQuickMoveSpeed()
 	}
 }
 
-float ASandBoxCharacter::GetMaxMoveSpeed()
+float ASandBoxCharacter::GetMaxNormalMoveSpeed()
 {
 	float MoveSpeed;
 	switch (MovementMode)
@@ -377,7 +373,7 @@ float ASandBoxCharacter::GetMaxMoveSpeed()
 		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		break;
 	case MOVE_Flying:
-		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max);
+		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		break;
 	default:
 		return 0;
@@ -424,7 +420,7 @@ void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 void ASandBoxCharacter::Server_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
 {
 	MovementMode = InMoveState;
-	SetMaxMoveSpeed(GetMaxMoveSpeed());
+	SetMaxMoveSpeed(GetMaxNormalMoveSpeed());
 	GetCharacterMovement()->SetMovementMode(InMoveState);
 	Multicast_SetCurrentlyMoveMode(InMoveState);
 }
@@ -432,7 +428,7 @@ void ASandBoxCharacter::Server_SetCurrentlyMoveMode_Implementation(EMovementMode
 void ASandBoxCharacter::Multicast_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
 {
 	MovementMode = InMoveState;
-	SetMaxMoveSpeed(GetMaxMoveSpeed());
+	SetMaxMoveSpeed(GetMaxNormalMoveSpeed());
 	GetCharacterMovement()->SetMovementMode(InMoveState);
 }
 
@@ -580,7 +576,7 @@ void ASandBoxCharacter::StartQuick()
 void ASandBoxCharacter::StopQuick()
 {
 	//GetCharacterMovement()->MaxAcceleration = 2048;
-	SetMaxMoveSpeed(GetMaxMoveSpeed());
+	SetMaxMoveSpeed(GetMaxNormalMoveSpeed());
 }
 
 void ASandBoxCharacter::Interact()
@@ -713,5 +709,12 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			}
 		}
 	}
+}
+
+bool ASandBoxCharacter::ApplyDamage(float DamageAmount, AActor* DamageCauser)
+{
+	float CurrentHP = GetCurrentlyHP();
+	CurrentHP -= DamageAmount;
+	return SetCurrentlyHP(CurrentHP);
 }
 

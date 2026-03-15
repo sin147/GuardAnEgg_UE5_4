@@ -63,10 +63,10 @@ class SANDBOXDEMO_API UCharacterDataAsset : public UDataAsset
 	GENERATED_BODY()
 public:
 	//正常移动和快速移动比例  --Todo
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"), DisplayName = "快速移动速度比例")
 	float QuickMoveSpeedRateByMaxMoveSpeed=0.25;
 	//奔跑体力消耗
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"), DisplayName = "快速移动体力消耗比例（每秒）")
 	float QuickMoveEnduranceConsumptionValue=10;
 	//属性配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

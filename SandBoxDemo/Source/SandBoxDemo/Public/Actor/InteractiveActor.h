@@ -15,10 +15,10 @@ UCLASS()
 class SANDBOXDEMO_API AInteractiveActor : public AActor, public IInteract
 {
 	GENERATED_BODY()
-	
 public:	
 	// Sets default values for this actor's properties
 	AInteractiveActor();
+	friend class UInteractiveSubsystem;
 private:
 	//交互状态机
 	TObjectPtr<UStateMachineBase> InteractiveStateMachine;
@@ -42,16 +42,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interactive", meta = (AllowPrivateAccess = true))
 	float InteractBreakDuration=0;
 	//预开始交互
-	void PreInteract(float InCurrentlyStateTime, float InTotalDurationTime);
+	void PreInteract(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 
 	//准备交互
-	void StartInteract(float InCurrentlyStateTime, float InTotalDurationTime);
+	void StartInteract(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互中
-	void Interactting(float InCurrentlyStateTime, float InTotalDurationTime);
+	void Interactting(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互完成
-	void InteractOver(float InCurrentlyStateTime, float InTotalDurationTime);
+	void InteractOver(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互中断
-	void InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime);
+	void InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,25 +69,26 @@ protected:
 	void OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	//预准备交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void PreInteractImp(float InCurrentlyStateTime,float InTotalDurationTime);
+	void PreInteractImp(float InCurrentlyStateTime,float InTotalDurationTime, float InDeltaTime);
 	//准备交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void StartInteractImp(float InCurrentlyStateTime, float InTotalDurationTime);
+	void StartInteractImp(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteracttingImp(float InCurrentlyStateTime, float InTotalDurationTime);
+	void InteracttingImp(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互完成实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteractOverImp(float InCurrentlyStateTime, float InTotalDurationTime);
+	void InteractOverImp(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//交互中断实现
 	UFUNCTION(BlueprintNativeEvent, Category = "Interact")
-	void InteractBreakImp(float InCurrentlyStateTime, float InTotalDurationTime);
+	void InteractBreakImp(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime);
 	//获取当前交互的玩家组
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Interact")
 	TArray<ACharacter*> GetInteractiveCharacters();
 	//进入状态
 	void EnterState(EState InState);
-
+	//交互接口实现
+	void Interact(ACharacter* InCharacter);
 public:	
 	//获取交互准备时间
 	UFUNCTION(BlueprintCallable, Category = "Interactive")
@@ -109,8 +110,6 @@ public:
 	TEnumAsByte<EState> GetCurrentlyState();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	//交互接口实现
-	void Interact(ACharacter* InCharacter);
 	//是否可以交互
 	virtual bool CanInteract(ACharacter* InCharacter) override;
 	//交互中断接口实现

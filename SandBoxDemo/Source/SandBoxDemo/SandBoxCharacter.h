@@ -17,6 +17,7 @@
 #include "Datas/CharacterDataAsset.h"
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
+#include "Interface/Damage.h"
 #include "AbilitySystemComponent.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
@@ -33,11 +34,10 @@ UENUM(BlueprintType)
 
 
 UCLASS()
-class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter
+class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter,public IDamage
 {
 	
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this pawn's properties
 	ASandBoxCharacter();
@@ -148,7 +148,7 @@ public:
 	float GetMaxQuickMoveSpeed();
 	//获取最大移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetMaxMoveSpeed();
+	float GetMaxNormalMoveSpeed();
 
 	//设置当前移动速度
 	bool SetCurrentlyMoveSpeed(float InSpeed);
@@ -292,5 +292,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+/***********************************************************************************************/
+protected:
+	//应用伤害
+	virtual bool ApplyDamage(float DamageAmount, AActor* DamageCauser) override;
+
 
 };

@@ -77,61 +77,61 @@ void AInteractiveActor::OnTriggerBoxOverlapEnd(UPrimitiveComponent* OverlappedCo
 
 }
 
-void AInteractiveActor::PreInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::PreInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:PreInteractImp"), *GetName());
 }
 
-void AInteractiveActor::StartInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::StartInteractImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:StartInteractImp"), *GetName());
 }
 
-void AInteractiveActor::InteracttingImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::InteracttingImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteracttingImp"), *GetName());
 }
 
-void AInteractiveActor::InteractOverImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::InteractOverImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteractOverImp"), *GetName());
 }
 
-void AInteractiveActor::InteractBreakImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::InteractBreakImp_Implementation(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s:InteractBreakImp"), *GetName());
 }
 
-void AInteractiveActor::PreInteract(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::PreInteract(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
-	PreInteractImp(InCurrentlyStateTime, InTotalDurationTime);
+	PreInteractImp(InCurrentlyStateTime, InTotalDurationTime, InDeltaTime);
 	if (InteractTime >= PreInteractDuration&&InteractiveType==IT_Passive)
 	{
-		EnterState(EState::S_InteractiveActor_Interacting);
+		EnterState(EState::S_InteractiveActor_Start);
 	} 
 }
 
-void AInteractiveActor::StartInteract(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::StartInteract(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
-	StartInteractImp(InCurrentlyStateTime, InTotalDurationTime);
+	StartInteractImp(InCurrentlyStateTime, InTotalDurationTime, InDeltaTime);
 	if (InteractTime >= StartInteractDuration)
 	{
 		EnterState(EState::S_InteractiveActor_Interacting);
 	}
 }
 
-void AInteractiveActor::Interactting(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::Interactting(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
-	InteracttingImp(InCurrentlyStateTime, InTotalDurationTime);
+	InteracttingImp(InCurrentlyStateTime, InTotalDurationTime, InDeltaTime);
 	if (InteractTime >= InteractDuration)
 	{
 		EnterState(EState::S_InteractiveActor_Finish);
 	}
 }
 
-void AInteractiveActor::InteractOver(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::InteractOver(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
-	InteractOverImp(InCurrentlyStateTime, InTotalDurationTime);
+	InteractOverImp(InCurrentlyStateTime, InTotalDurationTime, InDeltaTime);
 	if (InteractTime >= InteractOverDuration)
 	{
 		EnterState(EState::S_None);
@@ -139,9 +139,9 @@ void AInteractiveActor::InteractOver(float InCurrentlyStateTime, float InTotalDu
 	}
 }
 
-void AInteractiveActor::InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime)
+void AInteractiveActor::InteractBreak(float InCurrentlyStateTime, float InTotalDurationTime, float InDeltaTime)
 {
-	InteractBreakImp(InCurrentlyStateTime, InTotalDurationTime);
+	InteractBreakImp(InCurrentlyStateTime, InTotalDurationTime, InDeltaTime);
 	if (InteractTime >= InteractBreakDuration)
 	{
 		EnterState(EState::S_None);
@@ -168,19 +168,19 @@ void AInteractiveActor::Tick(float DeltaTime)
 	case S_None:
 		break;
 	case S_InteractiveActor_Pre:
-		PreInteract(InteractTime,PreInteractDuration);
+		PreInteract(InteractTime,PreInteractDuration, DeltaTime);
 		break;
 	case S_InteractiveActor_Start:
-		StartInteract(InteractTime,StartInteractDuration);
+		StartInteract(InteractTime,StartInteractDuration, DeltaTime);
 		break;
 	case S_InteractiveActor_Interacting:
-		Interactting(InteractTime,InteractDuration);
+		Interactting(InteractTime,InteractDuration, DeltaTime);
 		break;
 	case S_InteractiveActor_Break:
-		InteractBreak(InteractTime,InteractBreakDuration);
+		InteractBreak(InteractTime,InteractBreakDuration, DeltaTime);
 		break;
 	case S_InteractiveActor_Finish:
-		InteractOver(InteractTime,InteractOverDuration);
+		InteractOver(InteractTime,InteractOverDuration, DeltaTime);
 		break;
 	default:
 		break;
