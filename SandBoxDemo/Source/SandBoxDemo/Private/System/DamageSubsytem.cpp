@@ -2,16 +2,33 @@
 
 
 #include "System/DamageSubsytem.h"
+#include "NetworkProxyActor/DamageProxyActor.h"
 
-bool UDamageSubsytem::TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
+void UDamageSubsytem::TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
+{
+	DamageProxy->Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+}
+
+void UDamageSubsytem::Server_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
 	if (DamagedActor)
 	{
-		
-		if (Cast<IDamage>(DamagedActor)!=nullptr)
+
+		if (Cast<IDamage>(DamagedActor) != nullptr)
 		{
-			return Cast<IDamage>(DamagedActor)->ApplyDamage(DamageAmount, DamageCauser);
+			Cast<IDamage>(DamagedActor)->ApplyDamage(DamageAmount, DamageCauser);
+			DamageProxy->Multicast_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
 		}
 	}
-	return false;
+}
+
+void UDamageSubsytem::Multicast_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
+{
+	if (DamagedActor)
+	{
+		if (Cast<IDamage>(DamagedActor) != nullptr)
+		{
+			Cast<IDamage>(DamagedActor)->ApplyDamage(DamageAmount, DamageCauser);
+		}
+	}
 }

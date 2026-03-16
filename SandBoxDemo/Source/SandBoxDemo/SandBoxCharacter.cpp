@@ -199,7 +199,7 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	}
 	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed())
 	{
-		if (GetAttributeByEnum(ECharacterAttribute::EnduranceValue) <= 0)
+		if (GetAttributeByEnum(ECharacterAttribute::EnduranceValue) <= 0&&IsLocallyControlled())
 		{
 			StopQuick();
 		}
@@ -711,10 +711,10 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
-bool ASandBoxCharacter::ApplyDamage(float DamageAmount, AActor* DamageCauser)
+void ASandBoxCharacter::ApplyDamage(float DamageAmount, AActor* DamageCauser)
 {
 	float CurrentHP = GetCurrentlyHP();
 	CurrentHP -= DamageAmount;
-	return SetCurrentlyHP(CurrentHP);
+	SetCurrentlyHP(CurrentHP);
 }
 

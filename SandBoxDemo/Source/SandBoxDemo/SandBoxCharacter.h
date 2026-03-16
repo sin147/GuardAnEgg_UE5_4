@@ -295,7 +295,7 @@ public:
 /***********************************************************************************************/
 protected:
 	//应用伤害
-	virtual bool ApplyDamage(float DamageAmount, AActor* DamageCauser) override;
+	virtual void ApplyDamage(float DamageAmount, AActor* DamageCauser) override;
 
 
 };

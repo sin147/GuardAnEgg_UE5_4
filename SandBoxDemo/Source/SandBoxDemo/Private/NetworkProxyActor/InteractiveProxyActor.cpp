@@ -19,10 +19,7 @@ AInteractiveProxyActor::AInteractiveProxyActor()
 void AInteractiveProxyActor::BeginPlay()
 {
 	Super::BeginPlay();
-	if (Owner == GetWorld()->GetFirstPlayerController())
-	{
-		GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->SetInteractiveProxy(this);
-	}
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->SetInteractiveProxy(this);
 
 }
 

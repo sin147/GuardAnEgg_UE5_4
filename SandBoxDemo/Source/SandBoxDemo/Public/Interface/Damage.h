@@ -24,5 +24,5 @@ class SANDBOXDEMO_API IDamage
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 protected:
 	//应用伤害
-	virtual bool ApplyDamage(float DamageAmount,AActor* DamageCauser)=0;
+	virtual void ApplyDamage(float DamageAmount,AActor* DamageCauser)=0;
 };
