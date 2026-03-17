@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "GlobalEnums.h"
+#include "System/AttributeSubsystem.h"
 #include "Abilities/GameplayAbility.h"
 #include "CharacterDataAsset.generated.h"
 
@@ -22,36 +22,40 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float MinValue;
 public:
-	void SetMaxValue(float InValue)
+	void SetValueByValueType(float InValue,ECAVType InValueType)
 	{
-		MaxValue = fmaxf(InValue,MinValue);
-	}
+		switch (InValueType)
+		{
+		case CAVT_Max:
+			MaxValue = fmaxf(InValue, MinValue);
+			break;
+		case CAVT_Currently:
+			Default = InValue > MaxValue ? MaxValue : InValue < MinValue ? MinValue : InValue;
+			break;
+		case CAVT_Min:
+			MinValue = fminf(InValue, MaxValue);
+			break;
+		default:
+			break;
+		}
 
-	void SetMinValue(float InValue)
-	{
-		MinValue = fminf(InValue, MaxValue);
+		
 	}
-
-	void SetCurrentlyValue(float InValue)
+	float GetValueByValueType(ECAVType InValueType)
 	{
-		Default = InValue > MaxValue ? MaxValue : InValue < MinValue ? MinValue : InValue;
-		//UE_LOG(LogTemp, Log, TEXT("SetYawRotatorSpeed %lf "), Default);
-
+		switch (InValueType)
+		{
+		case CAVT_Max:
+			return MaxValue;
+		case CAVT_Currently:
+			return Default;
+		case CAVT_Min:
+			return MinValue;
+		default:
+			break;
+		}
+		return 0;
 	}
-	float GetMaxValue()
-	{
-		return MaxValue;
-	}
-	float GetMinValue()
-	{
-		return MinValue;
-	}
-	float GetCurrentlyValue()
-	{
-		//UE_LOG(LogTemp, Log, TEXT("GetYawRotatorSpeed %lf "), Default);
-		return Default;
-	}
-
 };
 
 /**
@@ -70,15 +74,15 @@ public:
 	float QuickMoveEnduranceConsumptionValue=10;
 	//属性配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TMap<TEnumAsByte<ECharacterAttribute>,FCharacterAttribute>  Attributes;
+	TMap<TEnumAsByte<EAttribute>,FCharacterAttribute>  Attributes;
 	//技能配置
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FGameplayTag,TSubclassOf<UGameplayAbility>>  Abilities;
 	
-	FCharacterAttribute& GetAttributeByEnum(ECharacterAttribute CharacterAttribute);
+	FCharacterAttribute& GetAttributeByEnum(EAttribute CharacterAttribute);
 	TSubclassOf<UGameplayAbility> GetAbility(FGameplayTag AbilityTag);
 
-	bool IsVaildAttribute(ECharacterAttribute CharacterAttribute);
+	bool IsVaildAttribute(EAttribute CharacterAttribute);
 	bool IsVaildAbility(FGameplayTag CharacterAttribute);
 
 	//深拷贝

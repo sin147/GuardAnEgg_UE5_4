@@ -2,7 +2,6 @@
 
 
 #include "NetworkProxyActor/CharacterProxyActor.h"
-#include "System/CharacterSubsystem.h"
 
 // Sets default values
 ACharacterProxyActor::ACharacterProxyActor()
@@ -16,13 +15,13 @@ ACharacterProxyActor::ACharacterProxyActor()
 void ACharacterProxyActor::BeginPlay()
 {
 	Super::BeginPlay();
-	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetCharacterProxy(this);
+
 }
 
 // Called every frame
 void ACharacterProxyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
+
 

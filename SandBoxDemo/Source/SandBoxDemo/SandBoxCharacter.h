@@ -18,6 +18,7 @@
 #include "Attributes/AttributeBase.h"
 #include "State/StateMachineBase.h"
 #include "Interface/Damage.h"
+#include "Interface/AttributeInterface.h"
 #include "AbilitySystemComponent.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
@@ -34,7 +35,7 @@ UENUM(BlueprintType)
 
 
 UCLASS()
-class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter,public IDamage
+class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter,public IDamage,public IAttributeInterface
 {
 	
 	GENERATED_BODY()
@@ -60,24 +61,12 @@ private:
 	void InitAttribute();
 
 protected:
-	//设置属性
-	UFUNCTION()
-	bool SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType =ECAVType::CAVT_Currently);
-	//服务器设置属性值
-	UFUNCTION(Server,Reliable)
-	void Server_SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType = ECAVType::CAVT_Currently);
-	//服务器设置属性值
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetAttributeByEnum(ECharacterAttribute Attribute, float NewValue, ECAVType InValueType = ECAVType::CAVT_Currently);
-
-	
-	//获取属性
-	UFUNCTION(BlueprintCallable)
-	float GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType = ECAVType::CAVT_Currently);
+	virtual void SetAttributeByEnum(EAttribute InAttribute, float Value, ECAVType InAttributeValueType= ECAVType::CAVT_Currently) override;
+	virtual float GetAttributeByEnum(EAttribute InAttribute, ECAVType InAttributeValueType = ECAVType::CAVT_Currently) override;
 public:
 	//设置血量
 	UFUNCTION()
-	bool SetCurrentlyHP(float NewHP);
+	void SetCurrentlyHP(float NewHP);
 	//获取血量
 	UFUNCTION()
 	float GetCurrentlyHP();
@@ -94,11 +83,6 @@ protected:
 	//设置角色运动类型
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentlyMoveMode(EMovementMode InMoveState);
-private:
-	UFUNCTION(Server,Reliable)
-	void Server_SetCurrentlyMoveMode(EMovementMode InMoveState);
-	UFUNCTION(NetMulticast,Reliable)
-	void Multicast_SetCurrentlyMoveMode(EMovementMode InMoveState);
 
 protected:
 	//获取角色运动类型
@@ -109,38 +93,31 @@ protected:
 	virtual void OnMoveModeChange();
 public:
 	//设置左右旋转速度
-	bool SetCurrentlyYawRotatorSpeed(float InRotatorSpeed);
+	void SetCurrentlyYawRotatorSpeed(float InRotatorSpeed);
 	//获取左右转向速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyYawRotatorSpeed();
 
 	//设置最大左右旋转速度
-	bool SetMaxYawRotatorSpeed(float InRotatorSpeed);
+	void SetMaxYawRotatorSpeed(float InRotatorSpeed);
 	//获取最大左右转向速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxYawRotatorSpeed();
 
 	//设置上下旋转速度
-	bool SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed);
+	void SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed);
 	//获取上下旋转速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyPitchRotatorSpeed();
 
 	//设置最大上下旋转速度
-	bool SetMaxPitchRotatorSpeed(float InRotatorSpeed);
+	void SetMaxPitchRotatorSpeed(float InRotatorSpeed);
 	//获取最大上下旋转速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxPitchRotatorSpeed();
 
 	//设置最大移动速度
 	void SetMaxMoveSpeed(float InSpeed);
-private:
-	//设置最大移动速度
-	UFUNCTION(Server,Reliable)
-	void Server_SetMaxMoveSpeed(float InSpeed);
-	//设置最大移动速度
-	UFUNCTION(NetMulticast,Reliable)
-	void Multicast_SetMaxMoveSpeed(float InSpeed);
 public:
 
 	//获取最大移动速度
@@ -151,7 +128,7 @@ public:
 	float GetMaxNormalMoveSpeed();
 
 	//设置当前移动速度
-	bool SetCurrentlyMoveSpeed(float InSpeed);
+	void SetCurrentlyMoveSpeed(float InSpeed);
 	//获取当前移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyMoveSpeed();

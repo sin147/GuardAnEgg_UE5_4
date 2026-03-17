@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "System/CharacterSubsystem.h"
 #include "CharacterProxyActor.generated.h"
 
 UCLASS()

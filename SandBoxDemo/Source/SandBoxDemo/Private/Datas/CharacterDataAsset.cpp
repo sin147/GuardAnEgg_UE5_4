@@ -3,7 +3,7 @@
 
 #include "Datas/CharacterDataAsset.h"
 
-FCharacterAttribute& UCharacterDataAsset::GetAttributeByEnum(ECharacterAttribute CharacterAttribute)
+FCharacterAttribute& UCharacterDataAsset::GetAttributeByEnum(EAttribute CharacterAttribute)
 {
     checkf(Attributes.Find(CharacterAttribute), TEXT("Attribute %d  Is Not Exist"), CharacterAttribute);
 
@@ -17,7 +17,7 @@ TSubclassOf<UGameplayAbility> UCharacterDataAsset::GetAbility(FGameplayTag Abili
     return Abilities[AbilityTag];
 }
 
-bool UCharacterDataAsset::IsVaildAttribute(ECharacterAttribute CharacterAttribute)
+bool UCharacterDataAsset::IsVaildAttribute(EAttribute CharacterAttribute)
 {
 
     return Attributes.Find(CharacterAttribute)?true:false;

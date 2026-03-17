@@ -73,119 +73,47 @@ void ASandBoxCharacter::InitAttribute()
 	{
 		//工具数据资产初始化属性
 		//飞行速度
-		CharacterMovementComponent->MaxFlySpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::FlySpeed).GetMaxValue()* CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		CharacterMovementComponent->MaxFlySpeed = CharacterDataAsset->GetAttributeByEnum(EAttribute::FlySpeed).GetValueByValueType(ECAVType::CAVT_Max)* CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		//步行速度
-		CharacterMovementComponent->MaxWalkSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::WalkSpeed).GetMaxValue() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		CharacterMovementComponent->MaxWalkSpeed = CharacterDataAsset->GetAttributeByEnum(EAttribute::WalkSpeed).GetValueByValueType(ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		//游泳速度
-		CharacterMovementComponent->MaxSwimSpeed = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed).GetMaxValue() * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		CharacterMovementComponent->MaxSwimSpeed = CharacterDataAsset->GetAttributeByEnum(EAttribute::SwimmingSpeed).GetValueByValueType(ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 	}
 	if (CharacterDataAsset and SandBoxPlayerController)
 	{
 		//左右旋转速度
-		SandBoxPlayerController->MaxRotationRate.Yaw = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed).GetMaxValue();
+		SandBoxPlayerController->MaxRotationRate.Yaw = CharacterDataAsset->GetAttributeByEnum(EAttribute::YawRotatorSpeed).GetValueByValueType(ECAVType::CAVT_Max);
 		//上下旋转速度
-		SandBoxPlayerController->MaxRotationRate.Pitch = CharacterDataAsset->GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed).GetMaxValue();
+		SandBoxPlayerController->MaxRotationRate.Pitch = CharacterDataAsset->GetAttributeByEnum(EAttribute::PitchRotatorSpeed).GetValueByValueType(ECAVType::CAVT_Max);
 	}
 	SetCurrentlyMoveMode(EMovementMode::MOVE_Walking);
 
 }
 
-bool ASandBoxCharacter::SetAttributeByEnum(ECharacterAttribute InAttribute, float InNewValue, ECAVType InValueType)
+void ASandBoxCharacter::SetAttributeByEnum(EAttribute InAttribute, float InNewValue, ECAVType InValueType)
 {
 	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(InAttribute))
 	{
-		return false;
+		return;
 	}
-	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-	//}
-
-	Server_SetAttributeByEnum(InAttribute, InNewValue,InValueType);
-	return true;
+	CharacterDataAsset->GetAttributeByEnum(InAttribute).SetValueByValueType(InNewValue, InValueType);
 }
 
-void ASandBoxCharacter::Server_SetAttributeByEnum_Implementation(ECharacterAttribute InAttribute, float InNewValue, ECAVType InValueType)
+float ASandBoxCharacter::GetAttributeByEnum(EAttribute InAttribute, ECAVType InValueType)
 {
-	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(InAttribute)) { return; }
-	switch (InValueType)
-	{
-	case CAVT_Max:
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMaxValue(InNewValue);
-		break;
-	case CAVT_Currently:
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetCurrentlyValue(InNewValue);
-		break;
-	case CAVT_Min:
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMinValue(InNewValue);
-		break;
-	default:
-		break;
-	}
-	Multicast_SetAttributeByEnum(InAttribute, InNewValue,  InValueType);
-	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-	//}
+
+	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(InAttribute)) { return 0; }
+	return CharacterDataAsset->GetAttributeByEnum(InAttribute).GetValueByValueType(InValueType);
 }
 
-void ASandBoxCharacter::Multicast_SetAttributeByEnum_Implementation(ECharacterAttribute InAttribute, float InNewValue, ECAVType InValueType)
+void ASandBoxCharacter::SetCurrentlyHP(float NewHP)
 {
-	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(InAttribute)) { return; }
-	//if (InAttribute == ECharacterAttribute::YawRotatorSpeed)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-	//}
-	switch (InValueType)
-	{
-	case CAVT_Max:
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMaxValue(InNewValue);
-		break;
-	case CAVT_Currently:
-		if (InAttribute == ECharacterAttribute::WalkSpeed)
-{
-		//UE_LOG(LogTemp, Log, TEXT("%lf"), InNewValue);
-}
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetCurrentlyValue(InNewValue);
-		break;
-	case CAVT_Min:
-		CharacterDataAsset->GetAttributeByEnum(InAttribute).SetMinValue(InNewValue);
-		break;
-	default:
-		break;
-	}
-}
-
-float ASandBoxCharacter::GetAttributeByEnum(ECharacterAttribute Attribute, ECAVType InValueType)
-{
-
-	if (!IsValid(CharacterDataAsset) or !CharacterDataAsset->IsVaildAttribute(Attribute)) { return 0; }
-	switch (InValueType)
-	{
-	case CAVT_Max:
-		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMaxValue();
-	case CAVT_Currently:
-		//if (Attribute == ECharacterAttribute::YawRotatorSpeed)
-		//{
-		//	UE_LOG(LogTemp, Log, TEXT("%lf"), CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue());
-		//}
-		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetCurrentlyValue();
-	case CAVT_Min:
-		return CharacterDataAsset->GetAttributeByEnum(Attribute).GetMinValue();
-	default:
-		return 0;
-	}
-
-}
-
-bool ASandBoxCharacter::SetCurrentlyHP(float NewHP)
-{
-	return SetAttributeByEnum(ECharacterAttribute::HP, NewHP);
+	SetAttributeByEnum(EAttribute::HP, NewHP,ECAVType::CAVT_Currently);
 }
 
 float ASandBoxCharacter::GetCurrentlyHP()
 {
-	return GetAttributeByEnum(ECharacterAttribute::HP);
+	return GetAttributeByEnum(EAttribute::HP, ECAVType::CAVT_Currently);
 }
 
 void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
@@ -199,7 +127,7 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	}
 	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed())
 	{
-		if (GetAttributeByEnum(ECharacterAttribute::EnduranceValue) <= 0&&IsLocallyControlled())
+		if (GetAttributeByEnum(EAttribute::EnduranceValue, ECAVType::CAVT_Currently) <= 0&&IsLocallyControlled())
 		{
 			StopQuick();
 		}
@@ -216,11 +144,11 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	//快速移动的体力消耗
 	if (StateMachine->GetCurrentlyState() != EState::S_QuickMove)
 	{
-		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) + GetAttributeByEnum(ECharacterAttribute::EnduranceValue,ECAVType::CAVT_Max) *CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime);
+		SetAttributeByEnum(EAttribute::EnduranceValue, GetAttributeByEnum(EAttribute::EnduranceValue, ECAVType::CAVT_Currently) + GetAttributeByEnum(EAttribute::EnduranceValue,ECAVType::CAVT_Max) *CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime);
 	}
 	else
 	{
-		SetAttributeByEnum(ECharacterAttribute::EnduranceValue, GetAttributeByEnum(ECharacterAttribute::EnduranceValue) - GetAttributeByEnum(ECharacterAttribute::EnduranceValue, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime * (AbsMoveSpeed / GetMaxQuickMoveSpeed()));
+		SetAttributeByEnum(EAttribute::EnduranceValue, GetAttributeByEnum(EAttribute::EnduranceValue, ECAVType::CAVT_Currently) - GetAttributeByEnum(EAttribute::EnduranceValue, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveEnduranceConsumptionValue * DeltaTime * (AbsMoveSpeed / GetMaxQuickMoveSpeed()));
 	}
 
 	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
@@ -259,103 +187,59 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 
 }
 
-bool ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
+void ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
 {
-	if (SetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, InRotatorSpeed))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
+	SetAttributeByEnum(EAttribute::YawRotatorSpeed, InRotatorSpeed, ECAVType::CAVT_Currently);
 }
 float ASandBoxCharacter::GetCurrentlyYawRotatorSpeed()
 {
-	return GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed);
+	return GetAttributeByEnum(EAttribute::YawRotatorSpeed);
 }
-bool ASandBoxCharacter::SetMaxYawRotatorSpeed(float InRotatorSpeed)
+void ASandBoxCharacter::SetMaxYawRotatorSpeed(float InRotatorSpeed)
 {
-	return SetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, InRotatorSpeed, ECAVType::CAVT_Max);
+	 SetAttributeByEnum(EAttribute::YawRotatorSpeed, InRotatorSpeed, ECAVType::CAVT_Max);
 }
 float ASandBoxCharacter::GetMaxYawRotatorSpeed()
 {
-	return GetAttributeByEnum(ECharacterAttribute::YawRotatorSpeed, ECAVType::CAVT_Max);
+	return GetAttributeByEnum(EAttribute::YawRotatorSpeed, ECAVType::CAVT_Max);
 }
 
-bool ASandBoxCharacter::SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed)
+void ASandBoxCharacter::SetCurrentlyPitchRotatorSpeed(float InRotatorSpeed)
 {
-	return SetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed, InRotatorSpeed);
+	 SetAttributeByEnum(EAttribute::PitchRotatorSpeed, InRotatorSpeed);
 }
 float ASandBoxCharacter::GetCurrentlyPitchRotatorSpeed()
 {
-	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed);
+	return GetAttributeByEnum(EAttribute::PitchRotatorSpeed);
 }
 
-bool ASandBoxCharacter::SetMaxPitchRotatorSpeed(float InRotatorSpeed)
+void ASandBoxCharacter::SetMaxPitchRotatorSpeed(float InRotatorSpeed)
 {
-	return SetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,InRotatorSpeed,ECAVType::CAVT_Max);
+	 SetAttributeByEnum(EAttribute::PitchRotatorSpeed,InRotatorSpeed,ECAVType::CAVT_Max);
 }
 
 float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
 {
 	
-	return GetAttributeByEnum(ECharacterAttribute::PitchRotatorSpeed,ECAVType::CAVT_Max);
+	return GetAttributeByEnum(EAttribute::PitchRotatorSpeed,ECAVType::CAVT_Max);
 }
 
 void ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
 {
-	Server_SetMaxMoveSpeed(InSpeed);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this,EAttribute::WalkSpeed,InSpeed);
 }
 
-void ASandBoxCharacter::Server_SetMaxMoveSpeed_Implementation(float InSpeed)
-{
-	switch (MovementMode)
-	{
-	case MOVE_Walking:
-		GetCharacterMovement()->MaxWalkSpeed = InSpeed;
-		break;
-	case MOVE_Swimming:
-		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
-		break;
-	case MOVE_Flying:
-		GetCharacterMovement()->MaxFlySpeed = InSpeed;
-		break;
-	default:
-		return;
-	}
-	Multicast_SetMaxMoveSpeed(InSpeed);
-}
-
-void ASandBoxCharacter::Multicast_SetMaxMoveSpeed_Implementation(float InSpeed)
-{
-	switch (MovementMode)
-	{
-	case MOVE_Walking:
-		GetCharacterMovement()->MaxWalkSpeed = InSpeed;
-		break;
-	case MOVE_Swimming:
-		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
-		break;
-	case MOVE_Flying:
-		GetCharacterMovement()->MaxFlySpeed = InSpeed;
-		break;
-	default:
-		return;
-	}
-}
 
 float ASandBoxCharacter::GetMaxQuickMoveSpeed()
 {
 	switch (MovementMode)
 	{
 	case MOVE_Walking:
-		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed, ECAVType::CAVT_Max);
+		return GetAttributeByEnum(EAttribute::WalkSpeed, ECAVType::CAVT_Max);
 	case MOVE_Swimming:
-		return GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, ECAVType::CAVT_Max);
+		return GetAttributeByEnum(EAttribute::SwimmingSpeed, ECAVType::CAVT_Max);
 	case MOVE_Flying:
-		return GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max);
+		return GetAttributeByEnum(EAttribute::FlySpeed, ECAVType::CAVT_Max);
 	default:
 		return 0;
 	}
@@ -367,13 +251,13 @@ float ASandBoxCharacter::GetMaxNormalMoveSpeed()
 	switch (MovementMode)
 	{
 	case MOVE_Walking:
-		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::WalkSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		MoveSpeed= GetAttributeByEnum(EAttribute::WalkSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		break;
 	case MOVE_Swimming:
-		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		MoveSpeed= GetAttributeByEnum(EAttribute::SwimmingSpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		break;
 	case MOVE_Flying:
-		MoveSpeed= GetAttributeByEnum(ECharacterAttribute::FlySpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
+		MoveSpeed= GetAttributeByEnum(EAttribute::FlySpeed, ECAVType::CAVT_Max) * CharacterDataAsset->QuickMoveSpeedRateByMaxMoveSpeed;
 		break;
 	default:
 		return 0;
@@ -381,18 +265,21 @@ float ASandBoxCharacter::GetMaxNormalMoveSpeed()
 	return MoveSpeed;
 }
 
-bool ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
+void ASandBoxCharacter::SetCurrentlyMoveSpeed(float InSpeed)
 {
 	switch (MovementMode)
 	{
 	case MOVE_Walking:
-		return SetAttributeByEnum(ECharacterAttribute::WalkSpeed, InSpeed);
+		 SetAttributeByEnum(EAttribute::WalkSpeed, InSpeed);
+		 break;
 	case MOVE_Swimming:
-		return SetAttributeByEnum(ECharacterAttribute::SwimmingSpeed, InSpeed);
+		 SetAttributeByEnum(EAttribute::SwimmingSpeed, InSpeed);
+		 break;
 	case MOVE_Flying:
-		return SetAttributeByEnum(ECharacterAttribute::FlySpeed, InSpeed);
+		 SetAttributeByEnum(EAttribute::FlySpeed, InSpeed);
+		 break;
 	default:
-		return false;
+		break;
 	}
 }
 
@@ -401,11 +288,11 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 	switch (MovementMode)
 	{
 	case MOVE_Walking:
-		return GetAttributeByEnum(ECharacterAttribute::WalkSpeed);
+		return GetAttributeByEnum(EAttribute::WalkSpeed);
 	case MOVE_Swimming:
-		return GetAttributeByEnum(ECharacterAttribute::SwimmingSpeed);
+		return GetAttributeByEnum(EAttribute::SwimmingSpeed);
 	case MOVE_Flying:
-		return GetAttributeByEnum(ECharacterAttribute::FlySpeed);
+		return GetAttributeByEnum(EAttribute::FlySpeed);
 	default:
 		return 0;
 	}
@@ -414,22 +301,7 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
-	Server_SetCurrentlyMoveMode_Implementation(InMoveState);
-}
-
-void ASandBoxCharacter::Server_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
-{
-	MovementMode = InMoveState;
-	SetMaxMoveSpeed(GetMaxNormalMoveSpeed());
-	GetCharacterMovement()->SetMovementMode(InMoveState);
-	Multicast_SetCurrentlyMoveMode(InMoveState);
-}
-
-void ASandBoxCharacter::Multicast_SetCurrentlyMoveMode_Implementation(EMovementMode InMoveState)
-{
-	MovementMode = InMoveState;
-	SetMaxMoveSpeed(GetMaxNormalMoveSpeed());
-	GetCharacterMovement()->SetMovementMode(InMoveState);
+	
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
