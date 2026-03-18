@@ -6,20 +6,20 @@
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
-bool UInteractiveSubsystem::StoreInteract(IInteract* InteractiveActor)
-{
-	if (!InteractiveActors.Contains(InteractiveActor))
-	{
-		InteractiveActors.Add(InteractiveActor);
-		return true;
-	}
-	return false;
-}
-
 void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
-	//TODO 代理到服务器
-	InteractiveProxy->Server_Interact(InCharacter);
+	ENetMode NetMode = GetWorld()->GetNetMode();
+	if (NetMode == NM_ListenServer || NetMode == NM_DedicatedServer)
+	{
+		//TODO 代理到服务器
+		InteractiveProxy->Muticast_Interact(InCharacter);
+	}
+	else
+	{
+		//TODO 代理到服务器
+		InteractiveProxy->Server_Interact(InCharacter);
+	}
+
 }
 
 bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter,EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID)
@@ -123,10 +123,11 @@ void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
 				InteractiveActor->Interact(InCharacter);
-				InteractiveProxy->Muticast_Interact(Cast<AActor>(InteractiveActor), InCharacter);
+
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
+		InteractiveProxy->Muticast_Interact(InCharacter);
 	}
 	else
 	{
@@ -134,12 +135,25 @@ void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 	}
 }
 
-void UInteractiveSubsystem::Multicast_Interact(AActor* InActor,ACharacter* InCharacter)
+void UInteractiveSubsystem::Multicast_Interact(ACharacter* InCharacter)
 {
-	IInteract* InteractiveActor = Cast<IInteract>(InActor);
-	if (InteractiveActor)
+	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
+	if (Info)
 	{
-		InteractiveActor->Interact(InCharacter);
+		TArray<FGuid> ActiveInteractiveActorGuids = Info->GetInteractiveActorGUIDs(EInteractiveType::IT_Active);
+		for (FGuid InteractiveActorGUID : ActiveInteractiveActorGuids)
+		{
+			IInteract* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
+			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
+			{
+				InteractiveActor->Interact(InCharacter);
+			}
+		}
+		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID : %s not InteractiveActors"), *InCharacter->GetActorNameOrLabel());
 	}
 }
 
@@ -221,6 +235,7 @@ void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> Act
 		//InteractiveActors.Add(NewInteractiveActor); // 存入接口指针列表
 		//InteractiveProxy->Muticast_OnSpawnInteractiveActor(NewActor); // 通知客户端更新交互对象列表
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: Spawned valid interactive actor %s"), *NewActor->GetName());
+		InteractiveProxy->Muticast_OnSpawnInteractiveActor(NewActor);
 	}
 	else
 	{
@@ -228,6 +243,18 @@ void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> Act
 		NewActor->Destroy(); // 销毁无效 Actor
 	}
 
+}
+
+void UInteractiveSubsystem::Multicast_SpawnInteractiveActor(AActor* AActor)
+{
+	IInteract* Interact = Cast<IInteract>(AActor);
+	if (Interact)
+	{
+		if (!InteractiveActors.Contains(Interact))
+		{
+			InteractiveActors.Add(Interact);
+		}
+	}
 }
 
 FCharacterInteractiveInfo::FCharacterInteractiveInfo(TObjectPtr<ACharacter> InCharacter)

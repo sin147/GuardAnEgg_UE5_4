@@ -6,6 +6,11 @@
 
 void UDamageSubsytem::TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
+	ENetMode NetMode = GetWorld()->GetNetMode();
+	if (NetMode == NM_ListenServer || NetMode == NM_DedicatedServer)
+	{
+		DamageProxy->Multicast_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+	}
 	DamageProxy->Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
 }
 

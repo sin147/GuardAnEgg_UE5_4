@@ -23,7 +23,6 @@ AInteractiveActor::AInteractiveActor()
 void AInteractiveActor::BeginPlay()
 {
 	Super::BeginPlay();
-	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->StoreInteract(Cast<IInteract>(this));
 	//绑定触发事件
 	if (TriggerBox)
 	{

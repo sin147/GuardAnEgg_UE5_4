@@ -28,9 +28,9 @@ void AInteractiveProxyActor::Server_Interact_Implementation(ACharacter* InCharac
 	 GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Server_Interact(InCharacter);
 }
 
-void AInteractiveProxyActor::Muticast_Interact_Implementation(AActor* InActor, ACharacter* InCharacter)
+void AInteractiveProxyActor::Muticast_Interact_Implementation(ACharacter* InCharacter)
 {
-	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_Interact(InActor,InCharacter);
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_Interact(InCharacter);
 }
 
 void AInteractiveProxyActor::Muticast_OnSpawnInteractiveActor_Implementation(AActor* InActor)

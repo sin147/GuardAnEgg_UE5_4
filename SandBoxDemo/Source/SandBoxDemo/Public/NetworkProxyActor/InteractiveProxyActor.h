@@ -25,7 +25,7 @@ protected:
 	void Server_Interact(ACharacter* InCharacter);
 	//多播
 	UFUNCTION(NetMulticast, Reliable)
-	void Muticast_Interact(AActor* InActor, ACharacter* InCharacter);
+	void Muticast_Interact(ACharacter* InCharacter);
 	//多播生成代理交互actor
 	UFUNCTION(NetMulticast, Reliable)
 	void Muticast_OnSpawnInteractiveActor(AActor* InActor);

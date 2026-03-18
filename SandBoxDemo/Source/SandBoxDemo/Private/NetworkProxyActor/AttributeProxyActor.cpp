@@ -28,9 +28,9 @@ void AAttributeProxyActor::Tick(float DeltaTime)
 }
 void AAttributeProxyActor::Server_SetAttributeByEnum_Implementation(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
-	//GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeProxy(this);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Server_SetAttributeByEnum(InActor,InAttribute,InValue,InAttributeValueType);
 }
 void AAttributeProxyActor::Multicast_SetAttributeByEnum_Implementation(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
-	//GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeProxy(this);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Multicast_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
 }

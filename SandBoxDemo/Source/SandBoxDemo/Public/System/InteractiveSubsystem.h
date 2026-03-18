@@ -111,8 +111,6 @@ protected:
 	//交互对象组
 	TArray<IInteract*> InteractiveActors;
 public:
-	//存储交互对象
-	bool StoreInteract(IInteract* InInteractiveActor);
 	//请求交互
 	void RequestInteract(ACharacter* InCharacter);
 	//填充交互对象
@@ -150,9 +148,10 @@ protected:
 
 	TArray<FGuid> FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const;
 	void Server_Interact(ACharacter* InCharacter);
-	void Multicast_Interact(AActor*InActor, ACharacter* InCharacter);
+	void Multicast_Interact(ACharacter* InCharacter);
 	void Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor);
 	void Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation);
+	void Multicast_SpawnInteractiveActor(AActor*AActor);
 
 	//设置代理Actor
 	void SetInteractiveProxy(AInteractiveProxyActor* InProxy);

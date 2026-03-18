@@ -226,7 +226,7 @@ float ASandBoxCharacter::GetMaxPitchRotatorSpeed()
 
 void ASandBoxCharacter::SetMaxMoveSpeed(float InSpeed)
 {
-	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this,EAttribute::WalkSpeed,InSpeed);
+	SetAttributeByEnum(EAttribute::WalkSpeed, InSpeed, ECAVType::CAVT_Max);
 }
 
 
@@ -301,7 +301,8 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 void ASandBoxCharacter::SetCurrentlyMoveMode(EMovementMode InMoveState)
 {
-	
+	MovementMode = InMoveState;
+	GetCharacterMovement()->SetMovementMode(InMoveState);
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
