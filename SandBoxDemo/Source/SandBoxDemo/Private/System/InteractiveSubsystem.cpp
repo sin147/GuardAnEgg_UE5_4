@@ -8,11 +8,12 @@
 
 void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
+	if (!IsValid(InteractiveProxy)) { return; }
 	ENetMode NetMode = GetWorld()->GetNetMode();
 	if (NetMode == NM_ListenServer || NetMode == NM_DedicatedServer)
 	{
 		//TODO 代理到服务器
-		InteractiveProxy->Muticast_Interact(InCharacter);
+		Server_Interact(InCharacter);
 	}
 	else
 	{
@@ -51,14 +52,8 @@ bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InC
 
 void UInteractiveSubsystem::SpawnInteractiveActor(TSubclassOf<AActor> ActorClass,FVector InLocation,FRotator InRotation)
 {
-	if(IsValid(InteractiveProxy))
-	{
-		InteractiveProxy->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SpawnInteractiveActor: InteractiveProxy is not valid! Cannot spawn interactive actor."));
-	}
+	if (!IsValid(InteractiveProxy)) { return; }
+	InteractiveProxy->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
 }
 
 TArray<IInteract*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
@@ -113,6 +108,7 @@ TArray<FGuid> UInteractiveSubsystem::FilterInteractiveActor(const TArray<FGuid> 
 
 void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 {
+	if (!IsValid(InteractiveProxy)) { return; }
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info)
 	{
@@ -123,7 +119,6 @@ void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
 				InteractiveActor->Interact(InCharacter);
-
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());
@@ -205,6 +200,9 @@ void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor(AActor* NewInterac
 
 void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation)
 {
+
+	if (!IsValid(InteractiveProxy)) { return; }
+
 	// 1. 基础有效性检查：World/ActorClass 不能为空
 	UWorld* World = GetWorld();
 	if (!World || !IsValid(ActorClass))

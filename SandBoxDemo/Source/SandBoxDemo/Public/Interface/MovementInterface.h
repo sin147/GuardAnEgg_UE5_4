@@ -24,7 +24,7 @@ class SANDBOXDEMO_API IMovementInterface
 public:
 
 	//设置运动Mode
-	virtual void SetMoveMode(AActor*InAActor,EMovementMode InNewMode)=0;
+	virtual void SetMoveMode(EMovementMode InNewMode)=0;
 
 	//获取运动Mode
 	virtual EMovementMode GetMoveMode()=0;

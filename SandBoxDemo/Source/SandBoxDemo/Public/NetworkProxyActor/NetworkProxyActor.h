@@ -6,6 +6,7 @@
 #include "InteractiveProxyActor.h"
 #include "MessageProxyActor.h"
 #include "DamageProxyActor.h"
+#include "AttributeProxyActor.h"
 #include "CharacterProxyActor.h"
 #include "MessageProxyActor.h"
 

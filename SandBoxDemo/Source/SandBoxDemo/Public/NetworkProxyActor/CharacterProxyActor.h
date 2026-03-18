@@ -19,7 +19,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	//服务器设置角色运动Mode
+	UFUNCTION(Server,Reliable)
+	void Server_ChangeMovementMode(AActor*InCharacter,EMovementMode InMovementMode );
 
+	//广播设置角色移动Mode
+	UFUNCTION(NetMulticast,Reliable)
+	void Multicast_ChangeMovementMode(AActor* InCharacter, EMovementMode InMovementMode);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -19,6 +19,7 @@
 #include "State/StateMachineBase.h"
 #include "Interface/Damage.h"
 #include "Interface/AttributeInterface.h"
+#include "Interface/MovementInterface.h"
 #include "AbilitySystemComponent.h"
 #include "InputAction.h"
 #include "SandBoxCharacter.generated.h"
@@ -35,7 +36,7 @@ UENUM(BlueprintType)
 
 
 UCLASS()
-class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter,public IDamage,public IAttributeInterface
+class SANDBOXDEMO_API ASandBoxCharacter : public ACharacter,public IDamage,public IAttributeInterface,public IMovementInterface
 {
 	
 	GENERATED_BODY()
@@ -81,9 +82,12 @@ protected:
 
 protected:
 	//设置角色运动类型
-	UFUNCTION(BlueprintCallable)
 	void SetCurrentlyMoveMode(EMovementMode InMoveState);
+	//设置运动Mode
+	virtual void SetMoveMode(EMovementMode InNewMode)override;
 
+	//获取运动Mode
+	virtual EMovementMode GetMoveMode()override;
 protected:
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)

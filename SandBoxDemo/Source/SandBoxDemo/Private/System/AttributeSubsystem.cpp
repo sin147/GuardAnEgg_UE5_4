@@ -12,6 +12,7 @@ void UAttributeSubsystem::SetAttributeProxy(AAttributeProxyActor* InProxyActor)
 
 void UAttributeSubsystem::Server_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
+	if (!IsValid(AttributeProxy)) { return; }
 	IAttributeInterface* AttributeInterface = Cast<IAttributeInterface>(InActor);
 	if (AttributeInterface != nullptr)
 	{
@@ -42,11 +43,11 @@ float UAttributeSubsystem::GetAttributeByEnum(AActor* InActor, EAttribute InAttr
 
 void UAttributeSubsystem::SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
+	if (!IsValid(AttributeProxy)) { return; }
 	ENetMode CurrentNetMode = GetWorld()->GetNetMode();
 	if (CurrentNetMode == NM_DedicatedServer || CurrentNetMode == NM_ListenServer)
 	{
-		// 当前为服务器端
-		AttributeProxy->Multicast_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
+		Server_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
 	}
 	else
 	{
