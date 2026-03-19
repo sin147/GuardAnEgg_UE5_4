@@ -25,8 +25,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	EMovementMode GetMovementMode(AActor* InActor);
 	//设置角色最大运动速度
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void SetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
 	//获取角色运动最大速度
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	float GetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode);
 protected:
 	//设置角色代理

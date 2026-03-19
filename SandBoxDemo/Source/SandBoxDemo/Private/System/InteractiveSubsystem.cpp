@@ -77,6 +77,15 @@ void UInteractiveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
+void UInteractiveSubsystem::StoreInteractiveActor(IInteract* InInteract)
+{
+	if (!InteractiveActors.Contains(InInteract))
+	{
+		InteractiveActors.Add(InInteract);
+	}
+
+}
+
 void UInteractiveSubsystem::SetInteractiveProxy(AInteractiveProxyActor* InProxy)
 {
 	if (InProxy)

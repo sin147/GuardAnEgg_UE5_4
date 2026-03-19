@@ -141,6 +141,7 @@ public:
 	void DestoryInteractiveActorByGuid(FGuid Guid);
 	//初始化
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	void StoreInteractiveActor(IInteract*InInteract);
 
 protected:
 	//CanInteract过滤交互对象列表

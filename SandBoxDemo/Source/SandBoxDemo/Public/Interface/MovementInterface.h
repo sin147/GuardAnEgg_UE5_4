@@ -29,8 +29,8 @@ public:
 	virtual EMovementMode GetMoveMode()=0;
 
 	//设置最大运动速度
-	virtual void SetMoveMaxSpeed(EMovementMode InMovementMode, float InSpeed)=0;
+	virtual void SetMoveMaxSpeed(float InSpeed,EMovementMode InMovementMode=EMovementMode::MOVE_None)=0;
 
 	//获取最大运动速度
-	virtual float GetMoveMaxSpeed(EMovementMode InMovementMode) = 0;
+	virtual float GetMoveMaxSpeed(EMovementMode InMovementMode= EMovementMode::MOVE_None) = 0;
 };

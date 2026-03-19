@@ -23,6 +23,8 @@ AInteractiveActor::AInteractiveActor()
 void AInteractiveActor::BeginPlay()
 {
 	Super::BeginPlay();
+	//提前放置在场景的Actor想要依靠这个步骤加入到系统中
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->StoreInteractiveActor(this);
 	//绑定触发事件
 	if (TriggerBox)
 	{

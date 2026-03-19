@@ -57,8 +57,8 @@ float UCharacterSubsystem::GetMoveMaxSpeed(AActor* InActor, EMovementMode InMove
 		{
 			return MovementInterface->GetMoveMaxSpeed(InMovementMode);
 		}
-
 	}
+	return 0;
 }
 
 void UCharacterSubsystem::SetCharacterProxy(ACharacterProxyActor* InCharacterProxy)
@@ -103,7 +103,7 @@ void UCharacterSubsystem::Server_SetMoveMaxSpeedImp(AActor* InActor, EMovementMo
 		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
 		if (MovementInterface != nullptr)
 		{
-			MovementInterface->SetMoveMaxSpeed(InMovementMode, InSpeed);
+			MovementInterface->SetMoveMaxSpeed(InSpeed,InMovementMode);
 			CharacterProxy->Multicast_SetMoveMaxSpeed(InActor,InMovementMode, InSpeed);
 		}
 	}
@@ -116,7 +116,7 @@ void UCharacterSubsystem::Multicast_SetMoveMaxSpeedImp(AActor* InActor, EMovemen
 		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
 		if (MovementInterface != nullptr)
 		{
-			MovementInterface->SetMoveMaxSpeed(InMovementMode, InSpeed);
+			MovementInterface->SetMoveMaxSpeed(InSpeed,InMovementMode);
 		}
 	}
 }

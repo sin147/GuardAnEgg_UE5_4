@@ -77,22 +77,25 @@ protected:
 	TObjectPtr<UStateMachineBase> StateMachine;
 
 /************************************运动***************************************************/
+private:
+	bool IsQuickMove=false;
 protected:
 	EMovementMode MovementMode;
 
 protected:
 	//设置运动Mode
 	virtual void SetMoveMode(EMovementMode InNewMode)override;
-
 	//获取运动Mode
 	virtual EMovementMode GetMoveMode()override;
+	//设置最大运动速度
+	virtual void SetMoveMaxSpeed(float InSpeed,EMovementMode InMode) override;
+	//获取最大运动速度
+	virtual float GetMoveMaxSpeed(EMovementMode InMode)override;
+
 protected:
 	//获取角色运动类型
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	EMovementMode GetCurrentlyMoveMode();
-	//当角色运动改变
-	UFUNCTION()
-	virtual void OnMoveModeChange();
 public:
 	//设置左右旋转速度
 	void SetCurrentlyYawRotatorSpeed(float InRotatorSpeed);
@@ -117,20 +120,19 @@ public:
 	//获取最大上下旋转速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetMaxPitchRotatorSpeed();
-
-	//设置最大移动速度
-	void SetMaxMoveSpeed(float InSpeed);
 public:
-
 	//获取最大移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetMaxQuickMoveSpeed();
+	float GetCurrentlyMovementMaxQuickMoveSpeed();
 	//获取最大移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetMaxNormalMoveSpeed();
-
-	//设置当前移动速度
-	void SetCurrentlyMoveSpeed(float InSpeed);
+	float GetCurrentlyMovementMaxNormalMoveSpeed();
+	//获取最大移动速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxQuickMoveSpeed(EMovementMode InMovementMode=MOVE_None);
+	//获取最大移动速度
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetMaxNormalMoveSpeed(EMovementMode InMovementMode= MOVE_None);
 	//获取当前移动速度
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetCurrentlyMoveSpeed();
