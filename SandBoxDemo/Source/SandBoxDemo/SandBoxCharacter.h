@@ -81,8 +81,6 @@ protected:
 	EMovementMode MovementMode;
 
 protected:
-	//设置角色运动类型
-	void SetCurrentlyMoveMode(EMovementMode InMoveState);
 	//设置运动Mode
 	virtual void SetMoveMode(EMovementMode InNewMode)override;
 

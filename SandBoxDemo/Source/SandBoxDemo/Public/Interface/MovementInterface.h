@@ -19,7 +19,6 @@ class UMovementInterface : public UInterface
 class SANDBOXDEMO_API IMovementInterface
 {
 	GENERATED_BODY()
-
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
@@ -28,4 +27,10 @@ public:
 
 	//获取运动Mode
 	virtual EMovementMode GetMoveMode()=0;
+
+	//设置最大运动速度
+	virtual void SetMoveMaxSpeed(EMovementMode InMovementMode, float InSpeed)=0;
+
+	//获取最大运动速度
+	virtual float GetMoveMaxSpeed(EMovementMode InMovementMode) = 0;
 };

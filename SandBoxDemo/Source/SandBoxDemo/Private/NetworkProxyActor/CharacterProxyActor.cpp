@@ -22,12 +22,23 @@ void ACharacterProxyActor::BeginPlay()
 
 void ACharacterProxyActor::Server_ChangeMovementMode_Implementation(AActor* InActor, EMovementMode InMovementMode)
 {
-	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Server_ChangeMovementMode(InActor,InMovementMode);
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Server_ChangeMovementModeImp(InActor,InMovementMode);
 }
 
 void ACharacterProxyActor::Multicast_ChangeMovementMode_Implementation(AActor* InActor, EMovementMode InMovementMode)
 {
-	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Multicast_ChangeMovementMode(InActor, InMovementMode);
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Multicast_ChangeMovementModeImp(InActor, InMovementMode);
+}
+
+
+void ACharacterProxyActor::Server_SetMoveMaxSpeed_Implementation(AActor* InActor, EMovementMode InMovementMode, float InSpeed)
+{
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Server_SetMoveMaxSpeedImp(InActor, InMovementMode, InSpeed);
+}
+
+void ACharacterProxyActor::Multicast_SetMoveMaxSpeed_Implementation(AActor* InActor, EMovementMode InMovementMode, float InSpeed)
+{
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Multicast_SetMoveMaxSpeedImp(InActor, InMovementMode, InSpeed);
 }
 
 // Called every frame

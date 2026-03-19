@@ -127,7 +127,7 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	}
 	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed())
 	{
-		if (GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this,EAttribute::EnduranceValue, ECAVType::CAVT_Currently) <= 0&&IsLocallyControlled())
+		if (GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this,EAttribute::EnduranceValue, ECAVType::CAVT_Currently) <= 0)
 		{
 			StopQuick();
 		}

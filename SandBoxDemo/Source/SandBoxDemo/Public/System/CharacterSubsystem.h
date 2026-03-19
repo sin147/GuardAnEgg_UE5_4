@@ -24,14 +24,22 @@ public:
 	//获取运动状态
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	EMovementMode GetMovementMode(AActor* InActor);
-
+	//设置角色最大运动速度
+	void SetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
+	//获取角色运动最大速度
+	float GetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode);
 protected:
 	//设置角色代理
 	void SetCharacterProxy(ACharacterProxyActor* InCharacterProxy);
 
 	//服务器切换运动状态
-	void Server_ChangeMovementMode(AActor* InActor, EMovementMode InMovementMode);
+	void Server_ChangeMovementModeImp(AActor* InActor, EMovementMode InMovementMode);
 
 	//客户端切换运动状态
-	void Multicast_ChangeMovementMode(AActor* InActor, EMovementMode InMovementMode);
+	void Multicast_ChangeMovementModeImp(AActor* InActor, EMovementMode InMovementMode);
+	//服务器设置角色运动速度
+	void Server_SetMoveMaxSpeedImp(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
+
+	//广播设置角色移动速度
+	void Multicast_SetMoveMaxSpeedImp(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
 };

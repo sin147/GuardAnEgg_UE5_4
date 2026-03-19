@@ -12,7 +12,7 @@ void UCharacterSubsystem::ChangeMovementMode(AActor* InActor, EMovementMode InMo
 	if (!IsValid(CharacterProxy)) { return; }
 	if (NetMode == NM_DedicatedServer || NetMode == NM_ListenServer)
 	{
-		Server_ChangeMovementMode(InActor, InMovementMode);
+		Server_ChangeMovementModeImp(InActor, InMovementMode);
 	}
 	else
 	{
@@ -34,6 +34,33 @@ EMovementMode UCharacterSubsystem::GetMovementMode(AActor* InActor)
 	return EMovementMode::MOVE_None;
 }
 
+void UCharacterSubsystem::SetMoveMaxSpeed(AActor* InActor, EMovementMode InMovementMode, float InSpeed)
+{
+	ENetMode NetMode = GetWorld()->GetNetMode();
+	if (!IsValid(CharacterProxy)) { return; }
+	if (NetMode == NM_DedicatedServer || NetMode == NM_ListenServer)
+	{
+		Server_SetMoveMaxSpeedImp(InActor, InMovementMode, InSpeed);
+	}
+	else
+	{
+		CharacterProxy->Server_SetMoveMaxSpeed(InActor, InMovementMode, InSpeed);
+	}
+}
+
+float UCharacterSubsystem::GetMoveMaxSpeed(AActor* InActor, EMovementMode InMovementMode)
+{
+	if (InActor != nullptr)
+	{
+		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
+		if (MovementInterface != nullptr)
+		{
+			return MovementInterface->GetMoveMaxSpeed(InMovementMode);
+		}
+
+	}
+}
+
 void UCharacterSubsystem::SetCharacterProxy(ACharacterProxyActor* InCharacterProxy)
 {
 	if (InCharacterProxy != nullptr)
@@ -42,7 +69,7 @@ void UCharacterSubsystem::SetCharacterProxy(ACharacterProxyActor* InCharacterPro
 	}
 }
 
-void UCharacterSubsystem::Server_ChangeMovementMode(AActor* InActor, EMovementMode InMovementMode)
+void UCharacterSubsystem::Server_ChangeMovementModeImp(AActor* InActor, EMovementMode InMovementMode)
 {
 	if (!IsValid(CharacterProxy)) { return; }
 	if (InActor != nullptr)
@@ -57,7 +84,7 @@ void UCharacterSubsystem::Server_ChangeMovementMode(AActor* InActor, EMovementMo
 	}
 }
 
-void UCharacterSubsystem::Multicast_ChangeMovementMode(AActor* InActor, EMovementMode InMovementMode)
+void UCharacterSubsystem::Multicast_ChangeMovementModeImp(AActor* InActor, EMovementMode InMovementMode)
 {
 	if (InActor != nullptr)
 	{
@@ -65,6 +92,31 @@ void UCharacterSubsystem::Multicast_ChangeMovementMode(AActor* InActor, EMovemen
 		if (MovementInterface != nullptr)
 		{
 			MovementInterface->SetMoveMode(InMovementMode);
+		}
+	}
+}
+
+void UCharacterSubsystem::Server_SetMoveMaxSpeedImp(AActor* InActor, EMovementMode InMovementMode, float InSpeed)
+{
+	if (InActor != nullptr)
+	{
+		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
+		if (MovementInterface != nullptr)
+		{
+			MovementInterface->SetMoveMaxSpeed(InMovementMode, InSpeed);
+			CharacterProxy->Multicast_SetMoveMaxSpeed(InActor,InMovementMode, InSpeed);
+		}
+	}
+}
+
+void UCharacterSubsystem::Multicast_SetMoveMaxSpeedImp(AActor* InActor, EMovementMode InMovementMode, float InSpeed)
+{
+	if (InActor != nullptr)
+	{
+		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
+		if (MovementInterface != nullptr)
+		{
+			MovementInterface->SetMoveMaxSpeed(InMovementMode, InSpeed);
 		}
 	}
 }

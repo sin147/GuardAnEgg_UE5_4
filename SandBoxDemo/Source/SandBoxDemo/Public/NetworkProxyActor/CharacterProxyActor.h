@@ -26,6 +26,13 @@ protected:
 	//广播设置角色移动Mode
 	UFUNCTION(NetMulticast,Reliable)
 	void Multicast_ChangeMovementMode(AActor* InCharacter, EMovementMode InMovementMode);
+
+	//服务器设置角色运动速度
+	UFUNCTION(Server, Reliable)
+	void Server_SetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode,float InSpeed);
+	//广播设置角色移动速度
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
