@@ -88,13 +88,9 @@ void UInteractiveSubsystem::StoreInteractiveActor(IInteract* InInteract)
 
 void UInteractiveSubsystem::SetInteractiveProxy(AInteractiveProxyActor* InProxy)
 {
-	if (InProxy)
+	if (GetWorld()->GetFirstPlayerController() == InProxy->Owner)
 	{
 		InteractiveProxy = InProxy;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UInteractiveSubsystem::SetInteractiveProxy: Invalid proxy actor!"));
 	}
 }
 

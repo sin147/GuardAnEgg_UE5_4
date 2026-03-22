@@ -25,7 +25,7 @@ public:
 	void TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser);
 protected:
 	//设置伤害代理
-	void SetDamageProxy(ADamageProxyActor* Proxy) { DamageProxy = Proxy; }
+    void SetDamageProxy(ADamageProxyActor* Proxy);
 	//服务器处理伤害
 	void Server_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser);
 	//多播处理伤害

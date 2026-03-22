@@ -63,7 +63,7 @@ float UCharacterSubsystem::GetMoveMaxSpeed(AActor* InActor, EMovementMode InMove
 
 void UCharacterSubsystem::SetCharacterProxy(ACharacterProxyActor* InCharacterProxy)
 {
-	if (InCharacterProxy != nullptr)
+	if (GetWorld()->GetFirstPlayerController() == InCharacterProxy->Owner)
 	{
 		CharacterProxy = InCharacterProxy;
 	}

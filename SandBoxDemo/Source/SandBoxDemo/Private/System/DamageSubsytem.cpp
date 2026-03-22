@@ -19,6 +19,14 @@ void UDamageSubsytem::TakeDamage(AActor* DamagedActor, float DamageAmount, AActo
 	}
 }
 
+void UDamageSubsytem::SetDamageProxy(ADamageProxyActor* Proxy)
+{
+    if(GetWorld()->GetFirstPlayerController() == Proxy->Owner)
+	{
+		DamageProxy = Proxy;
+	}
+}
+
 void UDamageSubsytem::Server_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
 	if (!IsValid(DamageProxy)) { return; }

@@ -145,19 +145,6 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 		StateMachine->EnterState(EState::S_Idle);
 	}
 
-	float EnduranceConsumption = CharacterDataAsset->QuickMoveEnduranceConsumptionValue;
-	float MaxEnduranceValue = GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this, EAttribute::EnduranceValue, ECAVType::CAVT_Max);
-	float CurrentlyEnduranceValue= GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this, EAttribute::EnduranceValue);
-	//快速移动的体力消耗
-	if (StateMachine->GetCurrentlyState() != EState::S_QuickMove)
-	{
-		GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::EnduranceValue, CurrentlyEnduranceValue+(EnduranceConsumption*MaxEnduranceValue * DeltaTime));
-	}
-	else
-	{
-		GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::EnduranceValue, CurrentlyEnduranceValue -(EnduranceConsumption * MaxEnduranceValue * DeltaTime));
-	}
-
 	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
 }
 
@@ -178,7 +165,18 @@ void ASandBoxCharacter::UpdateAttributes(float DeltaTime)
 		//更新上下速度旋转
 		SetCurrentlyPitchRotatorSpeed(PlayController->GetRotationRate().Pitch);
 	}
-
+	float EnduranceConsumption = CharacterDataAsset->QuickMoveEnduranceConsumptionValue;
+	float MaxEnduranceValue = GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this, EAttribute::EnduranceValue, ECAVType::CAVT_Max);
+	float CurrentlyEnduranceValue = GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this, EAttribute::EnduranceValue);
+	//快速移动的体力消耗
+	if (StateMachine->GetCurrentlyState() != EState::S_QuickMove)
+	{
+		GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::EnduranceValue, CurrentlyEnduranceValue + (EnduranceConsumption * MaxEnduranceValue * DeltaTime));
+	}
+	else
+	{
+		GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::EnduranceValue, CurrentlyEnduranceValue - (EnduranceConsumption * MaxEnduranceValue * DeltaTime));
+	}
 }
 
 void ASandBoxCharacter::SetCurrentlyYawRotatorSpeed(float InRotatorSpeed)
@@ -306,11 +304,11 @@ void ASandBoxCharacter::SetMoveMaxSpeed(float InSpeed,EMovementMode InMode)
 		break;
 	case MOVE_NavWalking:
 		break;
-	case MOVE_Falling:
-		break;
+
 	case MOVE_Swimming:
 		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
 		break;
+	case MOVE_Falling:
 	case MOVE_Flying:
 		GetCharacterMovement()->MaxFlySpeed = InSpeed;
 		break;
@@ -337,10 +335,10 @@ float ASandBoxCharacter::GetMoveMaxSpeed(EMovementMode InMode)
 		return	GetCharacterMovement()->MaxWalkSpeed;
 	case MOVE_NavWalking:
 		break;
-	case MOVE_Falling:
-		break;
+
 	case MOVE_Swimming:
 		return 	GetCharacterMovement()->MaxSwimSpeed;
+	case MOVE_Falling:
 	case MOVE_Flying:
 		return	GetCharacterMovement()->MaxFlySpeed;
 	case MOVE_Custom:

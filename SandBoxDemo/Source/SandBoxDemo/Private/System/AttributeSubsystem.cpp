@@ -7,7 +7,10 @@
 
 void UAttributeSubsystem::SetAttributeProxy(AAttributeProxyActor* InProxyActor)
 {
-	AttributeProxy = InProxyActor;
+    if(GetWorld()->GetFirstPlayerController() == InProxyActor->Owner)
+	{
+		AttributeProxy = InProxyActor;
+	}
 }
 
 void UAttributeSubsystem::Server_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
