@@ -18,10 +18,10 @@ class SANDBOXDEMO_API UCharacterSubsystem : public UGameInstanceSubsystem
 private:
 	TObjectPtr<ACharacterProxyActor> CharacterProxy;
 public:
-	//切换运动状态
+	//切换运动模式
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ChangeMovementMode(AActor* InActor,EMovementMode MovementMode);
-	//获取运动状态
+	//获取运动模式
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	EMovementMode GetMovementMode(AActor* InActor);
 	//设置角色最大运动速度
@@ -30,6 +30,10 @@ public:
 	//获取角色运动最大速度
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	float GetMoveMaxSpeed(AActor* InCharacter, EMovementMode InMovementMode);
+    //角色奔跑
+    UFUNCTION(BlueprintCallable, Category = "Character")
+    void SetCharacterRun(AActor* InCharacter, bool bRun);
+
 protected:
 	//设置角色代理
 	void SetCharacterProxy(ACharacterProxyActor* InCharacterProxy);
@@ -44,4 +48,8 @@ protected:
 
 	//广播设置角色移动速度
 	void Multicast_SetMoveMaxSpeedImp(AActor* InCharacter, EMovementMode InMovementMode, float InSpeed);
+    //服务器设置角色奔跑
+    void Server_SetCharacterRunImp(AActor* InCharacter, bool bRun);
+	//广播设置角色奔跑
+	void Multicast_SetCharacterRunImp(AActor* InCharacter, bool bRun);
 };

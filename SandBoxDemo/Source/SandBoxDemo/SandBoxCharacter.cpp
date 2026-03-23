@@ -247,7 +247,7 @@ float ASandBoxCharacter::GetMaxQuickMoveSpeed(EMovementMode InMovementMode)
 {
 	if (InMovementMode == MOVE_None)
 	{
-		InMovementMode = GetCharacterMovement()->MovementMode;
+		InMovementMode = GetMoveMode();
 	}
 	if (GetGameInstance()&&GetGameInstance()->GetSubsystem<UCharacterSubsystem>())
 	{
@@ -260,7 +260,7 @@ float ASandBoxCharacter::GetMaxNormalMoveSpeed(EMovementMode InMovementMode)
 {
 	if (InMovementMode == MOVE_None)
 	{
-		InMovementMode = GetCharacterMovement()->MovementMode;
+		InMovementMode = GetMoveMode();
 	}
 	if (GetGameInstance()&&GetGameInstance()->GetSubsystem<UCharacterSubsystem>())
 	{
@@ -276,6 +276,7 @@ float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 
 void ASandBoxCharacter::SetMoveMode(EMovementMode InNewMode)
 {
+	MovementMode = InNewMode;
 	if (GetCharacterMovement()->MovementMode != InNewMode)
 	{
 		GetCharacterMovement()->SetMovementMode(InNewMode);
@@ -285,16 +286,15 @@ void ASandBoxCharacter::SetMoveMode(EMovementMode InNewMode)
 
 EMovementMode ASandBoxCharacter::GetMoveMode()
 {
-	return GetCharacterMovement()->MovementMode;
+	return MovementMode;
 }
 
 void ASandBoxCharacter::SetMoveMaxSpeed(float InSpeed,EMovementMode InMode)
 {
 	if (InMode == S_None)
 	{
-		InMode = GetCharacterMovement()->MovementMode;
+		InMode = GetMoveMode();
 	}
-	IsQuickMove = InSpeed > GetMaxNormalMoveSpeed();
 	switch (InMode)
 	{
 	case MOVE_None:
@@ -309,6 +309,7 @@ void ASandBoxCharacter::SetMoveMaxSpeed(float InSpeed,EMovementMode InMode)
 		GetCharacterMovement()->MaxSwimSpeed = InSpeed;
 		break;
 	case MOVE_Falling:
+		break;
 	case MOVE_Flying:
 		GetCharacterMovement()->MaxFlySpeed = InSpeed;
 		break;
@@ -325,7 +326,7 @@ float ASandBoxCharacter::GetMoveMaxSpeed(EMovementMode InMode)
 {
 	if (InMode == S_None)
 	{
-		InMode = GetCharacterMovement()->MovementMode;
+		InMode = GetMoveMode();
 	}
 	switch (InMode)
 	{
@@ -339,6 +340,7 @@ float ASandBoxCharacter::GetMoveMaxSpeed(EMovementMode InMode)
 	case MOVE_Swimming:
 		return 	GetCharacterMovement()->MaxSwimSpeed;
 	case MOVE_Falling:
+		break;
 	case MOVE_Flying:
 		return	GetCharacterMovement()->MaxFlySpeed;
 	case MOVE_Custom:
@@ -349,6 +351,11 @@ float ASandBoxCharacter::GetMoveMaxSpeed(EMovementMode InMode)
 		break;
 	}
 	return 0;
+}
+
+void ASandBoxCharacter::SetCharacterRun(bool InIsRun)
+{
+	IsQuickMove = InIsRun;
 }
 
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
@@ -372,7 +379,7 @@ void ASandBoxCharacter::FarAttack()
 
 void ASandBoxCharacter::Move(const FInputActionValue& Value)
 {
-	switch (GetCharacterMovement()->MovementMode)
+	switch (GetMoveMode())
 	{
 	case MOVE_None:
 		break;
@@ -487,13 +494,26 @@ void ASandBoxCharacter::StartJump()
 
 void ASandBoxCharacter::StartQuick()
 {
-	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, GetCharacterMovement()->MovementMode, GetMaxQuickMoveSpeed());
+	if(IsQuickMove)
+	{
+	return;
+	}
+    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetCharacterRun(this, true);
+    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Walking));
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Swimming, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Swimming));
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Flying));
 }
 
 void ASandBoxCharacter::StopQuick()
 {
-	//GetCharacterMovement()->MaxAcceleration = 2048;
-	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this,GetCharacterMovement()->MovementMode, GetMaxNormalMoveSpeed());
+	if(!IsQuickMove)
+	{
+		return;
+	}
+    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Flying));
+    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Swimming, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Swimming));
+    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Walking));
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetCharacterRun(this, false);
 }
 
 void ASandBoxCharacter::Interact()
@@ -540,16 +560,19 @@ void ASandBoxCharacter::TakeOff(const FInputActionValue& InputValue)
 {
 	if (GetCurrentlyMoveMode() != EMovementMode::MOVE_Flying)
 	{
+		//起飞逻辑
+		ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.TakeOff")));
 		if (IsQuickMove)
 		{
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Flying));
+			UE_LOG(LogTemp, Log, TEXT("Quick Move Speed: %f"), GetMaxQuickMoveSpeed(EMovementMode::MOVE_Flying));
 		}
 		else
 		{
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Flying));
+			UE_LOG(LogTemp, Log, TEXT("Quick Move Speed: %f"), GetMaxNormalMoveSpeed(EMovementMode::MOVE_Flying));
 		}
-		//起飞逻辑
-		ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.TakeOff")));
+
 	}
 }
 
@@ -557,6 +580,7 @@ void ASandBoxCharacter::Land(const FInputActionValue& InputValue)
 {
 	if (GetCurrentlyMoveMode() == EMovementMode::MOVE_Flying)
 	{
+		ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.Land")));
 		if (IsQuickMove)
 		{
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Walking));
@@ -566,7 +590,7 @@ void ASandBoxCharacter::Land(const FInputActionValue& InputValue)
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Walking));
 		}
 
-		ActivateAbilityByTag(FGameplayTag::RequestGameplayTag(FName("Ability.Land")));
+
 	}
 }
 

@@ -61,6 +61,20 @@ float UCharacterSubsystem::GetMoveMaxSpeed(AActor* InActor, EMovementMode InMove
 	return 0;
 }
 
+void UCharacterSubsystem::SetCharacterRun(AActor* InCharacter, bool bRun)
+{
+	ENetMode NetMode = GetWorld()->GetNetMode();
+	if (!IsValid(CharacterProxy)) { return; }
+	if (NetMode == NM_DedicatedServer || NetMode == NM_ListenServer)
+	{
+		Server_SetCharacterRunImp(InCharacter, bRun);
+	}
+	else
+	{
+		CharacterProxy->Server_SetCharacterRun(InCharacter, bRun);
+	}
+}
+
 void UCharacterSubsystem::SetCharacterProxy(ACharacterProxyActor* InCharacterProxy)
 {
 	if (GetWorld()->GetFirstPlayerController() == InCharacterProxy->Owner)
@@ -117,6 +131,31 @@ void UCharacterSubsystem::Multicast_SetMoveMaxSpeedImp(AActor* InActor, EMovemen
 		if (MovementInterface != nullptr)
 		{
 			MovementInterface->SetMoveMaxSpeed(InSpeed,InMovementMode);
+		}
+	}
+}
+
+void UCharacterSubsystem::Server_SetCharacterRunImp(AActor* InCharacter, bool bRun)
+{
+	if (InCharacter != nullptr)
+	{
+		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InCharacter);
+		if (MovementInterface != nullptr)
+		{
+            MovementInterface->SetCharacterRun(bRun);
+			CharacterProxy->Multicast_SetCharacterRun(InCharacter, bRun);
+		}
+	}
+}
+
+void UCharacterSubsystem::Multicast_SetCharacterRunImp(AActor* InCharacter, bool bRun)
+{
+	if (InCharacter != nullptr)
+	{
+		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InCharacter);
+		if (MovementInterface != nullptr)
+		{
+			MovementInterface->SetCharacterRun(bRun);
 		}
 	}
 }

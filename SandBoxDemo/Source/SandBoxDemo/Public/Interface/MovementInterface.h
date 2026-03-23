@@ -33,4 +33,7 @@ public:
 
 	//获取最大运动速度
 	virtual float GetMoveMaxSpeed(EMovementMode InMovementMode= EMovementMode::MOVE_None) = 0;
+	//设置开始奔跑
+	virtual void SetCharacterRun(bool InIsRun)=0;
+
 };

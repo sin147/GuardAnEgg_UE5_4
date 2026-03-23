@@ -41,6 +41,16 @@ void ACharacterProxyActor::Multicast_SetMoveMaxSpeed_Implementation(AActor* InAc
 	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Multicast_SetMoveMaxSpeedImp(InActor, InMovementMode, InSpeed);
 }
 
+void ACharacterProxyActor::Server_SetCharacterRun_Implementation(AActor* InCharacter, bool bRun)
+{
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Server_SetCharacterRunImp(InCharacter, bRun);
+}
+
+void ACharacterProxyActor::Multicast_SetCharacterRun_Implementation(AActor* InCharacter, bool bRun)
+{
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->Multicast_SetCharacterRunImp(InCharacter, bRun);
+}
+
 // Called every frame
 void ACharacterProxyActor::Tick(float DeltaTime)
 {

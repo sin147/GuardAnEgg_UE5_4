@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AnimNotify/SandBoxAnimNotify_Base.h"
@@ -13,7 +13,7 @@ void USandBoxAnimNotify_Base::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("SandboxNotify只能用于ASandboxPeople中"));
+		//UE_LOG(LogTemp, Log, TEXT("SandboxNotify只能用于ASandboxPeople中"));
 	}
 }
 

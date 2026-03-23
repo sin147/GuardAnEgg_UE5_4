@@ -91,6 +91,8 @@ protected:
 	virtual void SetMoveMaxSpeed(float InSpeed,EMovementMode InMode) override;
 	//获取最大运动速度
 	virtual float GetMoveMaxSpeed(EMovementMode InMode)override;
+	//设置开始奔跑
+	virtual void SetCharacterRun(bool InIsRun)override;
 
 protected:
 	//获取角色运动类型
