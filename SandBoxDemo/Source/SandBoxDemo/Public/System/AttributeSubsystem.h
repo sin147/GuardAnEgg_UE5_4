@@ -61,9 +61,9 @@ protected:
 	void SetAttributeProxy(AAttributeProxyActor*InProxyActor);
 
 	//服务器设置值
-	void Server_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType);
+	void Server_SetAttributeByEnumImp(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType);
 	//多播设置值
-	void Multicast_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute,float InValue, ECAVType InAttributeValueType);
+	void Multicast_SetAttributeByEnumImp(AActor* InActor, EAttribute InAttribute,float InValue, ECAVType InAttributeValueType);
 
 public:
 	//获取值
@@ -72,7 +72,7 @@ public:
 
 	//设置值
 	UFUNCTION(BlueprintCallable)
-	void SetAttributeByEnum(AActor* InActor,EAttribute InAttribute, float Value, ECAVType InAttributeValueType = ECAVType::CAVT_Currently);
+	void SetAttributeByEnum(AActor* InActor,EAttribute InAttribute, float Value, ECAVType InAttributeValueType = ECAVType::CAVT_Currently,bool OnlyUseInServer =false);
 
 
 };

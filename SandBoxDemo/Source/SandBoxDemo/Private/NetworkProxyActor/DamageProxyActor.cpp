@@ -24,12 +24,12 @@ void ADamageProxyActor::BeginPlay()
 
 void ADamageProxyActor::Server_TakeDamage_Implementation(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
-	GetGameInstance()->GetSubsystem<UDamageSubsytem>()->Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+	GetGameInstance()->GetSubsystem<UDamageSubsytem>()->Server_TakeDamageImp(DamagedActor, DamageAmount, DamageCauser);
 }
 
 void ADamageProxyActor::Multicast_TakeDamage_Implementation(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
-	GetGameInstance()->GetSubsystem<UDamageSubsytem>()->Multicast_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+	GetGameInstance()->GetSubsystem<UDamageSubsytem>()->Multicast_TakeDamageImp(DamagedActor, DamageAmount, DamageCauser);
 }
 
 // Called every frame

@@ -10,17 +10,25 @@ void UInteractiveSubsystem::RequestInteract(ACharacter* InCharacter)
 {
 	if (!IsValid(InteractiveProxy)) { return; }
 	ENetMode NetMode = GetWorld()->GetNetMode();
-	if (NetMode == NM_ListenServer || NetMode == NM_DedicatedServer)
+	switch (NetMode)
 	{
-		//TODO 代理到服务器
-		Server_Interact(InCharacter);
-	}
-	else
-	{
-		//TODO 代理到服务器
+	case NM_Standalone:
+		Multicast_InteractImp(InCharacter);
+		break;
+	case NM_DedicatedServer:
+		Server_InteractImp(InCharacter);
+		break;
+	case NM_ListenServer:
+		InteractiveProxy->Muticast_Interact(InCharacter);
+		break;
+	case NM_Client:
 		InteractiveProxy->Server_Interact(InCharacter);
+		break;
+	case NM_MAX:
+		break;
+	default:
+		break;
 	}
-
 }
 
 bool UInteractiveSubsystem::PaddingInteractiveActor(TObjectPtr<ACharacter> InCharacter,EInteractiveType InInteractiveType, FGuid InInteractiveActorGUID)
@@ -53,7 +61,23 @@ bool UInteractiveSubsystem::UnPaddingInteractiveActor(TObjectPtr<ACharacter> InC
 void UInteractiveSubsystem::SpawnInteractiveActor(TSubclassOf<AActor> ActorClass,FVector InLocation,FRotator InRotation)
 {
 	if (!IsValid(InteractiveProxy)) { return; }
-	InteractiveProxy->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
+	ENetMode NetMode = GetWorld()->GetNetMode();
+	switch (NetMode)
+	{
+	case NM_Standalone:
+	case NM_DedicatedServer:
+	case NM_ListenServer:
+		Server_SpawnInteractiveActorImp(ActorClass, InLocation, InRotation);
+		break;
+	case NM_Client:
+		InteractiveProxy->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
+		break;
+	case NM_MAX:
+		break;
+	default:
+		break;
+	}
+
 }
 
 TArray<IInteract*> UInteractiveSubsystem::GetInteractiveActorsByGUIDs(TArray<FGuid> InGUIDs) const
@@ -111,7 +135,7 @@ TArray<FGuid> UInteractiveSubsystem::FilterInteractiveActor(const TArray<FGuid> 
 	return InInteractiveActorGUID;
 }
 
-void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
+void UInteractiveSubsystem::Server_InteractImp(ACharacter* InCharacter)
 {
 	if (!IsValid(InteractiveProxy)) { return; }
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
@@ -135,7 +159,7 @@ void UInteractiveSubsystem::Server_Interact(ACharacter* InCharacter)
 	}
 }
 
-void UInteractiveSubsystem::Multicast_Interact(ACharacter* InCharacter)
+void UInteractiveSubsystem::Multicast_InteractImp(ACharacter* InCharacter)
 {
 	FCharacterInteractiveInfo* Info = CharacterInteractiveInfos.Find(InCharacter);
 	if (Info)
@@ -194,7 +218,7 @@ TStatId UInteractiveSubsystem::GetStatId() const
 	return TStatId();
 }
 
-void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor)
+void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActorImp(AActor* NewInteractiveActor)
 {
 	IInteract* CastedInteractiveActor = Cast<IInteract>(NewInteractiveActor);
 	if (CastedInteractiveActor!=nullptr&& InteractiveActors.Find(CastedInteractiveActor))
@@ -203,7 +227,7 @@ void UInteractiveSubsystem::Multicast_OnSpawnInteractiveActor(AActor* NewInterac
 	}
 }
 
-void UInteractiveSubsystem::Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation)
+void UInteractiveSubsystem::Server_SpawnInteractiveActorImp(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation)
 {
 
 	if (!IsValid(InteractiveProxy)) { return; }

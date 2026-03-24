@@ -2,20 +2,33 @@
 
 
 #include "System/DamageSubsytem.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "NetworkProxyActor/DamageProxyActor.h"
 
 void UDamageSubsytem::TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
+
 	if (!IsValid(DamageProxy)) { return; }
 	ENetMode NetMode = GetWorld()->GetNetMode();
-	if (NetMode == NM_ListenServer || NetMode == NM_DedicatedServer)
+	UKismetSystemLibrary::PrintString(GetWorld(),"TakeDamage");
+	switch (NetMode)
 	{
-		Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
-
-	}
-	else
-	{
-		DamageProxy->Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+	case NM_Standalone:
+		Multicast_TakeDamageImp(DamagedActor, DamageAmount, DamageCauser);
+		break;
+	case NM_DedicatedServer:
+		Server_TakeDamageImp(DamagedActor, DamageAmount, DamageCauser);
+		break;
+	case NM_ListenServer:
+		DamageProxy->Multicast_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+		break;
+	case NM_Client:
+		//DamageProxy->Server_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
+		break;
+	case NM_MAX:
+		break;
+	default:
+		break;
 	}
 }
 
@@ -27,7 +40,7 @@ void UDamageSubsytem::SetDamageProxy(ADamageProxyActor* Proxy)
 	}
 }
 
-void UDamageSubsytem::Server_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
+void UDamageSubsytem::Server_TakeDamageImp(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
 	if (!IsValid(DamageProxy)) { return; }
 
@@ -42,7 +55,7 @@ void UDamageSubsytem::Server_TakeDamage(AActor* DamagedActor, float DamageAmount
 	}
 }
 
-void UDamageSubsytem::Multicast_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
+void UDamageSubsytem::Multicast_TakeDamageImp(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser)
 {
 	if (DamagedActor)
 	{

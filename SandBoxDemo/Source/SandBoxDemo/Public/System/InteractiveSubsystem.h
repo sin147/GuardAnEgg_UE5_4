@@ -148,10 +148,10 @@ protected:
 	bool CanInteractFilter(ACharacter* InCharacter) const;
 
 	TArray<FGuid> FilterInteractiveActor(const TArray<FGuid> InInteractiveActorGUID) const;
-	void Server_Interact(ACharacter* InCharacter);
-	void Multicast_Interact(ACharacter* InCharacter);
-	void Multicast_OnSpawnInteractiveActor(AActor* NewInteractiveActor);
-	void Server_SpawnInteractiveActor(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation);
+	void Server_InteractImp(ACharacter* InCharacter);
+	void Multicast_InteractImp(ACharacter* InCharacter);
+	void Multicast_OnSpawnInteractiveActorImp(AActor* NewInteractiveActor);
+	void Server_SpawnInteractiveActorImp(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation);
 	void Multicast_SpawnInteractiveActor(AActor*AActor);
 
 	//设置代理Actor

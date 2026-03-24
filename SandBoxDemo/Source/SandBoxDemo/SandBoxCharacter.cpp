@@ -498,10 +498,11 @@ void ASandBoxCharacter::StartQuick()
 	{
 	return;
 	}
-    GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetCharacterRun(this, true);
+
     GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Walking));
 	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Swimming, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Swimming));
 	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Flying));
+	GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetCharacterRun(this, true);
 }
 
 void ASandBoxCharacter::StopQuick()
@@ -510,6 +511,7 @@ void ASandBoxCharacter::StopQuick()
 	{
 		return;
 	}
+
     GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Flying, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Flying));
     GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Swimming, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Swimming));
     GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Walking));
@@ -700,6 +702,6 @@ void ASandBoxCharacter::ApplyDamage(float DamageAmount, AActor* DamageCauser)
 {
 	float CurrentHP = GetCurrentlyHP();
 	CurrentHP -= DamageAmount;
-	SetCurrentlyHP(CurrentHP);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::HP, CurrentHP, ECAVType::CAVT_Currently,true);
 }
 

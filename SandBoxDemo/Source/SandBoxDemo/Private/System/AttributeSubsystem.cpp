@@ -13,7 +13,7 @@ void UAttributeSubsystem::SetAttributeProxy(AAttributeProxyActor* InProxyActor)
 	}
 }
 
-void UAttributeSubsystem::Server_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
+void UAttributeSubsystem::Server_SetAttributeByEnumImp(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
 	if (!IsValid(AttributeProxy)) { return; }
 	IAttributeInterface* AttributeInterface = Cast<IAttributeInterface>(InActor);
@@ -24,7 +24,7 @@ void UAttributeSubsystem::Server_SetAttributeByEnum(AActor* InActor, EAttribute 
 	}
 }
 
-void UAttributeSubsystem::Multicast_SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
+void UAttributeSubsystem::Multicast_SetAttributeByEnumImp(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
 	IAttributeInterface* AttributeInterface = Cast<IAttributeInterface>(InActor);
 	if (AttributeInterface != nullptr)
@@ -44,17 +44,30 @@ float UAttributeSubsystem::GetAttributeByEnum(AActor* InActor, EAttribute InAttr
 	return 0.0f;
 }
 
-void UAttributeSubsystem::SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
+void UAttributeSubsystem::SetAttributeByEnum(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType,bool OnlyUseInServer)
 {
 	if (!IsValid(AttributeProxy)) { return; }
 	ENetMode CurrentNetMode = GetWorld()->GetNetMode();
-	if (CurrentNetMode == NM_DedicatedServer || CurrentNetMode == NM_ListenServer)
+	switch (CurrentNetMode)
 	{
-		Server_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
-	}
-	else
-	{
-		AttributeProxy->Server_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
-	}
+	case NM_Standalone:
+		Multicast_SetAttributeByEnumImp(InActor, InAttribute, InValue, InAttributeValueType);
+		break;
+	case NM_DedicatedServer:
+		Server_SetAttributeByEnumImp(InActor, InAttribute, InValue, InAttributeValueType);
+		break;
+	case NM_ListenServer:
+		AttributeProxy->Multicast_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
+		break;
+	case NM_Client:
+		if (!OnlyUseInServer) {
+			AttributeProxy->Server_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
+		}
 
+		break;
+	case NM_MAX:
+		break;
+	default:
+		break;
+	}
 }

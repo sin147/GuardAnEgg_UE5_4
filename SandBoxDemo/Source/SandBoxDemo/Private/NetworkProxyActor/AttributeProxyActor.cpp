@@ -30,7 +30,7 @@ void AAttributeProxyActor::Tick(float DeltaTime)
 }
 void AAttributeProxyActor::Server_SetAttributeByEnum_Implementation(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
-	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Server_SetAttributeByEnum(InActor,InAttribute,InValue,InAttributeValueType);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Server_SetAttributeByEnumImp(InActor,InAttribute,InValue,InAttributeValueType);
 	if (InAttribute == EAttribute::WalkSpeed && InAttributeValueType == ECAVType::CAVT_Max)
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::SanitizeFloat(InValue));
@@ -39,7 +39,7 @@ void AAttributeProxyActor::Server_SetAttributeByEnum_Implementation(AActor* InAc
 }
 void AAttributeProxyActor::Multicast_SetAttributeByEnum_Implementation(AActor* InActor, EAttribute InAttribute, float InValue, ECAVType InAttributeValueType)
 {
-	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Multicast_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
+	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->Multicast_SetAttributeByEnumImp(InActor, InAttribute, InValue, InAttributeValueType);
 	if (InAttribute == EAttribute::WalkSpeed && InAttributeValueType == ECAVType::CAVT_Max)
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::SanitizeFloat(InValue));

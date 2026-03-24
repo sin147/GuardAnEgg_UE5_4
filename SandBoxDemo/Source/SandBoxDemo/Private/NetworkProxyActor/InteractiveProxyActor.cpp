@@ -25,21 +25,21 @@ void AInteractiveProxyActor::BeginPlay()
 
 void AInteractiveProxyActor::Server_Interact_Implementation(ACharacter* InCharacter)
 {
-	 GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Server_Interact(InCharacter);
+	 GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Server_InteractImp(InCharacter);
 }
 
 void AInteractiveProxyActor::Muticast_Interact_Implementation(ACharacter* InCharacter)
 {
-	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_Interact(InCharacter);
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_InteractImp(InCharacter);
 }
 
 void AInteractiveProxyActor::Muticast_OnSpawnInteractiveActor_Implementation(AActor* InActor)
 {
-	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_OnSpawnInteractiveActor(InActor);
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Multicast_OnSpawnInteractiveActorImp(InActor);
 }
 void AInteractiveProxyActor::Server_SpawnInteractiveActor_Implementation(TSubclassOf<AActor> ActorClass, FVector InLocation, FRotator InRotation)
 {
-	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Server_SpawnInteractiveActor(ActorClass, InLocation, InRotation);
+	GetGameInstance()->GetSubsystem<UInteractiveSubsystem>()->Server_SpawnInteractiveActorImp(ActorClass, InLocation, InRotation);
 }
 // Called every frame
 void AInteractiveProxyActor::Tick(float DeltaTime)

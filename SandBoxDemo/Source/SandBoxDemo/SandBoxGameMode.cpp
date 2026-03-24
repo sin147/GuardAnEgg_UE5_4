@@ -27,6 +27,7 @@ void ASandBoxGameMode::PostLogin(APlayerController* NewPlayer)
 	GetWorld()->SpawnActor<AInteractiveProxyActor>(AInteractiveProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
 	GetWorld()->SpawnActor<AAttributeProxyActor>(AAttributeProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
 	GetWorld()->SpawnActor<ACharacterProxyActor>(ACharacterProxyActor ::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
+	GetWorld()->SpawnActor<ADamageProxyActor>(ADamageProxyActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
 }
 
 void ASandBoxGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
