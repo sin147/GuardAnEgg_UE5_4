@@ -147,7 +147,7 @@ void UInteractiveSubsystem::Server_InteractImp(ACharacter* InCharacter)
 			IInteract* InteractiveActor = GetInteractiveActorByGUID(InteractiveActorGUID);
 			if (InteractiveActor && InteractiveActor->CanInteract(InCharacter))
 			{
-				InteractiveActor->Interact(InCharacter);
+				//InteractiveActor->Interact(InCharacter);
 			}
 		}
 		UE_LOG(LogTemp, Log, TEXT("UInteractiveSubsystem::RequestInteract CharacterGUID %s interact with %d actors"), *InCharacter->GetActorNameOrLabel(), ActiveInteractiveActorGuids.Num());

@@ -700,8 +700,10 @@ void ASandBoxCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void ASandBoxCharacter::ApplyDamage(float DamageAmount, AActor* DamageCauser)
 {
+	ENetMode Netmode = GetWorld()->GetNetMode();
 	float CurrentHP = GetCurrentlyHP();
 	CurrentHP -= DamageAmount;
 	GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->SetAttributeByEnum(this, EAttribute::HP, CurrentHP, ECAVType::CAVT_Currently,true);
+	UKismetSystemLibrary::PrintString(GetWorld(),"10");
 }
 

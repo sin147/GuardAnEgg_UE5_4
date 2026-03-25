@@ -49,7 +49,7 @@ void UDamageSubsytem::Server_TakeDamageImp(AActor* DamagedActor, float DamageAmo
 
 		if (Cast<IDamage>(DamagedActor) != nullptr)
 		{
-			Cast<IDamage>(DamagedActor)->ApplyDamage(DamageAmount, DamageCauser);
+			//Cast<IDamage>(DamagedActor)->ApplyDamage(DamageAmount, DamageCauser);
 			DamageProxy->Multicast_TakeDamage(DamagedActor, DamageAmount, DamageCauser);
 		}
 	}

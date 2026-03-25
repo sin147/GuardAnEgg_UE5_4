@@ -19,10 +19,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION(Server,Unreliable)
+	UFUNCTION(Server,Reliable)
 	void Server_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser);
 
-	UFUNCTION(NetMulticast,Unreliable)
+	UFUNCTION(NetMulticast,Reliable)
 	void Multicast_TakeDamage(AActor* DamagedActor, float DamageAmount, AActor* DamageCauser);
 
 public:	

@@ -124,7 +124,7 @@ void UCharacterSubsystem::Server_ChangeMovementModeImp(AActor* InActor, EMovemen
 		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
 		if (MovementInterface !=nullptr)
 		{
-			MovementInterface->SetMoveMode(InMovementMode);
+			//MovementInterface->SetMoveMode(InMovementMode);
 			CharacterProxy->Multicast_ChangeMovementMode(InActor, InMovementMode);
 		}
 
@@ -150,7 +150,7 @@ void UCharacterSubsystem::Server_SetMoveMaxSpeedImp(AActor* InActor, EMovementMo
 		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InActor);
 		if (MovementInterface != nullptr)
 		{
-			MovementInterface->SetMoveMaxSpeed(InSpeed,InMovementMode);
+			//MovementInterface->SetMoveMaxSpeed(InSpeed,InMovementMode);
 			CharacterProxy->Multicast_SetMoveMaxSpeed(InActor,InMovementMode, InSpeed);
 		}
 	}
@@ -175,7 +175,7 @@ void UCharacterSubsystem::Server_SetCharacterRunImp(AActor* InCharacter, bool bR
 		IMovementInterface* MovementInterface = Cast<IMovementInterface>(InCharacter);
 		if (MovementInterface != nullptr)
 		{
-            MovementInterface->SetCharacterRun(bRun);
+            //MovementInterface->SetCharacterRun(bRun);
 			CharacterProxy->Multicast_SetCharacterRun(InCharacter, bRun);
 		}
 	}

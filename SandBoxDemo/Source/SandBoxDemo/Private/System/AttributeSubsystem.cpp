@@ -19,7 +19,7 @@ void UAttributeSubsystem::Server_SetAttributeByEnumImp(AActor* InActor, EAttribu
 	IAttributeInterface* AttributeInterface = Cast<IAttributeInterface>(InActor);
 	if (AttributeInterface != nullptr)
 	{
-		AttributeInterface->SetAttributeByEnum(InAttribute, InValue, InAttributeValueType);
+		//AttributeInterface->SetAttributeByEnum(InAttribute, InValue, InAttributeValueType);
 		AttributeProxy->Multicast_SetAttributeByEnum(InActor, InAttribute, InValue, InAttributeValueType);
 	}
 }
