@@ -124,6 +124,7 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 {
 	//根据当前移MovementMode判断状态
 	float AbsMoveSpeed = FMath::Abs(GetCurrentlyMoveSpeed());
+
 	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxNormalMoveSpeed())
 	{
 		StateMachine->EnterState(EState::S_Move);
@@ -271,7 +272,9 @@ float ASandBoxCharacter::GetMaxNormalMoveSpeed(EMovementMode InMovementMode)
 
 float ASandBoxCharacter::GetCurrentlyMoveSpeed()
 {
-		return GetVelocity().Length();
+	//当前速度方向和前进方向是否一致
+    float Dot = FVector::DotProduct(GetVelocity().GetSafeNormal(), GetCharacterForwardVector());
+    return GetVelocity().Length() * FMath::Sign(Dot);
 }
 
 void ASandBoxCharacter::SetMoveMode(EMovementMode InNewMode)
@@ -407,13 +410,18 @@ void ASandBoxCharacter::Move(const FInputActionValue& Value)
 void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
 {
 	FVector Value = InputValue.Get<FVector>();
-	if (!IsValid(Controller)) { return; }
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
-	const FRotator ControllerRotation = Controller->GetControlRotation();
+    //求垂直速度分量
+    float VerticalSpeed = FVector::DotProduct(GetVelocity(), GetCharacterUpVector());
+    if (!IsValid(Controller)||(VerticalSpeed)!=0.0f) { return; }
+    const FRotator ControllerRotation = Controller->GetControlRotation();
 	const FRotator CharacterRotation = GetCharacterRotation();
 	// 应用前进和后退输入
 	if (Value.X != 0)
 	{
+		if (Value.X < 0)
+		{
+			StopQuick();
+		}
 		//设置上下偏转限制
 		const FVector ForwardDirection = FRotationMatrix(ControllerRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(ForwardDirection, Value.X);
@@ -494,7 +502,7 @@ void ASandBoxCharacter::StartJump()
 
 void ASandBoxCharacter::StartQuick()
 {
-	if(IsQuickMove)
+	if(IsQuickMove&&GetCurrentlyMoveSpeed()>=0)
 	{
 	return;
 	}

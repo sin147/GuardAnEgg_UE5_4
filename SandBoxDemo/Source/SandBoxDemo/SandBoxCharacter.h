@@ -32,6 +32,15 @@ UENUM(BlueprintType)
 	AT_CloseAttack,
 	AT_FarAttack
 };
+UENUM(BlueprintType)
+enum MoveDirection : uint8
+{
+	MD_None,
+	MD_Forward,
+	MD_Backward,
+	MD_Left,
+	MD_Right
+};
 
 
 
@@ -81,7 +90,7 @@ private:
 	bool IsQuickMove=false;
 protected:
 	EMovementMode MovementMode;
-
+	MoveDirection MoveDirection;
 protected:
 	//设置运动Mode
 	virtual void SetMoveMode(EMovementMode InNewMode)override;

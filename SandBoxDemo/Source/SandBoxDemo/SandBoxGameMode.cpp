@@ -5,7 +5,6 @@
 #include "SandBoxPlayerController.h"
 #include "SandBoxCharacter.h"
 #include "NetworkProxyActor/NetworkProxyActor.h"
-#include "System/MessageSystem.h"
 #include "SandBoxHUD.h"
 
 ASandBoxGameMode::ASandBoxGameMode()
