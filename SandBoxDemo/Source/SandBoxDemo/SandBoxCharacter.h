@@ -102,6 +102,8 @@ protected:
 	virtual float GetMoveMaxSpeed(EMovementMode InMode)override;
 	//设置开始奔跑
 	virtual void SetCharacterRun(bool InIsRun)override;
+	//是否跳跃
+	bool IsJump();
 
 protected:
 	//获取角色运动类型

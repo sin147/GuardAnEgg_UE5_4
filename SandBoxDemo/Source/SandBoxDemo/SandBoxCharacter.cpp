@@ -125,12 +125,12 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 	//根据当前移MovementMode判断状态
 	float AbsMoveSpeed = FMath::Abs(GetCurrentlyMoveSpeed());
 
-	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxNormalMoveSpeed())
+	if (1 < AbsMoveSpeed && AbsMoveSpeed <= GetMaxNormalMoveSpeed()&& !IsJump())
 	{
 		StateMachine->EnterState(EState::S_Move);
 
 	}
-	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed())
+	else if(AbsMoveSpeed > GetMaxNormalMoveSpeed()&&!IsJump())
 	{
 		if (GetGameInstance()->GetSubsystem<UAttributeSubsystem>()->GetAttributeByEnum(this,EAttribute::EnduranceValue, ECAVType::CAVT_Currently) <= 0)
 		{
@@ -146,7 +146,7 @@ void ASandBoxCharacter::UpdateCharacterState(float DeltaTime)
 		StateMachine->EnterState(EState::S_Idle);
 	}
 
-	//UE_LOG(LogTemp, Log, TEXT("MoveSpeed:%lf"), GetSpeed());
+	
 }
 
 TEnumAsByte<EState> ASandBoxCharacter::GetCurrentlyChracterState()
@@ -361,6 +361,15 @@ void ASandBoxCharacter::SetCharacterRun(bool InIsRun)
 	IsQuickMove = InIsRun;
 }
 
+bool ASandBoxCharacter::IsJump()
+{
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return true;
+	}
+	return false;
+}
+
 EMovementMode ASandBoxCharacter::GetCurrentlyMoveMode()
 {
 	if (GetGameInstance())
@@ -412,7 +421,7 @@ void ASandBoxCharacter::WalkMove(const FInputActionValue& InputValue)
 	FVector Value = InputValue.Get<FVector>();
     //求垂直速度分量
     float VerticalSpeed = FVector::DotProduct(GetVelocity(), GetCharacterUpVector());
-    if (!IsValid(Controller)||(VerticalSpeed)!=0.0f) { return; }
+    //if (!IsValid(Controller)||(VerticalSpeed)!=0.0f) { return; }
     const FRotator ControllerRotation = Controller->GetControlRotation();
 	const FRotator CharacterRotation = GetCharacterRotation();
 	// 应用前进和后退输入
@@ -594,10 +603,12 @@ void ASandBoxCharacter::Land(const FInputActionValue& InputValue)
 		if (IsQuickMove)
 		{
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxQuickMoveSpeed(EMovementMode::MOVE_Walking));
+			UE_LOG(LogTemp, Log, TEXT("Quick Move Speed: %f"), GetMaxQuickMoveSpeed(EMovementMode::MOVE_Walking));
 		}
 		else
 		{
 			GetGameInstance()->GetSubsystem<UCharacterSubsystem>()->SetMoveMaxSpeed(this, EMovementMode::MOVE_Walking, GetMaxNormalMoveSpeed(EMovementMode::MOVE_Walking));
+            UE_LOG(LogTemp, Log, TEXT("Normal Move Speed: %f"), GetMaxNormalMoveSpeed(EMovementMode::MOVE_Walking));
 		}
 
 
